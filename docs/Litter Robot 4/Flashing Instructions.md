@@ -184,7 +184,7 @@ The device should be auto-discovered by the ESPHome integration. If it doesn't a
 
 > The hostname is usually the same name as the access point earlier. You can find the hostname or IP in your router device list.
 
-All entities (cycle controls, sensors, lights, sleep schedule) will be available in Home Assistant.
+All entities (cycle controls, sensors, lights, sleep schedule) will be available in Home Assistant. Some entities may be disabled by default to avoid cluttering your dashboard. You can enable them in the device page.
 
 ![Home Assistant](Images/Home%20Assistant.JPG)
 
