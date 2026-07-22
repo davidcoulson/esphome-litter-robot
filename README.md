@@ -1,10 +1,19 @@
 # Litter Robot ESPHome Packages
 
-This repository serves as a home for ESPHome packages relating to the Whisker Litter Robot, as well as instructions to flash the custom ESPHome firmware.
+This repository hosts ESPHome packages relating to the Whisker Litter Robot, as well as instructions to flash ESPHome based firmware on it.
+
+## Why?
+
+Flashing the Litter Robot with ESPHome-based firmware eliminates the dependency on Whisker's cloud infrastructure, instead providing easy integration with open self-hosted services like Home Assistant. This means:
+
+- **Total privacy** - all data stays local. No telemetry, usage statistics, or other data is ever sent to Whisker or AWS.
+- **No internet required** - the device can connect to your smart home entirely offline, with no cloud outages or future service shutdowns to worry about.
+- **Customizable** - Add or modify functionality however you want.
 
 ![Home Assistant](docs/Litter%20Robot%204/Images/Home%20Assistant.JPG)
 
 ## What devices are supported?
+
 Only the Litter Robot 4 is supported at this time. Though I suspect the Litter Robot 3 is very similar, I do not have one to test on. Contributions are appreciated!
 
 ## Is it safe?
@@ -18,6 +27,8 @@ Every known function of the original firmware is supported, with these exception
 - Not all faults are descriptively named, though generic fault status is still detected.
 - Litter hopper configuration is not supported yet, but the hopper itself may still function.
 - Updating mainboard/laserboard firmware.
+
+For some reason the official app/firmware only lets you set sleep schedules on a coarse weekday/weekend basis. This firmware actually allows for independent sleep schedules for every day of the week.
 
 ## Is it reversible?
 
