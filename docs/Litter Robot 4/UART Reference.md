@@ -1,0 +1,243 @@
+# Litter Robot 4 — Mainboard UART Protocol Reference
+
+## 1. Architecture
+
+The LR4 contains two microcontrollers plus a satellite board:
+
+- **ESP32** (ESP32-WROOM-32E, "ESP") - a thin WiFi/MQTT-to-UART bridge. It contains no Litter Robot hardware logic; it relays register reads/writes between the cloud (AWS IoT / MQTT) and the mainboard.
+- **Mainboard MCU** (PIC18F47Q43-I/PT, "PIC") - runs all robot logic: motor control, sensor processing, the cycle state machine, RTC, sleep scheduling, and all safety interlocks (anti-pinch, weight-pause, over-current). This board survives independently of the ESP32 and can even cut power to the ESP32 completely for power saving on battery.
+- **Laserboard** - a satellite board handling ToF sensors for detecting cat presence as well as litter and waste drawer level.
+
+## 2. Physical Layer
+
+- UART1, 256000 baud, no flow control.
+- ESP32 pins: TX = GPIO19, RX = GPIO5.
+
+
+## 3. Serial Frame Format
+
+The bus is full-duplex with 7 bytes per frame:
+
+| Field      | Description                                                    |
+|------------|----------------------------------------------------------------|
+| Direction  | `0x02` = ESP→PIC, `0x01` = PIC→ESP                             |
+| Operation  | `0x01`=read, `0x02`=write, `0x03`=read-reply, `0x04`=write-ack |
+| Register   | register number, 1 byte                                        |
+| Value high | Most significant byte of 16-bit big-endian value               |
+| Value low  | Least significant byte of 16-bit big-endian value              |
+| Checksum   | sum of bytes 0–4, mod 256                                      |
+| Terminator | always `0xFF`                                                  |
+
+The PIC periodically sends unsolicited event notifications (`0x01 0x02` writes) and the ESP acknowledges every one with a `0x02 0x04` echoing the register and value received. The PIC acknowledges writes in the same way, though the value it acknowledges is not guaranteed to be valid/saved. Some registers like those for version/identification have indexed values which are read using the low value byte as the index.
+
+
+## 4. Cloud Command Format (for reference)
+
+The AWS-side MQTT command payload is:
+```json
+{"serial": "<device-serial>", "data": ["0xPPRRVVVV"]}
+```
+where `PP`=op, `RR`=register, `VVVV`=16-bit value. The ESP32 prepends the `0x02` direction byte and computes the checksum before forwarding to the PIC over UART.
+
+
+## 5. Commands
+
+| Action            | Register | Value    |
+|-------------------|----------|----------|
+| Start clean cycle | `0x34`   | `0x000A` |
+| Empty litter      | `0x34`   | `0x000B` |
+| Replace filter    | `0x34`   | `0x000C` |
+| Factory reset     | `0x2D`   | `0x0001` |
+
+Register `0x34` doubles as the [Robot Status](#robot-status-0x34) telemetry register. The PIC does not ack the `Factory reset` command, though it writes the command back to the ESP as a new write event before rebooting. Register values are reset internally to the PIC and are not written over UART. The `Day-of-week` value is reset in this process as well, though the time otherwise remains unchanged, likely due to the other values being read directly by the RTC.
+
+### 5.1 Simulated Control Panel Input
+
+| Button      | Register | Value    |
+|-------------|----------|----------|
+| Power       | `0x01`   | `0x0101` |
+| Reset       | `0x01`   | `0x0401` |
+| Clean/cycle | `0x01`   | `0x0201` |
+| Empty       | `0x01`   | `0x0801` |
+| WiFi        | `0x01`   | `0x1001` |
+
+The PIC reports physical button presses by pushing a value to register `0x01`. The ESP can write the same value to simulate a press. This is actually how the Whisker app handles `Power` and `Reset`.
+
+A low byte value of `0x02` is written instead of `0x01` to indicate a long press.
+
+
+## 6. Configuration Registers
+
+#### Debug mode 0x05
+
+Boolean; Causes the PIC to output various registers at regular intervals. TODO: List debug registers.
+
+#### WiFi State 0x33
+
+Register `0x33` is used to read and write the current WiFi state.
+
+| Value  | Meaning    | Notes               |
+|--------|------------|---------------------|
+| `0x00` | Off        | White LED           |
+| `0x11` | Pairing    | Flashing yellow LED |
+| `0x21` | Connecting | Flashing blue LED   |
+| `0x22` | Connected  | Solid blue LED      |
+| `0x23` | Error      | Flashing red LED    |
+
+The PIC writes `0x11` when WiFi is enabled and `0x00` when disabled via the WiFi button on the control panel.
+
+#### Date 0x0F-0x15
+
+Value is **local time** spread across the following registers. The PIC's RTC drives the [sleep schedule](#sleep-schedule-0x1d-0x2b); keeping time in sync is required for schedule accuracy.
+
+| Register | Meaning     | Notes                       |
+|----------|-------------|-----------------------------|
+| `0x0F`   | Day-of-week | 0=Sunday                    |
+| `0x10`   | Hour        | 0-23                        |
+| `0x11`   | Minute      |                             |
+| `0x12`   | Second      |                             |
+| `0x13`   | Day         |                             |
+| `0x14`   | Month       |                             |
+| `0x15`   | Year        | two-digit only              |
+
+#### Clean Cycle Delay 0x16
+
+Determines how long to wait before starting a clean cycle after a cat has no longer been detected. Value in minutes with a minimum of 3. Defaults to 7.
+
+#### Control Panel lockout 0x17
+
+State of the control panel lock. Panel inputs will be ignored, including [simulated ones](#51-simulated-control-panel-input).
+
+#### Night light 0x18/0x19
+
+Configures the night light inside the globe. See [Night Light 0x3B](#night-light-0x3b) for the current state reading.
+
+| Register | Meaning                   | Notes                                      |
+|----------|---------------------------|--------------------------------------------|
+| `0x18`   | Night light mode          | 0=off, 1=on, 2=auto.                       |
+| `0x19`   | Night light brightness    | 0-100                                      |
+
+The Whisker app maps brightness low/med/high to 25/50/100, with high as default.
+
+#### Control Panel LED brightness 0x0E
+
+Brightness level of the panel LED. Two independant values are packed into this register's high and low bytes. Low/medium/high is mapped to 25/15, 50/40, and 100/90 in the app. The two values are most likely for the normal and dimmed brightness based on ambient light. Factory resetting the PIC sets these values to 100/50, which is close enough I suppose.
+
+#### Panel Sleep Time 0x1B
+
+1260 by default. Appears to be minutes from midnight (21:00, 9pm). Unclear purpose. TODO: Need more info.
+
+#### Panel Wake Time 0x1C
+
+360 by default. Appears to be minutes from midnight (6:00, 6am). Unclear purpose. TODO: Need more info.
+
+#### CAL flag (Purpose unknown) 0x76
+
+Register `0x76` is the first register read by the ESP on boot. Logs output "Wifi Init because CAL flag is 1" immediately after. TODO: Need more info.
+
+
+## 7. Telemetry Registers
+
+#### Power Type 0x07
+
+0 is AC power. Set to 1 when on battery before powering down the ESP.
+
+#### Cat Weight 0x09
+
+Per-visit cat weight. Signed 16 bit integer in centipounds (divide by 100 for lb).
+
+#### Unit Power Status 0x31
+
+Identified in logs. TODO: Need more info.
+
+#### Sleep Status 0x32
+
+Identified in logs. Presumably a boolean value indicating the current time is within a [sleep schedule](#sleep-schedule-0x1d-0x2b) time period. TODO: Needs testing.
+
+#### Robot Status 0x34
+
+| Value  | Meaning                   |
+|--------|---------------------------|
+| `0x01` | Powered off               |
+| `0x02` | Powering on               |
+| `0x03` | Powering off              |
+| `0x04` | Ready                     |
+| `0x05` | Bonnet removed            |
+| `0x06` | ?                         |
+| `0x07` | Cat detected              |
+| `0x0A` | Clean cycle in progress   |
+| `0x0B` | Emptying litter           |
+| `0x0E` | Filter replacement mode   |
+| `0x17` | Starting calibration      |
+| `0x18` | Calibration in progress   |
+
+`0x06` is always set just before `0x07`, so its meaning is unclear but related to cat detection.
+
+#### Fault Code 0x35
+
+| Value  | Meaning        |
+|--------|----------------|
+| `0x00` | No fault       |
+| `0x06` | Pinch detected |
+
+TODO: Capture more fault codes
+
+#### Bonnet Sensor 0x3A
+
+Boolean, inverted; 0 = OK, 1 = bonnet removed. Tracks the same state as status `0x05` in [Robot Status](#robot-status-0x34).
+
+#### Night Light 0x3B
+
+Boolean; Current state of the night light inside the globe. Controlled via the [night light config registers](#night-light-0x180x19).
+
+#### USB Power 0x04
+
+"isUSBPowerOn" according to logs. Only ever observed a value of 1.
+
+#### Odometers
+
+| Register | Field              | Notes                                 |
+|----------|--------------------|---------------------------------------|
+| `0x3D`   | Power cycle count  |                                       |
+| `0x3E`   | Clean cycle count  |                                       |
+| `0x3F`   | Empty cycle count  |                                       |
+| `0x40`   | Filter cycle count |                                       |
+| `0x42`   | DFINumberOfCycles  | Name exposed in logs, unclear purpose |
+
+#### Litter / Drawer Level
+
+| Register | Field                   | Notes                                       |
+|----------|-------------------------|---------------------------------------------|
+| `0x43`   | Waste drawer percentage |                                             |
+| `0x44`   | Waste drawer full       | Boolean                                     |
+| `0x47`   | Litter level            | Raw distance value. 490=empty, 440<=full    |
+
+#### Sleep Schedule 0x1D-0x2B
+
+Sleep/wake times are encoded in minutes-of-day, so 21:00 (9pm) would be 1260 for example. The schedule relies on the PIC's [date/time registers](#date-0x0f-0x15) having accurate local time.
+
+| Register      | Field                                                         |
+|---------------|---------------------------------------------------------------|
+| `0x1D`        | Day-enable bitmask: bit 0=Sunday ... 6=Saturday               |
+| `0x1E`/`0x1F` | Sunday sleep/wake time                                        |
+| `0x20`/`0x21` | Monday sleep/wake time                                        |
+| `0x22`/`0x23` | Tuesday sleep/wake time                                       |
+| `0x24`/`0x25` | Wednesday sleep/wake time                                     |
+| `0x26`/`0x27` | Thursday sleep/wake time                                      |
+| `0x28`/`0x29` | Friday sleep/wake time                                        |
+| `0x2A`/`0x2B` | Saturday sleep/wake time                                      |
+
+Recommended write order: `0x1D=0` (disable) -> write all time pairs -> `0x1D=<mask>` (enable), to avoid the schedule firing against a partially-written set of times.
+
+#### Panel Sleep Mode 0x1A
+
+Identified in logs. Likely related to [Panel Sleep/Wake Times](#panel-sleep-time-0x1b) rather than the [cycle sleep schedule](#sleep-schedule-0x1d-0x2b). TODO: Needs testing
+
+#### Version / Identification Registers
+
+| Register    | Field                                        |
+|-------------|----------------------------------------------|
+| `0x79[0/1]` | Mainboard / laserboard revision ID           |
+| `0x7A[0/1]` | Mainboard / laserboard device ID             |
+| `0x7E[0-3]` | Laserboard hardware / BOM / suite / revision |
+| `0x7F[0-3]` | Mainboard hardware / BOM / suite / revision  |
