@@ -40,6 +40,12 @@ The initial firmware flashing requires connecting an [ESP-Prog-2 development boa
 
 The source code for the component can be found in my [ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4) until it is potentially merged into ESPHome.
 
+## Can I help?
+
+With the firmware installed, the PIC<->ESP communication can be logged wirelessly with ESPHome. If you can correlate specific register/value pairs to an action or event, it should be added to the UART reference for possible implementation.
+
+If you have a Litter Robot 3 "Connect" it would be helpful to capture UART packets between the PIC and ESP32 to help understand the LR3 UART protocol as well. I don't have a Litter Robot 3 so I can't assist much. This [blog post](https://www.elttam.com/blog/re-of-lr3) goes into detail on some of the hardware on the LR3 mainboard and may be of some help.
+
 ## Docs
 
 See the [Litter Robot 4 UART Reference](docs/Litter%20Robot%204/UART%20Reference.md) for a full breakdown of the mainboard serial protocol.
