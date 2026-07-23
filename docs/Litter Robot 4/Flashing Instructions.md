@@ -30,7 +30,7 @@ This is a **one-time** hardware flashing procedure. After ESPHome is on the devi
 
 - **Pre-compiled firmware binary** - download the latest release `.bin` from the [releases page](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases).
 
-  - *Alternatively*, if you want to build from source, you'll need the [custom ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4) until the `litter_robot4` component is merged upstream. Build with:
+  - *Alternatively*, you can compile it from source using `litter-robot4.yaml`
   
   ```bash
   esphome compile /path/to/litter-robot4.yaml
@@ -194,7 +194,7 @@ The default configuration hosts a web server from the device IP address. The def
 
 ### Adopting in ESPHome Dashboard
 
-Unfortunately adoption will not work until my code is merged into a future ESPHome version. To make changes to the configuration you must use my [custom ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome) and your modified version of `litter-robot4.yaml` to build a new firmware.
+The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. It imports the `litter_robot4.yaml` from this repository as a base package.
 
 ---
 
