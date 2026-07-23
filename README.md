@@ -25,7 +25,6 @@ The ESP32 in the Litter Robot 3 and 4 serves as a WiFi-to-UART bridge that relay
 Every known function of the original firmware is supported, with these exceptions, sorted most to least likely to change:
 
 - Not all faults are descriptively named, though generic fault status is still detected.
-- Litter hopper configuration is not supported yet, but the hopper itself will likely still function.
 - Multiple cats are not tracked, only the latest cat weight measurement is provided.
 - Updating mainboard/laserboard firmware is not currently possible.
 
@@ -38,6 +37,8 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 ## How do I install it?
 
 The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated ESP-Prog header on the mainboard. Since the pads are unpopulated you will either need to solder directly to them or populate it with the intended [1.27mm surface mount header](https://www.ebay.com/itm/336595048935) (Sold pre-cut to size by me) to utilize the ribbon cable included with the ESP-Prog-2. Full instructions can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+
+The source code for the component can be found in my [ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4) until it is potentially merged into ESPHome.
 
 ## Docs
 
