@@ -14,7 +14,7 @@ This is a **one-time** hardware flashing procedure. After ESPHome is on the devi
 
 - [**ESP-Prog-2 programmer**](https://amzn.to/4vMhlyv) (affiliate link) - includes a ribbon cable despite not being mentioned in the listing
 
-- [**1.27mm (0.05") pitch 6 pin surface-mount header**](https://www.ebay.com/itm/336595048935) (Pre-cut headers shipped directly from me) or source any size 1.27mm dual SMT header and cut to length. Technically optional but highly recommended
+- [**1.27mm (0.05") pitch 6 pin surface-mount header**](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412?s=N4IgTCBcDaIOICUAKAhADAZjANQOoEUBlAWgQGEQBdAXyA) Technically optional but highly recommended
 
 - **Soldering iron** (fine tip) and solder
 

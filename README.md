@@ -36,7 +36,7 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 
 ## How do I install it?
 
-The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated ESP-Prog header on the mainboard. Since the pads are unpopulated you will either need to solder directly to them or populate it with the intended [1.27mm surface mount header](https://www.ebay.com/itm/336595048935) (Sold pre-cut to size by me) to utilize the ribbon cable included with the ESP-Prog-2. Full instructions can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated ESP-Prog header on the mainboard. Since the pads are unpopulated you will either need to solder directly to them or populate it with the intended [1.27mm 6 pin surface mount header](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412?s=N4IgTCBcDaIOICUAKAhADAZjANQOoEUBlAWgQGEQBdAXyA) to utilize the ribbon cable included with the ESP-Prog-2. Full instructions can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
 
 The source code for the component can be found in my [ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4) until it is potentially merged into ESPHome.
 
