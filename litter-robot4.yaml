@@ -8,7 +8,7 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: Joseph-DiGiovanni.LitterRobot4
-    version: "0.9.1"
+    version: "0.9.2"
 
 esp32:
   board: esp32dev
@@ -40,8 +40,10 @@ dashboard_import:
   import_full_config: false
 
 external_components:
-  - source: github://Joseph-DiGiovanni/esphome@LR4
-    components: [litter_robot4]
+  source:
+    type: git
+    url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
+    ref: LR4/0.9.2
 
 uart:
   - id: uart_bus

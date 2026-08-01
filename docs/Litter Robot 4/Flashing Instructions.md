@@ -194,7 +194,7 @@ The default configuration hosts a web server from the device IP address. The def
 
 ### Adopting in ESPHome Dashboard
 
-The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. You may have to click "Take Control" twice if you get an error. The auto-generated config imports the `litter_robot4.yaml` from this repository as a base package.
+The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. The auto-generated config imports the `litter_robot4.yaml` from this repository as a base package.
 
 ---
 
