@@ -2,7 +2,7 @@
 
 This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible. You can restore the original firmware at any time.
 
-This is a **one-time** hardware flashing procedure. After ESPHome is on the device, future updates can be delivered wirelessly (OTA).
+This is a **one-time** hardware flashing procedure. After ESPHome is on the device, future updates can be delivered wirelessly ([OTA](#updating-the-firmware-ota)).
 
 > Disclaimer: This project is not affiliated with, endorsed by, or associated with Whisker, Litter Robot, or Automated Pet Care Products. Modifying your device involves hardware disassembly and modification which may void your warranty and carries a risk of permanent damage. Proceed at your own risk. Neither the author(s) nor contributors are responsible for any damage to your device, property, or pets resulting from the use of this firmware or instructions.
 
@@ -151,6 +151,8 @@ Write the ESPHome firmware starting at address 0x0:
 esptool --port /dev/ttyACM0 --baud 921600 write_flash 0x0 /path/to/firmware.bin
 ```
 
+> Be sure to use the `.bin` file and not `.ota`.
+
 A successful flash will end with output similar to:
 
 ```
@@ -192,6 +194,18 @@ The default configuration hosts a web server from the device IP address. The def
 ### Adopting in ESPHome Dashboard
 
 The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. The auto-generated config imports the `litter-robot4.yaml` from this repository as a base package.
+
+---
+
+## Updating the Firmware (OTA)
+
+Once ESPHome is installed, future firmware updates can be applied over the air without reopening the unit. This process is automated in the ESPHome Device Builder dashboard, but you can also update via the web server:
+
+1. Download the latest OTA update file (`.ota`) from the [releases page](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases).
+
+2. Open the device's web interface using the hostname or ip of the device in a browser.
+
+3. At the bottom, use the "OTA Update" file selector to select the downloaded OTA update file and click update. There may not be any visual feedback until the update completes which can take a few minutes. Be sure to not use the `.bin` file or the update will fail.
 
 ---
 
