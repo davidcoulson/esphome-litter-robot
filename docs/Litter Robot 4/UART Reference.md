@@ -182,6 +182,15 @@ Identified in logs. Presumably a boolean value indicating the current time is wi
 
 TODO: Capture more fault codes
 
+#### Detection Event 0x37
+
+| Value  | Meaning         |
+|--------|-----------------|
+| `0x10` | Laser clear     |
+| `0x11` | Laser triggered |
+| `0x20` | Weight clear    |
+| `0x21` | Weight detected |
+
 #### Bonnet Sensor 0x3A
 
 Boolean, inverted; 0 = OK, 1 = bonnet removed. Tracks the same state as status `0x05` in [Robot Status](#robot-status-0x34).
@@ -196,7 +205,7 @@ Boolean; Current state of the night light inside the globe. Controlled via the [
 
 #### Odometers
 
-| Register | Field              | Notes                                 |
+| Register | Meaning            | Notes                                 |
 |----------|--------------------|---------------------------------------|
 | `0x3D`   | Power cycle count  |                                       |
 | `0x3E`   | Clean cycle count  |                                       |
@@ -206,17 +215,27 @@ Boolean; Current state of the night light inside the globe. Controlled via the [
 
 #### Litter / Drawer Level
 
-| Register | Field                   | Notes                                       |
+| Register | Meaning                 | Notes                                       |
 |----------|-------------------------|---------------------------------------------|
 | `0x43`   | Waste drawer percentage |                                             |
 | `0x44`   | Waste drawer full       | Boolean                                     |
 | `0x47`   | Litter level            | Raw distance value. 490=empty, 440<=full    |
 
+#### Laser Board ToF Sensors 0x58-0x5A
+
+Three time-of-flight distance sensors on the laser board, reported in millimeters. They are published alongside [detection events](#detection-event-0x37) as a cat enters or exits. Labeled based on position facing into the globe.
+
+| Register | Sensor |
+|----------|--------|
+| `0x58`   | Left   |
+| `0x59`   | Center |
+| `0x5A`   | Right  |
+
 #### Sleep Schedule 0x1D-0x2B
 
 Sleep/wake times are encoded in minutes-of-day, so 21:00 (9pm) would be 1260 for example. The schedule relies on the PIC's [date/time registers](#date-0x0f-0x15) having accurate local time.
 
-| Register      | Field                                                         |
+| Register      | Meaning                                                       |
 |---------------|---------------------------------------------------------------|
 | `0x1D`        | Day-enable bitmask: bit 0=Sunday ... 6=Saturday               |
 | `0x1E`/`0x1F` | Sunday sleep/wake time                                        |
@@ -235,7 +254,7 @@ Identified in logs. Likely related to [Panel Sleep/Wake Times](#panel-sleep-time
 
 #### Version / Identification Registers
 
-| Register    | Field                                        |
+| Register    | Meaning                                      |
 |-------------|----------------------------------------------|
 | `0x79[0/1]` | Mainboard / laserboard revision ID           |
 | `0x7A[0/1]` | Mainboard / laserboard device ID             |
