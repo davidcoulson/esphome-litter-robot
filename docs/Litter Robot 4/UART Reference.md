@@ -13,7 +13,6 @@ The LR4 contains two microcontrollers plus a satellite board:
 - UART1, 256000 baud, no flow control.
 - ESP32 pins: TX = GPIO19, RX = GPIO5.
 
-
 ## 3. Serial Frame Format
 
 The bus is full-duplex with 7 bytes per frame:
@@ -30,7 +29,6 @@ The bus is full-duplex with 7 bytes per frame:
 
 The PIC periodically sends unsolicited event notifications (`0x01 0x02` writes) and the ESP acknowledges every one with a `0x02 0x04` echoing the register and value received. The PIC acknowledges writes in the same way, though the value it acknowledges is not guaranteed to be valid/saved. Some registers like those for version/identification have indexed values which are read using the low value byte as the index.
 
-
 ## 4. Cloud Command Format (for reference)
 
 The AWS-side MQTT command payload is:
@@ -38,7 +36,6 @@ The AWS-side MQTT command payload is:
 {"serial": "<device-serial>", "data": ["0xPPRRVVVV"]}
 ```
 where `PP`=op, `RR`=register, `VVVV`=16-bit value. The ESP32 prepends the `0x02` direction byte and computes the checksum before forwarding to the PIC over UART.
-
 
 ## 5. Commands
 
@@ -65,14 +62,13 @@ The PIC reports physical button presses by pushing a value to register `0x01`. T
 
 A low byte value of `0x02` is written instead of `0x01` to indicate a long press.
 
-
 ## 6. Configuration Registers
 
-#### Debug mode 0x05
+### Debug Mode 0x05
 
-Boolean; Causes the PIC to output various registers at regular intervals. TODO: List debug registers.
+Boolean; causes the PIC to output various registers at regular intervals. TODO: List debug registers.
 
-#### WiFi State 0x33
+### WiFi State 0x33
 
 Register `0x33` is used to read and write the current WiFi state.
 
@@ -86,7 +82,7 @@ Register `0x33` is used to read and write the current WiFi state.
 
 The PIC writes `0x11` when WiFi is enabled and `0x00` when disabled via the WiFi button on the control panel.
 
-#### Date 0x0F-0x15
+### Date 0x0F-0x15
 
 Value is **local time** spread across the following registers. The PIC's RTC drives the [sleep schedule](#sleep-schedule-0x1d-0x2b); keeping time in sync is required for schedule accuracy.
 
@@ -100,15 +96,15 @@ Value is **local time** spread across the following registers. The PIC's RTC dri
 | `0x14`   | Month       |                             |
 | `0x15`   | Year        | two-digit only              |
 
-#### Clean Cycle Delay 0x16
+### Clean Cycle Delay 0x16
 
 Determines how long to wait before starting a clean cycle after a cat has no longer been detected. Value in minutes with a minimum of 3. Defaults to 7.
 
-#### Control Panel lockout 0x17
+### Control Panel Lockout 0x17
 
 State of the control panel lock. Panel inputs will be ignored, including [simulated ones](#51-simulated-control-panel-input).
 
-#### Night light 0x18/0x19
+### Night Light 0x18/0x19
 
 Configures the night light inside the globe. See [Night Light 0x3B](#night-light-0x3b) for the current state reading.
 
@@ -119,42 +115,41 @@ Configures the night light inside the globe. See [Night Light 0x3B](#night-light
 
 The Whisker app maps brightness low/med/high to 25/50/100, with high as default.
 
-#### Control Panel LED brightness 0x0E
+### Control Panel LED Brightness 0x0E
 
-Brightness level of the panel LED. Two independant values are packed into this register's high and low bytes. Low/medium/high is mapped to 25/15, 50/40, and 100/90 in the app. The two values are most likely for the normal and dimmed brightness based on ambient light. Factory resetting the PIC sets these values to 100/50, which is close enough I suppose.
+Brightness level of the panel LED. Two independent values are packed into this register's high and low bytes. Low/medium/high is mapped to 25/15, 50/40, and 100/90 in the app. The two values are most likely for the normal and dimmed brightness based on ambient light. Factory resetting the PIC sets these values to 100/50, which is close enough I suppose.
 
-#### Panel Sleep Time 0x1B
+### Panel Sleep Time 0x1B
 
 1260 by default. Appears to be minutes from midnight (21:00, 9pm). Unclear purpose. TODO: Need more info.
 
-#### Panel Wake Time 0x1C
+### Panel Wake Time 0x1C
 
 360 by default. Appears to be minutes from midnight (6:00, 6am). Unclear purpose. TODO: Need more info.
 
-#### CAL flag (Purpose unknown) 0x76
+### CAL Flag (Purpose unknown) 0x76
 
 Register `0x76` is the first register read by the ESP on boot. Logs output "Wifi Init because CAL flag is 1" immediately after. TODO: Need more info.
 
-
 ## 7. Telemetry Registers
 
-#### Power Type 0x07
+### Power Type 0x07
 
 0 is AC power. Set to 1 when on battery before powering down the ESP.
 
-#### Cat Weight 0x09
+### Cat Weight 0x09
 
 Per-visit cat weight. Signed 16 bit integer in centipounds (divide by 100 for lb).
 
-#### Unit Power Status 0x31
+### Unit Power Status 0x31
 
 Identified in logs. TODO: Need more info.
 
-#### Sleep Status 0x32
+### Sleep Status 0x32
 
 Identified in logs. Presumably a boolean value indicating the current time is within a [sleep schedule](#sleep-schedule-0x1d-0x2b) time period. TODO: Needs testing.
 
-#### Robot Status 0x34
+### Robot Status 0x34
 
 | Value  | Meaning                   |
 |--------|---------------------------|
@@ -173,16 +168,16 @@ Identified in logs. Presumably a boolean value indicating the current time is wi
 
 `0x06` is always set just before `0x07`, so its meaning is unclear but related to cat detection.
 
-#### Fault Code 0x35
+### Fault Code 0x35
 
 | Value  | Meaning        |
 |--------|----------------|
 | `0x00` | No fault       |
 | `0x06` | Pinch detected |
 
-TODO: Capture more fault codes
+TODO: Capture more fault codes.
 
-#### Detection Event 0x37
+### Detection Event 0x37
 
 | Value  | Meaning         |
 |--------|-----------------|
@@ -191,19 +186,19 @@ TODO: Capture more fault codes
 | `0x20` | Weight clear    |
 | `0x21` | Weight detected |
 
-#### Bonnet Sensor 0x3A
+### Bonnet Sensor 0x3A
 
 Boolean, inverted; 0 = OK, 1 = bonnet removed. Tracks the same state as status `0x05` in [Robot Status](#robot-status-0x34).
 
-#### Night Light 0x3B
+### Night Light 0x3B
 
-Boolean; Current state of the night light inside the globe. Controlled via the [night light config registers](#night-light-0x180x19).
+Boolean; current state of the night light inside the globe. Controlled via the [night light config registers](#night-light-0x180x19).
 
-#### USB Power 0x04
+### USB Power 0x04
 
 "isUSBPowerOn" according to logs. Only ever observed a value of 1.
 
-#### Odometers
+### Odometers
 
 | Register | Meaning            | Notes                                 |
 |----------|--------------------|---------------------------------------|
@@ -213,15 +208,15 @@ Boolean; Current state of the night light inside the globe. Controlled via the [
 | `0x40`   | Filter cycle count |                                       |
 | `0x42`   | DFINumberOfCycles  | Name exposed in logs, unclear purpose |
 
-#### Litter / Drawer Level
+### Litter / Drawer Level
 
 | Register | Meaning                 | Notes                                       |
 |----------|-------------------------|---------------------------------------------|
 | `0x43`   | Waste drawer percentage |                                             |
 | `0x44`   | Waste drawer full       | Boolean                                     |
-| `0x47`   | Litter level            | Raw distance value. 490=empty, 440<=full    |
+| `0x47`   | Litter level            | Raw distance value. 480=empty, 435<=full    |
 
-#### Laser Board ToF Sensors 0x58-0x5A
+### Laser Board ToF Sensors 0x58-0x5A
 
 Three time-of-flight distance sensors on the laser board, reported in millimeters. They are published alongside [detection events](#detection-event-0x37) as a cat enters or exits. Labeled based on position facing into the globe.
 
@@ -231,7 +226,7 @@ Three time-of-flight distance sensors on the laser board, reported in millimeter
 | `0x59`   | Center |
 | `0x5A`   | Right  |
 
-#### Sleep Schedule 0x1D-0x2B
+### Sleep Schedule 0x1D-0x2B
 
 Sleep/wake times are encoded in minutes-of-day, so 21:00 (9pm) would be 1260 for example. The schedule relies on the PIC's [date/time registers](#date-0x0f-0x15) having accurate local time.
 
@@ -248,11 +243,11 @@ Sleep/wake times are encoded in minutes-of-day, so 21:00 (9pm) would be 1260 for
 
 Recommended write order: `0x1D=0` (disable) -> write all time pairs -> `0x1D=<mask>` (enable), to avoid the schedule firing against a partially-written set of times.
 
-#### Panel Sleep Mode 0x1A
+### Panel Sleep Mode 0x1A
 
-Identified in logs. Likely related to [Panel Sleep/Wake Times](#panel-sleep-time-0x1b) rather than the [cycle sleep schedule](#sleep-schedule-0x1d-0x2b). TODO: Needs testing
+Identified in logs. Likely related to [Panel Sleep/Wake Times](#panel-sleep-time-0x1b) rather than the [cycle sleep schedule](#sleep-schedule-0x1d-0x2b). TODO: Needs testing.
 
-#### Version / Identification Registers
+### Version / Identification Registers
 
 | Register    | Meaning                                      |
 |-------------|----------------------------------------------|

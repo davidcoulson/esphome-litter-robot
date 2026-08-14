@@ -30,13 +30,13 @@ This is a **one-time** hardware flashing procedure. After ESPHome is on the devi
 
 - **Pre-compiled firmware binary** - download the latest release `.bin` from the [releases page](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases).
 
-  - *Alternatively*, you can compile it from source using `litter-robot4.yaml`
-  
+  - *Alternatively*, you can compile it from source using `litter-robot4.yaml`:
+
   ```bash
   esphome compile /path/to/litter-robot4.yaml
   ```
-  
-  The compiled binary will be in `./.esphome/build/litter-robot4/build/firmware.factory.bin` relative to the `.yaml` file
+
+  The compiled binary will be in `./.esphome/build/litter-robot4/build/firmware.factory.bin` relative to the `.yaml` file.
 
 ---
 
@@ -86,13 +86,10 @@ The mainboard has an unpopulated 6-pad footprint on the left side next to the ES
 
 You have two options:
 
-Solder the 1.27mm pitch 6-pin SMT header to the unpopulated pads on the mainboard. (Recommended)
+- Solder the 1.27mm pitch 6-pin SMT header to the unpopulated pads on the mainboard. (Recommended)
+- Solder the wires directly between the ESP-Prog-2 and the mainboard pads. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected.
 
--or-
-
-Solder the wires directly between the ESP-Prog-2 and the mainboard pads. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected.
-
-### Reinstall the mainboard
+### Reinstall the Mainboard
 
 The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the litter robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Double check the ribbon cable is centered and oriented properly on the mainboard since it isn't keyed. Resecure the mainboard with screws and plug the laser board and power cable back in.
 
@@ -194,7 +191,7 @@ The default configuration hosts a web server from the device IP address. The def
 
 ### Adopting in ESPHome Dashboard
 
-The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. The auto-generated config imports the `litter_robot4.yaml` from this repository as a base package.
+The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. The auto-generated config imports the `litter-robot4.yaml` from this repository as a base package.
 
 ---
 
