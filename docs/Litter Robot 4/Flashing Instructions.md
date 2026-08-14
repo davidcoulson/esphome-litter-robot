@@ -183,9 +183,18 @@ The device should be auto-discovered by the ESPHome integration. If it doesn't a
 
 > The hostname is usually the same name as the access point earlier. You can find the hostname or IP in your router device list.
 
-All entities (cycle controls, sensors, lights, sleep schedule) will be available in Home Assistant. Some entities may be disabled by default to avoid cluttering your dashboard. You can enable them in the device page.
+All entities will now be available in Home Assistant. Some may be disabled by default to avoid cluttering your dashboard. You can enable them in the device page.
 
 ![Home Assistant](Images/Home%20Assistant.JPG)
+
+#### Sleep Schedules
+
+Independent sleep schedules for every day of the week are supported. Each day has three entities:
+
+- A day-enable switch (e.g. "Sunday Sleep Schedule") that turns that day's schedule on or off.
+- A sleep time and a wake time (e.g. "Sunday Sleep Time" and "Sunday Wake Time").
+
+Enable the days you want to schedule and set their sleep and wake times. The schedule runs on the mainboard's real-time clock, which is kept in sync with local time from Home Assistant.
 
 ### Web Server
 
