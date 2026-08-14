@@ -50,6 +50,14 @@ If you have a Litter Robot 3 "Connect" it would be helpful to capture UART packe
 
 See the [Litter Robot 4 UART Reference](docs/Litter%20Robot%204/UART%20Reference.md) for a full breakdown of the mainboard serial protocol.
 
+## Can I buy you a coffee?
+
+If you find this project useful, donations of any amount are greatly appreciated.
+
+[![PayPal](https://img.shields.io/badge/PayPal-003087?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/jdigi78)
+
+Just know I'll most likely be passing it on to other open source projects anyway :)
+
 ## Disclaimer
 
 This project is not affiliated with, endorsed by, or associated with Whisker, Litter Robot, or Automated Pet Care Products. Modifying your device involves hardware disassembly and modification which may void your warranty and carries a risk of permanent damage. Proceed at your own risk. Neither the author(s) nor contributors are responsible for any damage to your device, property, or pets resulting from the use of this firmware or instructions.
