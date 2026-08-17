@@ -141,6 +141,10 @@ Register `0x76` is the first register read by the ESP on boot. Logs output "Wifi
 
 Per-visit cat weight. Signed 16 bit integer in centipounds (divide by 100 for lb).
 
+### Heartbeat 0x30
+
+0x63 gets written to ESP on register 0x30 every few seconds. If the ESP does not acknowledge these events immediately the PIC makes the "Connect" LED flash white, indicating "WiFi chip is defective" according to Whisker. The stock Whisker firmware filters this register from logs.
+
 ### Unit Power Status 0x31
 
 Identified in logs. TODO: Need more info.
