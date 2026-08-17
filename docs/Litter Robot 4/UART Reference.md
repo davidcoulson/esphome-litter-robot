@@ -53,10 +53,10 @@ Register `0x34` doubles as the [Robot Status](#robot-status-0x34) telemetry regi
 | Button      | Register | Value    |
 |-------------|----------|----------|
 | Power       | `0x01`   | `0x0101` |
+| Cycle       | `0x01`   | `0x0201` |
 | Reset       | `0x01`   | `0x0401` |
-| Clean/cycle | `0x01`   | `0x0201` |
 | Empty       | `0x01`   | `0x0801` |
-| WiFi        | `0x01`   | `0x1001` |
+| Connect     | `0x01`   | `0x1001` |
 
 The PIC reports physical button presses by pushing a value to register `0x01`. The ESP can write the same value to simulate a press. This is actually how the Whisker app handles `Power` and `Reset`.
 
@@ -80,7 +80,7 @@ Register `0x33` is used to read and write the current WiFi state.
 | `0x22` | Connected  | Solid blue LED      |
 | `0x23` | Error      | Flashing red LED    |
 
-The PIC writes `0x11` when WiFi is enabled and `0x00` when disabled via the WiFi button on the control panel.
+The PIC writes `0x11` when WiFi is enabled and `0x00` when disabled via the Connect button on the control panel.
 
 ### Date 0x0F-0x15
 
