@@ -22,9 +22,10 @@ The ESP32 in the Litter Robot 3 and 4 serves as a WiFi-to-UART bridge that relay
 
 ## What features are supported?
 
-Every known function of the original firmware is supported, with these exceptions:
+Every known function of the original firmware is supported, with these exceptions from most to least likely to change:
 
 - Not all faults are descriptively named yet, though generic fault status is still detected.
+- LitterHopper control and status are not implemented, but the hopper itself should still work.
 - Updating mainboard/laserboard firmware is not possible.
 
 There are actually some improvements compared to the official firmware/app:
@@ -56,11 +57,13 @@ If you can't decipher the serial data or write code yourself, just send me any c
 
 ## Can I buy you a coffee?
 
-If you find this project useful, donations of any amount are greatly appreciated.
+If you find this project useful, donations of any amount are greatly appreciated. Just know I'll most likely be passing it on to other open source projects anyway :)
 
 [![PayPal](https://img.shields.io/badge/PayPal-003087?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/jdigi78)
 
-Just know I'll most likely be passing it on to other open source projects anyway :)
+You can also get $50 off a Litter-Robot using my referral link:
+
+[![Whisker Referral](https://img.shields.io/badge/$50%20off-Litter--Robot-fbb040?style=for-the-badge)](https://share.litter-robot.com/x/x2zGcr)
 
 ## Disclaimer
 
