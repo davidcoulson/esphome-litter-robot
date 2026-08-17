@@ -10,6 +10,10 @@
 #include "esphome/components/wifi/wifi_component.h"
 #endif
 
+#ifndef LITTER_ROBOT4_MAX_TRACKED_CATS
+static constexpr uint8_t LITTER_ROBOT4_MAX_TRACKED_CATS = 0;
+#endif
+
 namespace esphome::litter_robot4 {
 
 static const uint8_t FRAME_LENGTH = 7;
@@ -69,6 +73,7 @@ enum Register : uint8_t {
   REG_ROBOT_STATUS = 0x34,
   REG_FAULT_CODE = 0x35,
   REG_SLEEP_STATUS = 0x32,
+  REG_DETECTION_EVENT = 0x37,
   REG_BONNET_REMOVED = 0x3A,
   REG_NIGHT_LIGHT = 0x3B,
   REG_POWER_CYCLE_COUNT = 0x3D,
@@ -78,6 +83,9 @@ enum Register : uint8_t {
   REG_WASTE_DRAWER_PCT = 0x43,
   REG_WASTE_DRAWER_FULL = 0x44,
   REG_LITTER_LEVEL_RAW = 0x47,
+  REG_LASER_1 = 0x58,
+  REG_LASER_2 = 0x59,
+  REG_LASER_3 = 0x5A,
 };
 
 enum RobotStatus : uint16_t {
@@ -109,6 +117,13 @@ enum Command : uint16_t {
   CMD_REPLACE_FILTER = 0x000C,
   CMD_FACTORY_RESET = 0x0001,
   CMD_START_CLEAN = 0x000A,
+};
+
+enum DetectionEvent : uint16_t {
+  DETECTION_EVENT_LASER_CLEAR = 0x10,
+  DETECTION_EVENT_LASER_DETECTED = 0x11,
+  DETECTION_EVENT_WEIGHT_CLEAR = 0x20,
+  DETECTION_EVENT_WEIGHT_DETECTED = 0x21,
 };
 
 enum KeypadCommand : uint16_t {
@@ -153,6 +168,8 @@ struct PendingOperation {
   uint16_t value{0};
 };
 
+class LitterRobot4CatWeightNumber;
+
 class LitterRobot4Component final : public uart::UARTDevice,
 #ifdef USE_WIFI_CONNECT_STATE_LISTENERS
                                     public wifi::WiFiConnectStateListener,
@@ -166,6 +183,10 @@ class LitterRobot4Component final : public uart::UARTDevice,
   void queue_register_read(Register reg, uint16_t value) { this->push_queue_(OP_READ, reg, value); }
   void queue_register_write(Register reg, uint16_t value) { this->push_queue_(OP_WRITE, reg, value); }
   void write_sleep_day_enabled(DayOfWeek day, bool enabled);
+  void set_cat_weight_tolerance(float tolerance) { this->cat_weight_tolerance_ = tolerance; }
+#if LITTER_ROBOT4_MAX_TRACKED_CATS > 0
+  void register_tracked_cat(LitterRobot4CatWeightNumber *sensor);
+#endif
 
 #ifdef USE_TIME
   void set_time_id(time::RealTimeClock *time_id) { this->time_id_ = time_id; }
@@ -185,6 +206,9 @@ class LitterRobot4Component final : public uart::UARTDevice,
   void push_queue_(Operation op, Register reg, uint16_t value);
   void pop_queue_();
   void check_timeouts_();
+#if LITTER_ROBOT4_MAX_TRACKED_CATS > 0
+  void handle_cat_weight_(uint16_t value);
+#endif
 #ifdef USE_WIFI
   void sync_time_();
   void sync_wifi_status_();
@@ -201,9 +225,12 @@ class LitterRobot4Component final : public uart::UARTDevice,
   uint32_t pending_timestamp_{0};
 
   LazyCallbackManager<void(Register, uint16_t)> on_register_update_callback_;
+#if LITTER_ROBOT4_MAX_TRACKED_CATS > 0
+  StaticVector<LitterRobot4CatWeightNumber *, LITTER_ROBOT4_MAX_TRACKED_CATS> tracked_cat_sensors_;
+#endif
 
+  float cat_weight_tolerance_{0.6f};
   uint16_t sleep_mask_{0};
-  bool api_was_connected_{false};
   bool pic_ready_{false};
 #ifdef USE_WIFI
   WifiStatus last_wifi_status_{WifiStatus{0xFF}};

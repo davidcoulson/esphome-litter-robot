@@ -196,6 +196,16 @@ Independent sleep schedules for every day of the week are supported. Each day ha
 
 Enable the days you want to schedule and set their sleep and wake times. The schedule runs on the mainboard's real-time clock, which is kept in sync with local time from Home Assistant.
 
+#### Multi-Cat Tracking
+
+The precompiled firmware includes weight and visit-count entities for four cats. To track a cat:
+
+1. Enable the needed cat's weight and visit entities.
+2. Rename each cat's weight and visit entities with the desired names.
+3. Set each cat's weight number entity to your best guess.
+
+The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, eventually replacing all user input weights with a real weight measurement. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Factory reset will clear all stored weights and reset visit counters along with other settings.
+
 ### Web Server
 
 The default configuration hosts a web server from the device IP address. The default username is `user` and the password is `Wh1sk3rM30wM30w`.

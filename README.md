@@ -22,13 +22,15 @@ The ESP32 in the Litter Robot 3 and 4 serves as a WiFi-to-UART bridge that relay
 
 ## What features are supported?
 
-Every known function of the original firmware is supported, with these exceptions, sorted most to least likely to change:
+Every known function of the original firmware is supported, with these exceptions:
 
-- Not all faults are descriptively named, though generic fault status is still detected.
-- Multiple cats are not tracked, only the latest cat weight measurement is provided.
-- Updating mainboard/laserboard firmware is not currently possible.
+- Not all faults are descriptively named yet, though generic fault status is still detected.
+- Updating mainboard/laserboard firmware is not possible.
 
-For some reason the official app/firmware only lets you set sleep schedules on a coarse weekday/weekend basis. This firmware actually allows for independent sleep schedules for every day of the week.
+There are actually some improvements compared to the official firmware/app:
+
+- Sleep schedules can be set on a daily basis instead of only one time for weekday/weekend.
+- More direct access to the laser and weight detection sensors, for precise enter and exit tracking.
 
 ## Is it reversible?
 
