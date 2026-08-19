@@ -143,7 +143,7 @@ Per-visit cat weight. Signed 16 bit integer in centipounds (divide by 100 for lb
 
 ### Heartbeat 0x30
 
-0x63 gets written to ESP on register 0x30 every few seconds. If the ESP does not acknowledge these events immediately the PIC makes the "Connect" LED flash white, indicating "WiFi chip is defective" according to Whisker. The stock Whisker firmware filters this register from logs.
+0x63 gets written to ESP on register 0x30 every 5 seconds. If the ESP does not acknowledge these events immediately the PIC makes the "Connect" LED flash white, indicating "WiFi chip is defective" according to Whisker. The stock Whisker firmware filters this register from logs.
 
 ### Unit Power Status 0x31
 
@@ -151,7 +151,7 @@ Identified in logs. TODO: Need more info.
 
 ### Sleep Status 0x32
 
-Identified in logs. Presumably a boolean value indicating the current time is within a [sleep schedule](#sleep-schedule-0x1d-0x2b) time period. TODO: Needs testing.
+Boolean value indicating the current time is within a [sleep schedule](#sleep-schedule-0x1d-0x2b) time period.
 
 ### Robot Status 0x34
 
@@ -172,16 +172,24 @@ Identified in logs. Presumably a boolean value indicating the current time is wi
 
 `0x06` is always set just before `0x07`, so its meaning is unclear but related to cat detection.
 
-### Fault Code 0x35
+### Globe Fault Status 0x35
 
-| Value  | Meaning        |
-|--------|----------------|
-| `0x00` | No fault       |
-| `0x06` | Pinch detected |
+Not all faults are well understood. Names used by the Whisker API are placeholders for a better confirmed meaning.
 
-TODO: Capture more fault codes.
+| Value  | Meaning                   |
+|--------|---------------------------|
+| `0x00` | No fault                  |
+| `0x01` | "FAULT_TIMEOUT"           |
+| `0x02` | Globe motor disconnected  |
+| `0x03` | Under-voltage / brown-out |
+| `0x04` | Globe motor over-current  |
+| `0x05` | Globe motor current spike |
+| `0x06` | Pinch detected            |
+| `0x07` | "FAULT_ALL_SENSORS"       |
 
 ### Detection Event 0x37
+
+Potentially not just for detection events, but these are the only understood published values:
 
 | Value  | Meaning         |
 |--------|-----------------|
