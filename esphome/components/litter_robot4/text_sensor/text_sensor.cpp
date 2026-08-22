@@ -14,9 +14,6 @@ void LitterRobot4StatusTextSensor::setup() {
       case REG_FAULT_CODE:
         this->fault_code_ = value;
         break;
-      case REG_WASTE_DRAWER_FULL:
-        this->waste_drawer_full_ = value != 0;
-        break;
       case REG_POWER_TYPE:
         this->on_battery_ = value != 0;
         break;
@@ -63,16 +60,15 @@ void LitterRobot4StatusTextSensor::update_display_() {
     this->publish_state("Fault detected");
     return;
   }
-  if (this->waste_drawer_full_) {
-    this->publish_state("Waste drawer full");
-    return;
-  }
   auto *str = status_name(this->robot_status_);
   if (str == nullptr) {
     return;
   }
   if (this->robot_status_ == STATUS_CAT_DETECTED && !this->laser_detected_ && !this->weight_detected_) {
     str = "Waiting to cycle";
+  }
+  if (this->robot_status_ == STATUS_CLEAN_CYCLE && (this->laser_detected_ || this->weight_detected_)) {
+    str = "Cycle interrupted";
   }
   this->publish_state(str);
 }

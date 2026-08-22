@@ -1,6 +1,7 @@
 substitutions:
   name: litter-robot4
   friendly_name: Litter Robot 4
+  version: 0.9.4
 
 esphome:
   name: "${name}"
@@ -8,7 +9,7 @@ esphome:
   name_add_mac_suffix: true
   project:
     name: Joseph-DiGiovanni.LitterRobot4
-    version: "0.9.3"
+    version: ${version}
 
 esp32:
   board: esp32dev
@@ -43,7 +44,7 @@ external_components:
   source:
     type: git
     url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
-    ref: LR4/0.9.3
+    ref: LR4/${version}
 
 uart:
   - id: uart_bus
