@@ -1,10 +1,14 @@
 # Litter Robot 4 - Firmware Flashing Guide
 
-This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible. You can restore the original firmware at any time.
+This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible and you can restore the original firmware at any time.
 
 This is a **one-time** hardware flashing procedure. After ESPHome is on the device, future updates can be delivered wirelessly ([OTA](#updating-the-firmware-ota)).
 
 > Disclaimer: This project is not affiliated with, endorsed by, or associated with Whisker, Litter Robot, or Automated Pet Care Products. Modifying your device involves hardware disassembly and modification which may void your warranty and carries a risk of permanent damage. Proceed at your own risk. Neither the author(s) nor contributors are responsible for any damage to your device, property, or pets resulting from the use of this firmware or instructions.
+
+## Mainboard Revision Notice
+
+There are 2 known major revisions of the Litter Robot 4 mainboard. Both will work, but prepairing the mainboard for flashing is slightly different. Older units have a serial number starting with "LR4C", and newer units manufactured after February 2026 have a serial number starting with "LR4S". Take note of which one you have before purchasing any hardware.
 
 ---
 
@@ -12,17 +16,27 @@ This is a **one-time** hardware flashing procedure. After ESPHome is on the devi
 
 ### Hardware
 
-- [**ESP-Prog-2 programmer**](https://amzn.to/4vMhlyv) (affiliate link) - includes a ribbon cable despite not being mentioned in the listing
+- [**ESP-Prog-2 programmer**](https://amzn.to/4vMhlyv) (affiliate link) - Includes a 1.27mm pitch ribbon cable despite not being mentioned in the listing
 
-- [**1.27mm (0.05") pitch 6 pin surface-mount header**](https://www.ebay.com/itm/336714254669) (sold directly by me in the US) can also be purchased from [digikey](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412) in many regions. Technically optional but highly recommended
-
-- **Soldering iron** (fine tip) and solder
+- **Soldering iron** (fine/curved tip) and solder
 
 - **Phillips-head screwdriver**
 
-- **Fiberglass brush or razor blade** or any other sharp object to scratch off conformal coating
+- **[Fine fiberglass brush](https://amzn.to/4iqF6Je)** (affiliate link) or **razor blade** - Any sharp object to scratch off conformal coating
 
 - **USB-C cable** for the ESP-Prog-2
+
+#### Technically optional but highly recommended:
+
+For serial numbers starting with "LR4C":
+
+- [**1.27mm (0.05") pitch 2x3 6 position surface-mount header**](https://www.ebay.com/itm/336714254669) (sold directly by me in the US) - Also available from [Digikey](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412) globally.
+
+For serial numbers starting with "LR4S":
+
+- [**2.54mm (0.1") pitch single row 5 position through-hole header**](https://www.digikey.com/en/products/detail/würth-elektronik/61300511121/4846831)
+
+- [**Female to female jumper wire**](https://www.digikey.com/en/products/detail/adafruit-industries-llc/1950/6827084)
 
 ### Software
 
@@ -40,9 +54,9 @@ This is a **one-time** hardware flashing procedure. After ESPHome is on the devi
 
 ---
 
-## Disassembly - Accessing the Mainboard
+## Accessing the Mainboard
 
-You can follow [Whisker's official video guide for replacing the laser board](https://www.youtube.com/watch?v=m9pkoDCwM14) up to the part where you disconnect the laser board (stop at 1:56) then skip to step 10, otherwise:
+You can follow [Whisker's official video guide for replacing the laser board](https://www.youtube.com/watch?v=m9pkoDCwM14) up to the part where you disconnect the laser board (stop at 1:56), otherwise expand the steps below:
 
 1. **Prepare the unit.** Make sure the globe is in the home position. Press the Power button to turn the unit off, then unplug it from the wall. Remove any accessories.
 
@@ -62,38 +76,77 @@ You can follow [Whisker's official video guide for replacing the laser board](ht
 
 9. **Unplug the laser board.** The laser board is at the top center of the unit. The mainboard is positioned just to the right of it, underneath the control panel. Gently pull out the laser board connector on the left side of the mainboard.
 
-10. **Remove the mainboard.** Unplug the larger power connector on the right side of the mainboard. Remove the 2 screws securing the mainboard and control panel to the bridge right below the control panel. The mainboard can now be removed with the control panel attached.
+## Remove the Mainboard
+
+Unplug the larger power connector on the right side of the mainboard. Remove the 2 screws securing the mainboard and control panel to the bridge right below the control panel. The mainboard can now be removed with the control panel attached.
 
 ![Remove mainboard](Images/Remove%20Main%20Board.JPG)
 
+
+
 ---
 
-## Connecting the Programmer
+## Preparing the Mainboard
 
-![ESP-Prog-2](Images/ESP-Prog-2.JPG)
+> The following directions assume the mainboard is oriented with the control panel facing up with the LED indicators facing you as they do normally, and the ESP-Prog-2 with the pins facing you and the USB-C port on the right side.
 
-> Directions assume the ESP-Prog-2 has the pins facing you with the USB-C port on the right side.
+<details>
+<summary>For serial numbers starting with "LR4C"</summary>
+<br>
 
-Plug the included 6 pin ribbon cable into the top right header on the ESP-Prog-2. It should be keyed to only plug in one way, with pin 1 (Usually indicated by a pink wire on the ribbon) on the left side.
+Plug the included 6 pin ribbon cable into the top right header on the ESP-Prog-2. It should be keyed to only plug in one way, with pin 1 (Indicated by a pink wire) on the left side.
 
-### Preparing the Mainboard
+![ESP-Prog-2](Images/LR4C/ESP-Prog-2.JPG)
 
-> Directions assume the mainboard is oriented with the control panel facing up with the LED indicators facing you as they do normally.
+The mainboard has an unpopulated 6-pad footprint on the left side next to the ESP32 for the ESP-Prog header, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on it before soldering, a fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
 
-The mainboard has an unpopulated 6-pad footprint on the left side next to the ESP32 for the ESP-Prog header, it is labeled "J3" on mine. You will need to scrape off the thin layer of conformal coating on it before soldering, a fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
+![ESP-Prog header location](Images/LR4C/ESP-Prog%20Header%20Location.JPG)
 
-![ESP-Prog header installed](Images/ESP-Prog%20Header%20Installed.JPG)
+You now have two options:
 
-You have two options:
+- Solder the 1.27mm pitch 6 pin surface mount header to the unpopulated pads. (Recommended)
 
-- Solder the 1.27mm pitch 6-pin SMT header to the unpopulated pads on the mainboard. (Recommended)
-- Solder the wires directly between the ESP-Prog-2 and the mainboard pads. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected.
+	![ESP-Prog header installed](Images/LR4C/ESP-Prog%20Header%20Installed.JPG)
 
-### Reinstall the Mainboard
+- Solder the wires directly between the ESP-Prog-2 and the mainboard pads. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. The pins of the large and small 6 pin connector on the ESP-Prog are electrically identical.
 
-The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the litter robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Double check the ribbon cable is centered and oriented properly on the mainboard since it isn't keyed. Resecure the mainboard with screws and plug the laser board and power cable back in.
+	![ESP-Prog wire diagram](Images/LR4C/ESP-Prog%20Wire%20Diagram.JPG)
 
-![ESP-Prog-2 connected](Images/ESP-Prog-2%20Connected.JPG)
+The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the Litter Robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Double check the ribbon cable is centered and oriented properly on the mainboard since it isn't keyed. Resecure the mainboard with screws and plug the laser board and power cable back in.
+
+![ESP-Prog-2 connected](Images/LR4C/ESP-Prog-2%20Connected.JPG)
+</details>
+
+<details>
+<summary>For serial numbers starting with "LR4S"</summary>
+<br>
+
+> **WARNING:** While the firmware reportedly works fine on this revision, this specific install method is not entirely confirmed. Proceed with caution and please submit feedback for confirmation or corrections.
+
+The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them before soldering, a fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
+
+![ESP-Prog header location](Images/LR4S/ESP-Prog%20Header%20Location.JPG)
+
+You can then either solder the 2.57mm pitch 5 pin header and connect the ESP-Prog with jumper wire or solder wires directly from the ESP-Prog to the pads following this diagram:
+
+![ESP-Prog wire diagram](Images/LR4S/ESP-Prog%20Wire%20Diagram.JPG)
+
+The pins of the large and small 6 pin connector on the ESP-Prog are electrically identical.
+
+This layout is arbitrary but I am fairly confident this is the pinout from left to right:
+
+```
+ESP_EN, TX, RX, GND, ESP_IO0
+```
+
+The order of TX/RX (3 and 5 in the diagram) is honestly a complete guess. It shouldn't damage anything if they are mixed up, but if reading/writing to the ESP fails in the next section, try swapping them.
+
+> Contribution Needed: A real clear photo of of the ESP-Prog connected to this revision of the mainboard in the same orientation would be appreciated, along with verification of the pinout.
+
+The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the Litter Robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Resecure the mainboard with screws and plug the laser board and power cable back in.
+
+> You can optionally connect 3.3v to the first square pad of J7 to power the mainboard and flash the firmware outside of the unit. **Make sure the ESP-Prog "VPROG" jumper is set to 3.3v first.**
+</details>
 
 ---
 

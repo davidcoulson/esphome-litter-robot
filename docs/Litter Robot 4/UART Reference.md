@@ -1,11 +1,15 @@
-# Litter Robot 4 — Mainboard UART Protocol Reference
+# Litter Robot 4 - Mainboard UART Protocol Reference
 
 ## 1. Architecture
 
-The LR4 contains two microcontrollers plus a satellite board:
+The LR4 mainboard contains two microcontrollers plus a satellite board:
 
 - **ESP32** (ESP32-WROOM-32E, "ESP") - a thin WiFi/MQTT-to-UART bridge. It contains no Litter Robot hardware logic; it relays register reads/writes between the cloud (AWS IoT / MQTT) and the mainboard.
+
 - **Mainboard MCU** (PIC18F47Q43-I/PT, "PIC") - runs all robot logic: motor control, sensor processing, the cycle state machine, RTC, sleep scheduling, and all safety interlocks (anti-pinch, weight-pause, over-current). This board survives independently of the ESP32 and can even cut power to the ESP32 completely for power saving on battery.
+
+	> Units manufactured after February 2026 (serial number starting with "LR4S") have a different mainboard revision which uses an STM microcontroller instead.
+
 - **Laserboard** - a satellite board handling ToF sensors for detecting cat presence as well as litter and waste drawer level.
 
 ## 2. Physical Layer
