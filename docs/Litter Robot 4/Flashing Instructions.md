@@ -129,31 +129,25 @@ The mainboard must be powered externally to read/write the flash of the ESP32. I
 <summary>For serial numbers starting with "LR4S"</summary>
 <br>
 
-> **WARNING:** While the firmware reportedly works fine on this revision, this specific install method is not entirely confirmed. Proceed with caution and please submit feedback for confirmation or corrections.
-
 The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them before soldering. A fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
 
 ![ESP-Prog header location](Images/LR4S/ESP-Prog%20Header%20Location.JPG)
 
-You can then either solder the 2.57mm pitch 5 pin header and connect the ESP-Prog with jumper wire, or solder wires directly from the ESP-Prog-2 to the mainboard following this diagram:
+You can then either solder the 2.57mm pitch 5 pin header and connect the ESP-Prog-2 with jumper wires:
+
+![ESP-Prog-2 connected](Images/LR4S/ESP-Prog-2%20Connected.JPG)
+
+or solder wires directly from the ESP-Prog-2 to the mainboard. Either way you will have to follow this diagram when connecting the wires:
 
 ![ESP-Prog wire diagram](Images/LR4S/ESP-Prog%20Wire%20Diagram.JPG)
 
+> You can optionally connect 3.3v to the first square pad of J7 to power the mainboard and flash the firmware outside of the unit. **Make sure the ESP-Prog-2 "VPROG" jumper is set to 3.3v first. Do not connect this pin when installed in the Litter Robot.**
+
 The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
-
-This layout is arbitrary but I am fairly confident this is the pinout from left to right:
-
-```
-ESP_EN, TX, RX, GND, ESP_IO0
-```
-
-The order of TX/RX (3 and 5 in the diagram) is honestly a complete guess. It shouldn't damage anything if they are mixed up, but if reading/writing to the ESP fails in the next section, try swapping them.
-
-> Contribution Needed: A real clear photo of of the ESP-Prog-2 connected to this revision of the mainboard in the same orientation would be appreciated, along with verification of the pinout.
 
 The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the Litter Robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Resecure the mainboard with screws and plug the laser board and power cable back in.
 
-> You can optionally connect 3.3v to the first square pad of J7 to power the mainboard and flash the firmware outside of the unit. **Make sure the ESP-Prog-2 "VPROG" jumper is set to 3.3v first.**
+>Thank you [@ghulands](https://codeberg.org/ghulands) for testing and photos
 </details>
 
 ---
