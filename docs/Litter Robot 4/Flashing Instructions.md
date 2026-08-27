@@ -16,7 +16,7 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 ### Hardware
 
-- [**ESP-Prog-2 programmer**](https://amzn.to/4vMhlyv) (affiliate link) - Includes a 1.27mm pitch ribbon cable despite not being mentioned in the listing
+- [**ESP-Prog-2 development board**](https://amzn.to/4vMhlyv) (affiliate link) - Includes a 1.27mm pitch ribbon cable despite not being mentioned in the listing
 
 - **Soldering iron** (fine/curved tip) and solder
 
@@ -58,6 +58,10 @@ For serial numbers starting with "LR4S":
 
 You can follow [Whisker's official video guide for replacing the laser board](https://www.youtube.com/watch?v=m9pkoDCwM14) up to the part where you disconnect the laser board (stop at 1:56), otherwise expand the steps below:
 
+<details>
+<summary>Step by step instructions</summary>
+<br>
+
 1. **Prepare the unit.** Make sure the globe is in the home position. Press the Power button to turn the unit off, then unplug it from the wall. Remove any accessories.
 
 2. **Remove the bonnet.** Press and hold the latches on both sides of the bonnet, then lift and rotate it to its open position. Remove the bonnet completely.
@@ -75,6 +79,8 @@ You can follow [Whisker's official video guide for replacing the laser board](ht
 8. **Separate the bezel.** With a hand in the drawer opening of the base, tip the unit slightly. Carefully pull out one side of the bezel to begin separating it from the bridge, then pull the other side and remove the bezel completely.
 
 9. **Unplug the laser board.** The laser board is at the top center of the unit. The mainboard is positioned just to the right of it, underneath the control panel. Gently pull out the laser board connector on the left side of the mainboard.
+
+</details>
 
 ## Remove the Mainboard
 
