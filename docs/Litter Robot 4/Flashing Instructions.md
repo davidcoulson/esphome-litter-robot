@@ -96,6 +96,8 @@ Unplug the larger power connector on the right side of the mainboard. Remove the
 
 > The following directions assume the mainboard is oriented with the control panel facing up with the LED indicators facing you as they do normally, and the ESP-Prog-2 with the pins facing you and the USB-C port on the right side.
 
+To connect the ESP-Prog-2 to the mainboard to backup/flash the firmware, some soldering is required. Follow the instructions based on the serial number of your Litter Robot:
+
 <details>
 <summary>For serial numbers starting with "LR4C"</summary>
 <br>
@@ -104,7 +106,7 @@ Plug the included 6 pin ribbon cable into the top right header on the ESP-Prog-2
 
 ![ESP-Prog-2](Images/LR4C/ESP-Prog-2.JPG)
 
-The mainboard has an unpopulated 6-pad footprint on the left side next to the ESP32 for the ESP-Prog header, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on it before soldering, a fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
+The mainboard has an unpopulated 6-pad footprint on the left side next to the ESP32 for the ESP-Prog header, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on it before soldering. A fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
 
 ![ESP-Prog header location](Images/LR4C/ESP-Prog%20Header%20Location.JPG)
 
@@ -114,7 +116,7 @@ You now have two options:
 
 	![ESP-Prog header installed](Images/LR4C/ESP-Prog%20Header%20Installed.JPG)
 
-- Solder the wires directly between the ESP-Prog-2 and the mainboard pads. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. The pins of the large and small 6 pin connector on the ESP-Prog are electrically identical.
+- Solder the wires directly between the ESP-Prog-2 and the mainboard. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
 
 	![ESP-Prog wire diagram](Images/LR4C/ESP-Prog%20Wire%20Diagram.JPG)
 
@@ -129,15 +131,15 @@ The mainboard must be powered externally to read/write the flash of the ESP32. I
 
 > **WARNING:** While the firmware reportedly works fine on this revision, this specific install method is not entirely confirmed. Proceed with caution and please submit feedback for confirmation or corrections.
 
-The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them before soldering, a fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
+The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them before soldering. A fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
 
 ![ESP-Prog header location](Images/LR4S/ESP-Prog%20Header%20Location.JPG)
 
-You can then either solder the 2.57mm pitch 5 pin header and connect the ESP-Prog with jumper wire or solder wires directly from the ESP-Prog to the pads following this diagram:
+You can then either solder the 2.57mm pitch 5 pin header and connect the ESP-Prog with jumper wire, or solder wires directly from the ESP-Prog-2 to the mainboard following this diagram:
 
 ![ESP-Prog wire diagram](Images/LR4S/ESP-Prog%20Wire%20Diagram.JPG)
 
-The pins of the large and small 6 pin connector on the ESP-Prog are electrically identical.
+The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
 
 This layout is arbitrary but I am fairly confident this is the pinout from left to right:
 
@@ -147,11 +149,11 @@ ESP_EN, TX, RX, GND, ESP_IO0
 
 The order of TX/RX (3 and 5 in the diagram) is honestly a complete guess. It shouldn't damage anything if they are mixed up, but if reading/writing to the ESP fails in the next section, try swapping them.
 
-> Contribution Needed: A real clear photo of of the ESP-Prog connected to this revision of the mainboard in the same orientation would be appreciated, along with verification of the pinout.
+> Contribution Needed: A real clear photo of of the ESP-Prog-2 connected to this revision of the mainboard in the same orientation would be appreciated, along with verification of the pinout.
 
 The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the Litter Robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Resecure the mainboard with screws and plug the laser board and power cable back in.
 
-> You can optionally connect 3.3v to the first square pad of J7 to power the mainboard and flash the firmware outside of the unit. **Make sure the ESP-Prog "VPROG" jumper is set to 3.3v first.**
+> You can optionally connect 3.3v to the first square pad of J7 to power the mainboard and flash the firmware outside of the unit. **Make sure the ESP-Prog-2 "VPROG" jumper is set to 3.3v first.**
 </details>
 
 ---
