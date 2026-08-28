@@ -133,7 +133,7 @@ The mainboard has 5 unpopulated through-hole pads on the left side next to the E
 
 ![ESP-Prog header location](Images/LR4S/ESP-Prog%20Header%20Location.JPG)
 
-You can then either solder the 2.57mm pitch 5 pin header and connect the ESP-Prog-2 with jumper wires:
+You can then either solder the 2.54mm pitch 5 pin header and connect the ESP-Prog-2 with jumper wires:
 
 ![ESP-Prog-2 connected](Images/LR4S/ESP-Prog-2%20Connected.JPG)
 
