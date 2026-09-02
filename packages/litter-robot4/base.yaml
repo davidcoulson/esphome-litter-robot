@@ -38,10 +38,6 @@ button:
     id: replace_filter
     name: "Replace Filter"
   - platform: litter_robot4
-    type: power
-    id: power
-    name: "Power"
-  - platform: litter_robot4
     type: factory_reset
     id: factory_reset
     name: "Factory Reset"
@@ -108,6 +104,10 @@ switch:
     type: control_panel_lockout
     id: control_panel_lockout
     name: "Control Panel Lockout"
+  - platform: litter_robot4
+    type: power
+    id: power
+    name: "Power"
 
 binary_sensor:
   - platform: litter_robot4
