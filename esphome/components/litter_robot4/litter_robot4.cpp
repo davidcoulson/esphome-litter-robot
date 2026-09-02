@@ -110,35 +110,21 @@ const char *status_name(uint16_t status) {
   return nullptr;
 }
 
-void LitterRobot4Component::setup() {
-#ifdef USE_WIFI
-  this->setup_on_register_update_callback([this](Register reg, uint16_t value) {
-    if (reg == REG_WIFI_STATUS) {
-      this->last_wifi_status_ = static_cast<WifiStatus>(value);
-      bool wifi_disabled = wifi::global_wifi_component->is_disabled();
-      if (value == WIFI_OFF) {
-        if (!wifi_disabled) {
-          this->set_timeout("wifi_disable", 500, [this] { wifi::global_wifi_component->disable(); });
-        }
-      } else {
-        if (wifi_disabled) {
-          wifi::global_wifi_component->enable();
-        }
-        if (!wifi_disabled) {
-          this->sync_wifi_status_();
-        }
-      }
-    } else if (reg == REG_ROBOT_STATUS && value == STATUS_READY) {
-      this->set_timeout("wifi_status_check", 500, [this] { this->queue_register_read(REG_WIFI_STATUS); });
-    }
-  });
-
-#ifdef USE_WIFI_CONNECT_STATE_LISTENERS
-  if (wifi::global_wifi_component != nullptr) {
-    wifi::global_wifi_component->add_connect_state_listener(this);
+const char *wifi_status_name(uint16_t status) {
+  switch (status) {
+    case WIFI_OFF:
+      return "Off";
+    case WIFI_PAIRING:
+      return "Pairing";
+    case WIFI_CONNECTING:
+      return "Connecting";
+    case WIFI_CONNECTED:
+      return "Connected";
+    case WIFI_ERROR:
+      return "Error";
+    default:
+      return nullptr;
   }
-#endif
-#endif
 }
 
 void LitterRobot4Component::loop() {
@@ -152,12 +138,6 @@ void LitterRobot4Component::loop() {
 #ifdef USE_TIME
   if (millis() - this->last_time_sync_ > SYNC_TIME_INTERVAL) {
     this->sync_time_();
-  }
-#endif
-
-#ifdef USE_WIFI
-  if (wifi::global_wifi_component != nullptr) {
-    this->sync_wifi_status_();
   }
 #endif
 }
@@ -323,27 +303,9 @@ const char *format_register_value(Register reg, uint16_t value) {
       return status_buf;
     }
 
-#ifdef USE_WIFI
     case REG_WIFI_STATUS: {
+      auto *wifi_name = wifi_status_name(value);
       static char wifi_buf[32];
-      const char *wifi_name = nullptr;
-      switch (value) {
-        case WIFI_OFF:
-          wifi_name = "Off";
-          break;
-        case WIFI_PAIRING:
-          wifi_name = "Pairing";
-          break;
-        case WIFI_CONNECTING:
-          wifi_name = "Connecting";
-          break;
-        case WIFI_CONNECTED:
-          wifi_name = "Connected";
-          break;
-        case WIFI_ERROR:
-          wifi_name = "Error";
-          break;
-      }
       if (wifi_name) {
         return wifi_name;
       } else {
@@ -351,7 +313,6 @@ const char *format_register_value(Register reg, uint16_t value) {
       }
       return wifi_buf;
     }
-#endif
 
     case REG_FAULT_CODE: {
       static char fault_buf[16];
@@ -570,6 +531,9 @@ void LitterRobot4Component::handle_write_ack_(Register reg, uint16_t value) {
 }
 
 void LitterRobot4Component::pop_queue_() {
+  if (this->pending_count_ == 0) {
+    return;
+  }
   this->pending_head_ = (this->pending_head_ + 1) % MAX_PENDING;
   this->pending_count_--;
 
@@ -618,34 +582,6 @@ void LitterRobot4Component::sync_time_() {
   ESP_LOGD(TAG, "Time synced: %04d-%02d-%02d %02d:%02d:%02d DOW=%d", now.year, now.month, now.day_of_month, now.hour,
            now.minute, now.second, now.day_of_week - 1);
 }
-#endif
-
-#ifdef USE_WIFI
-void LitterRobot4Component::sync_wifi_status_() {
-  if (wifi::global_wifi_component == nullptr)
-    return;
-
-  WifiStatus status = WIFI_CONNECTING;
-  if (wifi::global_wifi_component->is_disabled()) {
-    status = WIFI_OFF;
-  } else if (wifi::global_wifi_component->is_ap_active()) {
-    status = WIFI_PAIRING;
-  } else if (wifi::global_wifi_component->is_connected()) {
-    status = WIFI_CONNECTED;
-  }
-
-  if (status == this->last_wifi_status_)
-    return;
-
-  this->last_wifi_status_ = status;
-  this->queue_register_write(REG_WIFI_STATUS, status);
-}
-
-#ifdef USE_WIFI_CONNECT_STATE_LISTENERS
-void LitterRobot4Component::on_wifi_connect_state(StringRef ssid, std::span<const uint8_t, 6> bssid) {
-  this->sync_wifi_status_();
-}
-#endif
 #endif
 
 #if LITTER_ROBOT4_MAX_TRACKED_CATS > 0

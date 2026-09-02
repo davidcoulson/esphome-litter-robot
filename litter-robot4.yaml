@@ -50,3 +50,4 @@ packages:
   litter_robot4_base: !include packages/litter-robot4/base.yaml
   sleep_schedule: !include packages/litter-robot4/sleep-schedule.yaml
   cat_tracking: !include packages/litter-robot4/cat-tracking.yaml
+  wifi: !include packages/litter-robot4/wifi.yaml

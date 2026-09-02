@@ -1,0 +1,50 @@
+script:
+  - id: sync_wifi_status
+    then:
+      - lambda: |-
+          const char *target;
+          if (esphome::wifi::global_wifi_component->is_disabled()) {
+            target = "Off";
+          } else if (esphome::wifi::global_wifi_component->is_connected()) {
+            target = "Connected";
+          } else if (esphome::wifi::global_wifi_component->is_ap_active()) {
+            target = "Pairing";
+          } else {
+            target = "Connecting";
+          }
+          if (id(wifi_status).current_option() != target) {
+            id(wifi_status).make_call().set_option(target).perform();
+          }
+
+interval:
+  - interval: 30s
+    then:
+      - script.execute: sync_wifi_status
+
+select:
+  - platform: litter_robot4
+    type: wifi_status
+    id: wifi_status
+    name: "WiFi Status"
+    disabled_by_default: true
+    on_value:
+      then:
+        - delay: 500ms
+        - if:
+            condition:
+              select.is:
+                id: wifi_status
+                options: ["Off"]
+            then:
+              - wifi.disable:
+            else:
+              - wifi.enable:
+              - script.execute: sync_wifi_status
+
+wifi:
+  on_connect:
+    then:
+      - script.execute: sync_wifi_status
+  on_disconnect:
+    then:
+      - script.execute: sync_wifi_status
