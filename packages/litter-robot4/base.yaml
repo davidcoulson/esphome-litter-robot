@@ -1,0 +1,143 @@
+uart:
+  - id: uart_bus
+    tx_pin: GPIO19
+    rx_pin: GPIO5
+    baud_rate: 256000
+    rx_buffer_size: 2048
+
+litter_robot4:
+  id: my_litter_robot4
+  time_id: ha_time
+
+time:
+  - platform: homeassistant
+    timezone: America/New_York
+    id: ha_time
+
+text_sensor:
+  - platform: litter_robot4
+    type: status
+    id: status
+    name: "Status"
+  - platform: litter_robot4
+    type: power_type
+    id: power_type
+    name: "Power Type"
+
+button:
+  - platform: litter_robot4
+    type: cycle
+    id: cycle
+    name: "Manual Cycle"
+  - platform: litter_robot4
+    type: empty
+    id: empty
+    name: "Empty Litter"
+  - platform: litter_robot4
+    type: replace_filter
+    id: replace_filter
+    name: "Replace Filter"
+  - platform: litter_robot4
+    type: power
+    id: power
+    name: "Power"
+  - platform: litter_robot4
+    type: factory_reset
+    id: factory_reset
+    name: "Factory Reset"
+  - platform: litter_robot4
+    type: reset
+    id: reset
+    name: "Reset"
+
+sensor:
+  - platform: litter_robot4
+    type: waste_drawer_level
+    id: waste_drawer_level
+    name: "Waste Drawer Level"
+  - platform: litter_robot4
+    type: litter_level
+    id: litter_level
+    name: "Litter Level"
+  - platform: litter_robot4
+    type: last_cat_weight
+    id: last_cat_weight
+    name: "Last Cat Weight"
+  - platform: litter_robot4
+    type: clean_cycle_count
+    id: clean_cycle_count
+    name: "Clean Cycles"
+  - platform: litter_robot4
+    type: power_cycle_count
+    id: power_cycle_count
+    name: "Power Cycles"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: empty_cycle_count
+    id: empty_cycle_count
+    name: "Empty Cycles"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: filter_cycle_count
+    id: filter_cycle_count
+    name: "Filter Cycles"
+    disabled_by_default: true
+
+number:
+  - platform: litter_robot4
+    type: clean_cycle_delay
+    id: clean_cycle_delay
+    name: "Clean Cycle Delay"
+
+select:
+  - platform: litter_robot4
+    type: night_light_mode
+    id: night_light_mode
+    name: "Night Light Mode"
+  - platform: litter_robot4
+    type: night_light_brightness
+    id: night_light_brightness
+    name: "Night Light Brightness"
+  - platform: litter_robot4
+    type: panel_brightness
+    id: panel_brightness
+    name: "Panel Brightness"
+
+switch:
+  - platform: litter_robot4
+    type: control_panel_lockout
+    id: control_panel_lockout
+    name: "Control Panel Lockout"
+
+binary_sensor:
+  - platform: litter_robot4
+    type: waste_drawer_full
+    id: waste_drawer_full
+    name: "Waste Drawer Full"
+  - platform: litter_robot4
+    type: bonnet_removed
+    id: bonnet_removed
+    name: "Bonnet Removed"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: night_light
+    id: night_light
+    name: "Night Light"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: sleep_status
+    id: sleep_status
+    name: "Sleep Status"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: fault_status
+    id: fault_status
+    name: "Fault Status"
+  - platform: litter_robot4
+    type: laser_detect
+    id: laser_detect
+    name: "Laser Detect"
+  - platform: litter_robot4
+    type: weight_detect
+    id: weight_detect
+    name: "Weight Detect"

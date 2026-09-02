@@ -1,0 +1,47 @@
+sensor:
+  - platform: litter_robot4
+    type: cat_visit_count
+    id: cat1_visits
+    cat_weight: cat1weight
+    name: "Cat 1 Visits"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: cat_visit_count
+    id: cat2_visits
+    cat_weight: cat2weight
+    name: "Cat 2 Visits"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: cat_visit_count
+    id: cat3_visits
+    cat_weight: cat3weight
+    name: "Cat 3 Visits"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: cat_visit_count
+    id: cat4_visits
+    cat_weight: cat4weight
+    name: "Cat 4 Visits"
+    disabled_by_default: true
+
+number:
+  - platform: litter_robot4
+    type: cat_weight
+    id: cat1weight
+    name: "Cat 1 Weight"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: cat_weight
+    id: cat2weight
+    name: "Cat 2 Weight"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: cat_weight
+    id: cat3weight
+    name: "Cat 3 Weight"
+    disabled_by_default: true
+  - platform: litter_robot4
+    type: cat_weight
+    id: cat4weight
+    name: "Cat 4 Weight"
+    disabled_by_default: true
