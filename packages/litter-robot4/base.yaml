@@ -22,12 +22,46 @@ interval:
 text_sensor:
   - platform: litter_robot4
     type: status
-    id: status
-    name: "Status"
+    id: robot_status
+    name: "Robot Status"
+    internal: true
+    on_value:
+      - script.execute: update_status
   - platform: litter_robot4
     type: power_type
     id: power_type
     name: "Power Type"
+    on_value:
+      - script.execute: update_status
+  - platform: template
+    id: status
+    name: "Status"
+    icon: "mdi:information-outline"
+
+script:
+  - id: update_status
+    then:
+      - lambda: |-
+          std::string result;
+          if (id(wifi_status).current_option() == "Off") {
+            result = "WiFi disabled";
+          } else if (id(power_type).state == "Battery") {
+            result = "On battery";
+          } else if (id(fault_status).state) {
+            result = "Fault detected";
+          } else {
+            const std::string &robot = id(robot_status).state;
+            if (robot == "Cat detected" && !id(laser_detect).state && !id(weight_detect).state) {
+              result = "Waiting to cycle";
+            } else if (robot == "Clean cycle in progress" && (id(laser_detect).state || id(weight_detect).state)) {
+              result = "Cycle interrupted";
+            } else {
+              result = robot;
+            }
+          }
+          if (!result.empty() && result != id(status).state) {
+            id(status).publish_state(result);
+          }
 
 button:
   - platform: litter_robot4
@@ -138,11 +172,17 @@ binary_sensor:
     type: fault_status
     id: fault_status
     name: "Fault Status"
+    on_state:
+      - script.execute: update_status
   - platform: litter_robot4
     type: laser_detect
     id: laser_detect
     name: "Laser Detect"
+    on_state:
+      - script.execute: update_status
   - platform: litter_robot4
     type: weight_detect
     id: weight_detect
     name: "Weight Detect"
+    on_state:
+      - script.execute: update_status
