@@ -14,6 +14,11 @@ time:
     timezone: America/New_York
     id: ha_time
 
+interval:
+  - interval: 24h
+    then:
+      - litter_robot4.sync_time: my_litter_robot4
+
 text_sensor:
   - platform: litter_robot4
     type: status
