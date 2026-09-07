@@ -33,6 +33,10 @@ text_sensor:
     name: "Power Type"
     on_value:
       - script.execute: update_status
+  - platform: litter_robot4
+    type: fault
+    id: fault
+    name: "Fault"
   - platform: template
     id: status
     name: "Status"
@@ -47,7 +51,7 @@ script:
             result = "WiFi disabled";
           } else if (id(power_type).state == "Battery") {
             result = "On battery";
-          } else if (id(fault_status).state) {
+          } else if (!id(fault).state.empty() && id(fault).state != "None") {
             result = "Fault detected";
           } else {
             const std::string &robot = id(robot_status).state;
@@ -176,12 +180,6 @@ binary_sensor:
     id: sleeping
     name: "Sleeping"
     disabled_by_default: true
-  - platform: litter_robot4
-    type: fault_status
-    id: fault_status
-    name: "Fault Status"
-    on_state:
-      - script.execute: update_status
   - platform: litter_robot4
     type: laser_detect
     id: laser_detect
