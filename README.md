@@ -12,13 +12,13 @@ Flashing the Litter Robot with ESPHome-based firmware eliminates the dependency 
 
 ![Home Assistant](docs/Litter%20Robot%204/Images/Home%20Assistant.JPG)
 
-## What devices are supported?
-
-Only the Litter Robot 4 is supported at this time. Though I suspect the Litter Robot 3 is very similar, I do not have one to test on. Contributions are appreciated!
-
 ## Is it safe?
 
 The ESP32 in the Litter Robot 3 and 4 serves as a WiFi-to-UART bridge that relays commands between the cloud and the mainboard PIC microcontroller. All hardware control and safety-critical logic comes from this separate microcontroller, so replacing the ESP32 firmware should not compromise safety mechanisms of the device in any way.
+
+## What devices are supported?
+
+Only the Litter Robot 4 is supported at this time. Though I suspect the Litter Robot 3 is very similar, I do not have one to test on. Contributions are appreciated!
 
 ## What features are supported?
 

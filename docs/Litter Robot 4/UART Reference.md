@@ -54,13 +54,13 @@ Register `0x34` doubles as the [Robot Status](#robot-status-0x34) telemetry regi
 
 ### 5.1 Simulated Control Panel Input
 
-| Button      | Register | Value    |
-|-------------|----------|----------|
-| Power       | `0x01`   | `0x0101` |
-| Cycle       | `0x01`   | `0x0201` |
-| Reset       | `0x01`   | `0x0401` |
-| Empty       | `0x01`   | `0x0801` |
-| Connect     | `0x01`   | `0x1001` |
+| Button  | Register | Value    |
+|---------|----------|----------|
+| Power   | `0x01`   | `0x0101` |
+| Cycle   | `0x01`   | `0x0201` |
+| Reset   | `0x01`   | `0x0401` |
+| Empty   | `0x01`   | `0x0801` |
+| Connect | `0x01`   | `0x1001` |
 
 The PIC reports physical button presses by pushing a value to register `0x01`. The ESP can write the same value to simulate a press. This is actually how the Whisker app handles `Power` and `Reset`.
 
@@ -94,15 +94,15 @@ The PIC writes `0x11` when WiFi is enabled and `0x00` when disabled via the Conn
 
 Value is **local time** spread across the following registers. The PIC's RTC drives the [sleep schedule](#sleep-schedule-0x1d-0x2b); keeping time in sync is required for schedule accuracy.
 
-| Register | Meaning     | Notes                       |
-|----------|-------------|-----------------------------|
-| `0x0F`   | Day-of-week | 0=Sunday                    |
-| `0x10`   | Hour        | 0-23                        |
-| `0x11`   | Minute      |                             |
-| `0x12`   | Second      |                             |
-| `0x13`   | Day         |                             |
-| `0x14`   | Month       |                             |
-| `0x15`   | Year        | two-digit only              |
+| Register | Meaning     | Notes          |
+|----------|-------------|----------------|
+| `0x0F`   | Day-of-week | 0=Sunday       |
+| `0x10`   | Hour        | 0-23           |
+| `0x11`   | Minute      |                |
+| `0x12`   | Second      |                |
+| `0x13`   | Day         |                |
+| `0x14`   | Month       |                |
+| `0x15`   | Year        | two-digit only |
 
 ### Clean Cycle Delay 0x16
 
@@ -116,10 +116,10 @@ State of the control panel lock. Panel inputs will be ignored, including [simula
 
 Configures the night light inside the globe. See [Night Light 0x3B](#night-light-0x3b) for the current state reading.
 
-| Register | Meaning                   | Notes                                      |
-|----------|---------------------------|--------------------------------------------|
-| `0x18`   | Night light mode          | 0=off, 1=on, 2=auto.                       |
-| `0x19`   | Night light brightness    | 0-100                                      |
+| Register | Meaning                   | Notes               |
+|----------|---------------------------|---------------------|
+| `0x18`   | Night light mode          | 0=off, 1=on, 2=auto |
+| `0x19`   | Night light brightness    | 0-100               |
 
 The Whisker app maps brightness low/med/high to 25/50/100, with high as default.
 
@@ -163,20 +163,20 @@ Boolean value indicating the current time is within a [sleep schedule](#sleep-sc
 
 ### Robot Status 0x34
 
-| Value  | Meaning                   |
-|--------|---------------------------|
-| `0x01` | Powered off               |
-| `0x02` | Powering on               |
-| `0x03` | Powering off              |
-| `0x04` | Ready                     |
-| `0x05` | Bonnet removed            |
-| `0x06` | ?                         |
-| `0x07` | Cat detected              |
-| `0x0A` | Clean cycle in progress   |
-| `0x0B` | Emptying litter           |
-| `0x0E` | Filter replacement mode   |
-| `0x17` | Starting calibration      |
-| `0x18` | Calibration in progress   |
+| Value  | Meaning                 |
+|--------|-------------------------|
+| `0x01` | Powered off             |
+| `0x02` | Powering on             |
+| `0x03` | Powering off            |
+| `0x04` | Ready                   |
+| `0x05` | Bonnet removed          |
+| `0x06` | ?                       |
+| `0x07` | Cat detected            |
+| `0x0A` | Clean cycle in progress |
+| `0x0B` | Emptying litter         |
+| `0x0E` | Filter replacement mode |
+| `0x17` | Starting calibration    |
+| `0x18` | Calibration in progress |
 
 `0x06` is always set just before `0x07`, so its meaning is unclear but related to cat detection.
 
@@ -244,11 +244,11 @@ With no sensors or means of communication with the Litter Robot, the Hopper not 
 
 ### Litter / Drawer Level
 
-| Register | Meaning                 | Notes                                       |
-|----------|-------------------------|---------------------------------------------|
-| `0x43`   | Waste drawer percentage |                                             |
-| `0x44`   | Waste drawer full       | Boolean                                     |
-| `0x47`   | Litter level            | Raw distance value. 480=empty, 435<=full    |
+| Register | Meaning                 | Notes                                    |
+|----------|-------------------------|------------------------------------------|
+| `0x43`   | Waste drawer percentage |                                          |
+| `0x44`   | Waste drawer full       | Boolean                                  |
+| `0x47`   | Litter level            | Raw distance value. 480=empty, 435<=full |
 
 ### Laser Board ToF Sensors 0x58-0x5A
 
@@ -264,16 +264,16 @@ Three time-of-flight distance sensors on the laser board, reported in millimeter
 
 Sleep/wake times are encoded in minutes-of-day, so 21:00 (9pm) would be 1260 for example. The schedule relies on the PIC's [date/time registers](#date-0x0f-0x15) having accurate local time.
 
-| Register      | Meaning                                                       |
-|---------------|---------------------------------------------------------------|
-| `0x1D`        | Day-enable bitmask: bit 0=Sunday ... 6=Saturday               |
-| `0x1E`/`0x1F` | Sunday sleep/wake time                                        |
-| `0x20`/`0x21` | Monday sleep/wake time                                        |
-| `0x22`/`0x23` | Tuesday sleep/wake time                                       |
-| `0x24`/`0x25` | Wednesday sleep/wake time                                     |
-| `0x26`/`0x27` | Thursday sleep/wake time                                      |
-| `0x28`/`0x29` | Friday sleep/wake time                                        |
-| `0x2A`/`0x2B` | Saturday sleep/wake time                                      |
+| Register      | Meaning                                         |
+|---------------|-------------------------------------------------|
+| `0x1D`        | Day-enable bitmask: bit 0=Sunday ... 6=Saturday |
+| `0x1E`/`0x1F` | Sunday sleep/wake time                          |
+| `0x20`/`0x21` | Monday sleep/wake time                          |
+| `0x22`/`0x23` | Tuesday sleep/wake time                         |
+| `0x24`/`0x25` | Wednesday sleep/wake time                       |
+| `0x26`/`0x27` | Thursday sleep/wake time                        |
+| `0x28`/`0x29` | Friday sleep/wake time                          |
+| `0x2A`/`0x2B` | Saturday sleep/wake time                        |
 
 Recommended write order: `0x1D=0` (disable) -> write all time pairs -> `0x1D=<mask>` (enable), to avoid the schedule firing against a partially-written set of times.
 
