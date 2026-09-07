@@ -30,7 +30,7 @@ class LitterRobot4NightLightBinarySensor : public binary_sensor::BinarySensor,
   void dump_config() override;
 };
 
-class LitterRobot4SleepStatusBinarySensor : public binary_sensor::BinarySensor,
+class LitterRobot4SleepingBinarySensor : public binary_sensor::BinarySensor,
                                             public Component,
                                             public Parented<LitterRobot4Component> {
  public:
@@ -62,7 +62,7 @@ class LitterRobot4WeightDetectBinarySensor : public binary_sensor::BinarySensor,
   void dump_config() override;
 };
 
-class LitterRobot4HopperStateBinarySensor : public binary_sensor::BinarySensor,
+class LitterRobot4HopperMotorBinarySensor : public binary_sensor::BinarySensor,
                                             public Component,
                                             public Parented<LitterRobot4Component> {
  public:

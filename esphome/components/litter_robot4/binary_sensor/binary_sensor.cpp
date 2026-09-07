@@ -39,15 +39,15 @@ void LitterRobot4NightLightBinarySensor::setup() {
 
 void LitterRobot4NightLightBinarySensor::dump_config() { LOG_BINARY_SENSOR("", "Litter Robot 4 Night Light", this); }
 
-void LitterRobot4SleepStatusBinarySensor::setup() {
+void LitterRobot4SleepingBinarySensor::setup() {
   this->parent_->setup_on_register_update_callback([this](Register reg, uint16_t value) {
-    if (reg == REG_SLEEP_STATUS) {
+    if (reg == REG_SLEEPING) {
       this->publish_state(value != 0);
     }
   });
 }
 
-void LitterRobot4SleepStatusBinarySensor::dump_config() { LOG_BINARY_SENSOR("", "Litter Robot 4 Sleep Status", this); }
+void LitterRobot4SleepingBinarySensor::dump_config() { LOG_BINARY_SENSOR("", "Litter Robot 4 Sleeping", this); }
 
 void LitterRobot4FaultStatusBinarySensor::setup() {
   this->parent_->setup_on_register_update_callback([this](Register reg, uint16_t value) {
@@ -91,7 +91,7 @@ void LitterRobot4WeightDetectBinarySensor::dump_config() {
   LOG_BINARY_SENSOR("", "Litter Robot 4 Weight Detect", this);
 }
 
-void LitterRobot4HopperStateBinarySensor::setup() {
+void LitterRobot4HopperMotorBinarySensor::setup() {
   this->publish_initial_state(false);
   this->parent_->setup_on_register_update_callback([this](Register reg, uint16_t value) {
     if (reg != REG_LITTER_HOPPER)
@@ -111,8 +111,8 @@ void LitterRobot4HopperStateBinarySensor::setup() {
   });
 }
 
-void LitterRobot4HopperStateBinarySensor::dump_config() {
-  LOG_BINARY_SENSOR("", "Litter Robot 4 LitterHopper State", this);
+void LitterRobot4HopperMotorBinarySensor::dump_config() {
+  LOG_BINARY_SENSOR("", "Litter Robot 4 LitterHopper Motor", this);
 }
 
 }  // namespace esphome::litter_robot4

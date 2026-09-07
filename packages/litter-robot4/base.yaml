@@ -172,9 +172,9 @@ binary_sensor:
     name: "Night Light"
     disabled_by_default: true
   - platform: litter_robot4
-    type: sleep_status
-    id: sleep_status
-    name: "Sleep Status"
+    type: sleeping
+    id: sleeping
+    name: "Sleeping"
     disabled_by_default: true
   - platform: litter_robot4
     type: fault_status
