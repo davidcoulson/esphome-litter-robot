@@ -51,3 +51,4 @@ packages:
   sleep_schedule: !include packages/litter-robot4/sleep-schedule.yaml
   cat_tracking: !include { file: packages/litter-robot4/cat-tracking.yaml, vars: { weight_sensor_id: last_cat_weight } }
   wifi: !include packages/litter-robot4/wifi.yaml
+  smart_detection: !include packages/litter-robot4/smart-detection.yaml

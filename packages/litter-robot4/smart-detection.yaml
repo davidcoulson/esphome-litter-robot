@@ -1,0 +1,35 @@
+globals:
+  - id: cat_confirmed
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: cat_clear_seconds
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          const bool cat_detected = id(robot_status).state == "Cat detected";
+          const bool laser = id(laser_detect).state;
+          const bool weight = id(weight_detect).state;
+          if (!cat_detected) {
+            id(cat_confirmed) = false;
+            id(cat_clear_seconds) = 0;
+            return;
+          }
+          if (laser && weight) {
+            if (!id(cat_confirmed))
+              id(update_status)->execute();
+            id(cat_confirmed) = true;
+            id(cat_clear_seconds) = 0;
+          } else if (!laser && !weight) {
+            id(cat_clear_seconds) += 1;
+            if (id(cat_clear_seconds) == 10 && !id(cat_confirmed)) {
+              id(reset).press();
+            }
+          } else {
+            id(cat_clear_seconds) = 0;
+          }
