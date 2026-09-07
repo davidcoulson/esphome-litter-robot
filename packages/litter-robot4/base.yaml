@@ -147,6 +147,11 @@ switch:
     type: power
     id: power
     name: "Power"
+  - platform: litter_robot4
+    type: litter_hopper
+    id: litter_hopper
+    name: "Hopper"
+    disabled_by_default: true
 
 binary_sensor:
   - platform: litter_robot4
@@ -186,3 +191,8 @@ binary_sensor:
     name: "Weight Detect"
     on_state:
       - script.execute: update_status
+  - platform: litter_robot4
+    type: hopper_motor
+    id: hopper_motor
+    name: "Hopper Motor"
+    disabled_by_default: true

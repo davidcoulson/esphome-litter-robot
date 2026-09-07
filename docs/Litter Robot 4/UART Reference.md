@@ -72,6 +72,10 @@ A low byte value of `0x02` is written instead of `0x01` to indicate a long press
 
 Boolean; causes the PIC to output various registers at regular intervals. TODO: List debug registers.
 
+### LitterHopper 0x0C
+
+Boolean; Controls the optional LitterHopper automatic litter dispenser. See [LitterHopper Status](#litterhopper-status-0x0c) for the state values reported while it is enabled.
+
 ### WiFi State 0x33
 
 Register `0x33` is used to read and write the current WiFi state.
@@ -213,6 +217,20 @@ Boolean; current state of the night light inside the globe. Controlled via the [
 ### USB Power 0x04
 
 "isUSBPowerOn" according to logs. Only ever observed a value of 1.
+
+### LitterHopper Status 0x0C
+
+| Value      | Meaning             |
+|------------|---------------------|
+| `0x0020`   | Enabled/Idle        |
+| `0x0114`   | Motor start         |
+| `0x10xx`   | Motor running       |
+| `0x2076`   | Motor stopped       |
+| `0x0030`   | Fault/Not Connected |
+
+The `0x0114`/`0x2076` values appear as writes from the PIC during a clean cycle while the hopper is enabled. The `0x10xx` value is emitted between them with an unclear meaning.
+
+With no sensors or means of communication with the Litter Robot, the Hopper not dispensing litter or being empty must be inferred from the [litter level reading](#litter--drawer-level) not recovering after a few cycles.
 
 ### Odometers
 
