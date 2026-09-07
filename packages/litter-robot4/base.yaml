@@ -63,7 +63,7 @@ script:
               result = robot;
             }
           }
-          if (!id(cat_confirmed) && (result == "Cat detected" || result == "Waiting to cycle")) {
+          if (id(smart_detection_enabled) && !id(cat_confirmed) && (result == "Cat detected" || result == "Waiting to cycle")) {
             return;
           }
           if (!result.empty() && result != id(status).state) {
