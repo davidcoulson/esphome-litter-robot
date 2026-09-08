@@ -70,7 +70,19 @@ A low byte value of `0x02` is written instead of `0x01` to indicate a long press
 
 ### Debug Mode 0x05
 
-Boolean; causes the PIC to output various registers at regular intervals. TODO: List debug registers.
+Boolean; when enabled, the PIC emits the debug telemetry registers `0x80`-`0x96` every second. Their values cannot be read manually, even with debug mode enabled.
+
+#### Ambient Light 0x84
+
+Light sensor reading, 0-100. Used to control the [Night Light 0x3B](#night-light-0x3b) and [Control Panel Brightness](#control-panel-led-brightness-0x0e).
+
+#### Current Weight 0x89
+
+Live scale reading in decipounds (divide by 10 for pounds), signed. When a negative value is detected, the scale automatically tares back to 0 after a few seconds.
+
+#### Laser Board ToF 0x8B-0x8D
+
+Time-of-flight readings, mirroring [0x58-0x5A](#laser-board-tof-sensors-0x58-0x5a).
 
 ### LitterHopper 0x0C
 
@@ -112,20 +124,24 @@ Determines how long to wait before starting a clean cycle after a cat has no lon
 
 State of the control panel lock. Panel inputs will be ignored, including [simulated ones](#51-simulated-control-panel-input).
 
-### Night Light 0x18/0x19
+### Night Light Options 0x18/0x19
 
 Configures the night light inside the globe. See [Night Light 0x3B](#night-light-0x3b) for the current state reading.
 
-| Register | Meaning                   | Notes               |
-|----------|---------------------------|---------------------|
-| `0x18`   | Night light mode          | 0=off, 1=on, 2=auto |
-| `0x19`   | Night light brightness    | 0-100               |
+| Register | Meaning                | Notes               |
+|----------|------------------------|---------------------|
+| `0x18`   | Night light mode       | 0=off, 1=on, 2=auto |
+| `0x19`   | Night light brightness | 0-100               |
 
 The Whisker app maps brightness low/med/high to 25/50/100, with high as default.
 
+When Night light mode is set to `auto`, the light is driven by the [ambient light sensor](#ambient-light-0x84). Values below 20 turn on the light, and values above 70 turn it off.
+
 ### Control Panel LED Brightness 0x0E
 
-Brightness level of the panel LED. Two independent values are packed into this register's high and low bytes. Low/medium/high is mapped to 25/15, 50/40, and 100/90 in the app. The two values are most likely for the normal and dimmed brightness based on ambient light. Factory resetting the PIC sets these values to 100/50, which is close enough I suppose.
+Brightness level of the panel LED. Two independent values are packed into this register's high and low bytes. Low/medium/high is mapped to 25/15, 50/40, and 100/90 in the app. Factory resetting the PIC sets these values to 100/50, which is close enough I suppose.
+
+The brightness is driven by the [ambient light sensor](#ambient-light-0x84). Values below 20 set the panel brightness to the low byte value, and values above 70 set it to the high byte value.
 
 ### Panel Sleep Time 0x1B
 
@@ -163,20 +179,21 @@ Boolean value indicating the current time is within a [sleep schedule](#sleep-sc
 
 ### Robot Status 0x34
 
-| Value  | Meaning                 |
-|--------|-------------------------|
-| `0x01` | Powered off             |
-| `0x02` | Powering on             |
-| `0x03` | Powering off            |
-| `0x04` | Ready                   |
-| `0x05` | Bonnet removed          |
-| `0x06` | ?                       |
-| `0x07` | Cat detected            |
-| `0x0A` | Clean cycle in progress |
-| `0x0B` | Emptying litter         |
-| `0x0E` | Filter replacement mode |
-| `0x17` | Starting calibration    |
-| `0x18` | Calibration in progress |
+| Value  | Meaning                         |
+|--------|---------------------------------|
+| `0x01` | Powered off                     |
+| `0x02` | Powering on                     |
+| `0x03` | Powering off                    |
+| `0x04` | Ready                           |
+| `0x05` | Bonnet removed                  |
+| `0x06` | ?                               |
+| `0x07` | Cat detected                    |
+| `0x0A` | Clean cycle in progress         |
+| `0x0B` | Emptying litter                 |
+| `0x0C` | Motion detected in waste drawer |
+| `0x0E` | Filter replacement mode         |
+| `0x17` | Starting calibration            |
+| `0x18` | Calibration in progress         |
 
 `0x06` is always set just before `0x07`, so its meaning is unclear but related to cat detection.
 
@@ -212,7 +229,7 @@ Boolean, inverted; 0 = OK, 1 = bonnet removed. Tracks the same state as status `
 
 ### Night Light 0x3B
 
-Boolean; current state of the night light inside the globe. Controlled via the [night light config registers](#night-light-0x180x19).
+Boolean; current state of the night light inside the globe. Controlled via the [night light mode](#night-light-options-0x180x19).
 
 ### USB Power 0x04
 
@@ -249,6 +266,7 @@ With no sensors or means of communication with the Litter Robot, the Hopper not 
 | `0x43`   | Waste drawer percentage |                                          |
 | `0x44`   | Waste drawer full       | Boolean                                  |
 | `0x47`   | Litter level            | Raw distance value. 480=empty, 435<=full |
+| `0x69`   | Calibrated litter level | Raw distance value. Used by hopper logic |
 
 ### Laser Board ToF Sensors 0x58-0x5A
 
