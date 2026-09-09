@@ -2,6 +2,8 @@
 
 This repository hosts ESPHome packages relating to the Whisker Litter Robot, as well as instructions to flash ESPHome based firmware on it.
 
+[![Join the Discord](https://img.shields.io/badge/Discord-5865f2?style=for-the-badge&logo=discord&logoColor=f5f5f5)](https://discord.gg/NrMdSAkPsx) [![Get $50 off Litter-Robot](https://img.shields.io/badge/Get%20$50%20off%20Litter--Robot-fbb040?style=for-the-badge&logo=pipecat&logoColor=black)](https://share.litter-robot.com/x/x2zGcr) [![Donate via PayPal](https://img.shields.io/badge/Donate%20via%20PayPal-002991?style=for-the-badge&logo=paypal&logoColor=008cff)](https://www.paypal.com/paypalme/jdigi78)
+
 ## Why?
 
 Flashing the Litter Robot with ESPHome-based firmware eliminates the dependency on Whisker's cloud infrastructure, instead providing easy integration with open self-hosted services like Home Assistant. This means:
@@ -46,11 +48,13 @@ The source code for the component can be found in my [ESPHome fork](https://gith
 
 ## Where can I learn more?
 
+Feel free to join the [Discord](https://discord.gg/NrMdSAkPsx) for assistance or discussion, before and after install!
+
 See the [Litter Robot 4 UART Reference](docs/Litter%20Robot%204/UART%20Reference.md) for a full breakdown of the mainboard serial protocol.
 
 ## Can I help?
 
-This project can almost certainly be ported to the Litter Robot 3 with little effort, but I don't have one to try it myself. If you have a Litter Robot 3 "Connect" with WiFi it would be helpful to capture serial packets between the PIC and ESP32 to understand the LR3 UART protocol.
+This project can almost certainly be ported to the Litter Robot 3 with little effort, but I don't have one to try it myself. If you have a Litter Robot 3 "Connect" with WiFi it would be helpful to capture serial packets between the PIC and ESP32 to understand the LR3 UART protocol. You can share your findings here or on [Discord](https://discord.gg/NrMdSAkPsx)!
 
 This [blog post](https://www.elttam.com/blog/re-of-lr3) goes into detail on some of the hardware on the LR3 mainboard and the first section will tell you how to get logs out of the ESP32. If the logs do not contain serial data then the physical TX/RX lines should be the middle 2 pads of the 4 labeled J8 on the mainboard.
 
@@ -60,11 +64,11 @@ If you can't decipher the serial data or write code yourself, just send me any c
 
 If you find this project useful, donations of any amount are greatly appreciated. Just know I'll most likely be passing it on to other open source projects anyway :)
 
-[![PayPal](https://img.shields.io/badge/PayPal-003087?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/jdigi78)
+[![Donate via PayPal](https://img.shields.io/badge/Donate%20via%20PayPal-002991?style=for-the-badge&logo=paypal&logoColor=008cff)](https://www.paypal.com/paypalme/jdigi78)
 
 You can also get $50 off a Litter-Robot using my referral link:
 
-[![Whisker Referral](https://img.shields.io/badge/$50%20off-Litter--Robot-fbb040?style=for-the-badge)](https://share.litter-robot.com/x/x2zGcr)
+[![Get $50 off Litter-Robot](https://img.shields.io/badge/Get%20$50%20off%20Litter--Robot-fbb040?style=for-the-badge&logo=pipecat&logoColor=black)](https://share.litter-robot.com/x/x2zGcr)
 
 ## Disclaimer
 

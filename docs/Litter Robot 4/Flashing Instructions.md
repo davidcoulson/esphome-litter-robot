@@ -1,8 +1,8 @@
 # Litter Robot 4 - Firmware Flashing Guide
 
-This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible and you can restore the original firmware at any time.
+This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible and you can restore the original firmware at any time. After ESPHome is on the device, future updates can be delivered wirelessly ([OTA](#updating-the-firmware-ota)).
 
-This is a **one-time** hardware flashing procedure. After ESPHome is on the device, future updates can be delivered wirelessly ([OTA](#updating-the-firmware-ota)).
+Feel free to join the [Discord server](https://discord.gg/NrMdSAkPsx) for assistance or discussion, before and after install!
 
 > Disclaimer: This project is not affiliated with, endorsed by, or associated with Whisker, Litter Robot, or Automated Pet Care Products. Modifying your device involves hardware disassembly and modification which may void your warranty and carries a risk of permanent damage. Proceed at your own risk. Neither the author(s) nor contributors are responsible for any damage to your device, property, or pets resulting from the use of this firmware or instructions.
 
