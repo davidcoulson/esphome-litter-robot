@@ -22,13 +22,15 @@ Only the Litter Robot 4 is supported at this time. Though I suspect the Litter R
 
 ## What features are supported?
 
-Every known function of the original firmware is supported, with these exceptions from most to least likely to change:
+Every function of the original firmware/app is supported, with minor exceptions:
 
-- Not all faults are descriptively named yet, though generic fault status is still detected.
+- Some device faults are not detected or descriptively named. They will still show a light pattern on the LED panel as usual.
 - Updating mainboard/laserboard firmware is not possible.
 
-There are actually some improvements compared to the official firmware/app:
+Improvements include:
 
+- Less false cat detections and wasted clean cycles. "Smart Cat Detection" makes sure both weight _and_ curtain laser detections happen before confirming a cat visit.
+- Litter hopper can be enabled/disabled via automations. (Not possible with existing Home Assistant integration)
 - Sleep schedules can be set on a daily basis instead of only one time for weekday/weekend.
 - More direct access to the laser and weight detection sensors, for precise enter and exit tracking.
 

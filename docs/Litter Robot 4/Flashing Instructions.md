@@ -10,6 +10,8 @@ This is a **one-time** hardware flashing procedure. After ESPHome is on the devi
 
 There are 2 known major revisions of the Litter Robot 4 mainboard. Both will work, but prepairing the mainboard for flashing is slightly different. Older units have a serial number starting with "LR4C", and newer units manufactured after February 2026 have a serial number starting with "LR4S". Take note of which one you have before purchasing any hardware.
 
+> For serial numbers startng with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
+
 ---
 
 ## What You'll Need
@@ -87,8 +89,6 @@ You can follow [Whisker's official video guide for replacing the laser board](ht
 Unplug the larger power connector on the right side of the mainboard. Remove the 2 screws securing the mainboard and control panel to the bridge right below the control panel. The mainboard can now be removed with the control panel attached.
 
 ![Remove mainboard](Images/Remove%20Main%20Board.JPG)
-
-
 
 ---
 
