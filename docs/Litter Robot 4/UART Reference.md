@@ -62,7 +62,7 @@ Register `0x34` doubles as the [Robot Status](#robot-status-0x34) telemetry regi
 | Empty   | `0x01`   | `0x0801` |
 | Connect | `0x01`   | `0x1001` |
 
-The PIC reports physical button presses by pushing a value to register `0x01`. The ESP can write the same value to simulate a press. This is actually how the Whisker app handles `Power` and `Reset`.
+The PIC reports physical button presses by pushing a value to register `0x01`. The ESP can write the same value to simulate a press. This is actually how the Whisker app handles `Power` and `Reset` commands.
 
 A low byte value of `0x02` is written instead of `0x01` to indicate a long press.
 
@@ -241,23 +241,23 @@ Boolean; current state of the night light inside the globe. Controlled via the [
 |------------|---------------------|
 | `0x0020`   | Enabled/Idle        |
 | `0x0114`   | Motor start         |
-| `0x10xx`   | Motor running       |
-| `0x2076`   | Motor stopped       |
+| `0x10xx`   | Motor running (?)   |
+| `0x20xx`   | Motor stopped (?)   |
 | `0x0030`   | Fault/Not Connected |
 
-The `0x0114`/`0x2076` values appear as writes from the PIC during a clean cycle while the hopper is enabled. The `0x10xx` value is emitted between them with an unclear meaning.
+`0x10xx`/`0x20xx` are published in order during the hopper motor run but their values and meaning are unclear.
 
 With no sensors or means of communication with the Litter Robot, the Hopper not dispensing litter or being empty must be inferred from the [litter level reading](#litter--drawer-level) not recovering after a few cycles.
 
 ### Odometers
 
-| Register | Meaning            | Notes                                 |
-|----------|--------------------|---------------------------------------|
-| `0x3D`   | Power cycle count  |                                       |
-| `0x3E`   | Clean cycle count  |                                       |
-| `0x3F`   | Empty cycle count  |                                       |
-| `0x40`   | Filter cycle count |                                       |
-| `0x42`   | DFINumberOfCycles  | Name exposed in logs, unclear purpose |
+| Register | Meaning                  |
+|----------|--------------------------|
+| `0x3D`   | Power cycle count        |
+| `0x3E`   | Clean cycle count        |
+| `0x3F`   | Empty cycle count        |
+| `0x40`   | Filter cycle count       |
+| `0x42`   | Waste drawer cycle count |
 
 ### Litter / Drawer Level
 
@@ -265,8 +265,13 @@ With no sensors or means of communication with the Litter Robot, the Hopper not 
 |----------|-------------------------|------------------------------------------|
 | `0x43`   | Waste drawer percentage |                                          |
 | `0x44`   | Waste drawer full       | Boolean                                  |
+| `0x45`   | Cycles since full       | Not published consistently               |
 | `0x47`   | Litter level            | Raw distance value. 480=empty, 435<=full |
 | `0x69`   | Calibrated litter level | Raw distance value. Used by hopper logic |
+
+Waste drawer full (`0x44`) is set to true after 3 consecutive readings of the waste drawer percentage (`0x43`) over 80%. Each cycle after will increment cycles since full (`0x45`). After cycles since full is equal to 3 the robot will refuse to detect cats or cycle manually until the reset button is pushed. 
+
+The reset command will clear `0x44` and `0x42` but if the drawer was not actually emptied they will return to their previous states.
 
 ### Laser Board ToF Sensors 0x58-0x5A
 
