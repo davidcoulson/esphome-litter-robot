@@ -1,3 +1,6 @@
+packages:
+  sleep_override: !include sleep-override.yaml
+
 litter_robot4:
   time_id: ha_time
 
