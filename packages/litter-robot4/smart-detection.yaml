@@ -25,7 +25,7 @@ switch:
   - platform: template
     id: smart_cat_detection
     name: "Smart Cat Detection"
-    icon: "mdi:check-underline-circle-outline"
+    icon: "mdi:check-underline-circle"
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON

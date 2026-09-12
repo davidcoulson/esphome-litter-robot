@@ -29,7 +29,7 @@ text_sensor:
   - platform: template
     id: status
     name: "Status"
-    icon: "mdi:information-outline"
+    icon: "mdi:information"
 
 script:
   - id: update_status
