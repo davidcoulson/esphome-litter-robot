@@ -1,3 +1,16 @@
+litter_robot4:
+  time_id: ha_time
+
+time:
+  - platform: homeassistant
+    timezone: America/New_York
+    id: ha_time
+
+interval:
+  - interval: 24h
+    then:
+      - litter_robot4.sync_time: my_litter_robot4
+
 switch:
   - platform: litter_robot4
     type: sleep_schedule_sun
