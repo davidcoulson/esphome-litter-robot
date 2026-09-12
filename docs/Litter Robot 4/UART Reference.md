@@ -240,12 +240,12 @@ Boolean; current state of the night light inside the globe. Controlled via the [
 | Value      | Meaning             |
 |------------|---------------------|
 | `0x0020`   | Enabled/Idle        |
-| `0x0114`   | Motor start         |
-| `0x10xx`   | Motor running (?)   |
-| `0x20xx`   | Motor stopped (?)   |
+| `0x01XX`   | Motor start         |
+| `0x10XX`   | Motor stopped (?)   |
+| `0x20XX`   | Motor stopped (?)   |
 | `0x0030`   | Fault/Not Connected |
 
-`0x10xx`/`0x20xx` are published in order during the hopper motor run but their values and meaning are unclear.
+`0x01XX` and `0x10XX`/`0x20XX` are published in order during the hopper motor run but their values and meaning are unclear. The high byte is the only consistent pattern.
 
 With no sensors or means of communication with the Litter Robot, the Hopper not dispensing litter or being empty must be inferred from the [litter level reading](#litter--drawer-level) not recovering after a few cycles.
 
