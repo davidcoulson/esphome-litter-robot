@@ -1,16 +1,21 @@
 import esphome.codegen as cg
 from esphome.components import switch
 import esphome.config_validation as cv
-from esphome.const import CONF_TYPE, ENTITY_CATEGORY_CONFIG
+from esphome.const import CONF_TYPE, ENTITY_CATEGORY_CONFIG, ENTITY_CATEGORY_DIAGNOSTIC
 
-from .. import CONF_LITTER_ROBOT4_ID, LitterRobot4Component, litter_robot4_ns
+from .. import (
+    CONF_LITTER_ROBOT4_ID,
+    LITTER_ROBOT4_DEVICE_SCHEMA,
+    LitterRobot4Component,
+    litter_robot4_ns,
+)
 
 DEPENDENCIES = ["litter_robot4"]
 
 ICON_LOCK = "mdi:lock"
 
-LitterRobot4ControlPanelLockoutSwitch = litter_robot4_ns.class_(
-    "LitterRobot4ControlPanelLockoutSwitch",
+LitterRobot4BoolSwitch = litter_robot4_ns.class_(
+    "LitterRobot4BoolSwitch",
     switch.Switch,
     cg.Component,
     cg.Parented.template(LitterRobot4Component),
@@ -27,12 +32,11 @@ LitterRobot4PowerSwitch = litter_robot4_ns.class_(
     cg.Component,
     cg.Parented.template(LitterRobot4Component),
 )
-LitterRobot4LitterHopperSwitch = litter_robot4_ns.class_(
-    "LitterRobot4LitterHopperSwitch",
-    switch.Switch,
-    cg.Component,
-    cg.Parented.template(LitterRobot4Component),
-)
+_BOOL_REGISTERS = {
+    "control_panel_lockout": "REG_PANEL_LOCKOUT",
+    "litter_hopper": "REG_LITTER_HOPPER",
+    "debug_mode": "REG_DEBUG",
+}
 
 DAY_TYPES = {
     "sleep_schedule_sun": "DAY_SUN",
@@ -45,78 +49,60 @@ DAY_TYPES = {
 }
 
 
-def _lockout_schema():
+def _switch_schema(
+    class_,
+    *,
+    icon=None,
+    entity_category=None,
+    default_restore_mode=None,
+):
+    kwargs = {}
+    if icon is not None:
+        kwargs["icon"] = icon
+    if entity_category is not None:
+        kwargs["entity_category"] = entity_category
+    if default_restore_mode is not None:
+        kwargs["default_restore_mode"] = default_restore_mode
     return (
-        switch.switch_schema(
-            LitterRobot4ControlPanelLockoutSwitch,
-            icon=ICON_LOCK,
-            entity_category=ENTITY_CATEGORY_CONFIG,
-            default_restore_mode="DISABLED",
-        )
-        .extend(
-            {
-                cv.GenerateID(CONF_LITTER_ROBOT4_ID): cv.use_id(LitterRobot4Component),
-            }
-        )
-        .extend(cv.COMPONENT_SCHEMA)
-    )
-
-
-def _day_switch_schema():
-    return (
-        switch.switch_schema(
-            LitterRobot4SleepDayEnabledSwitch,
-            entity_category=ENTITY_CATEGORY_CONFIG,
-            icon="mdi:calendar-clock",
-        )
-        .extend(
-            {
-                cv.GenerateID(CONF_LITTER_ROBOT4_ID): cv.use_id(LitterRobot4Component),
-            }
-        )
-        .extend(cv.COMPONENT_SCHEMA)
-    )
-
-
-def _power_schema():
-    return (
-        switch.switch_schema(
-            LitterRobot4PowerSwitch,
-            icon="mdi:power",
-            default_restore_mode="DISABLED",
-        )
-        .extend(
-            {
-                cv.GenerateID(CONF_LITTER_ROBOT4_ID): cv.use_id(LitterRobot4Component),
-            }
-        )
-        .extend(cv.COMPONENT_SCHEMA)
-    )
-
-
-def _litter_hopper_schema():
-    return (
-        switch.switch_schema(
-            LitterRobot4LitterHopperSwitch,
-            icon="mdi:cup",
-            entity_category=ENTITY_CATEGORY_CONFIG,
-            default_restore_mode="DISABLED",
-        )
-        .extend(
-            {
-                cv.GenerateID(CONF_LITTER_ROBOT4_ID): cv.use_id(LitterRobot4Component),
-            }
-        )
+        switch.switch_schema(class_, **kwargs)
+        .extend(LITTER_ROBOT4_DEVICE_SCHEMA)
         .extend(cv.COMPONENT_SCHEMA)
     )
 
 
 CONFIG_SCHEMA = cv.typed_schema(
     {
-        "control_panel_lockout": _lockout_schema(),
-        **{key: _day_switch_schema() for key in DAY_TYPES},
-        "power": _power_schema(),
-        "litter_hopper": _litter_hopper_schema(),
+        "control_panel_lockout": _switch_schema(
+            LitterRobot4BoolSwitch,
+            icon=ICON_LOCK,
+            entity_category=ENTITY_CATEGORY_CONFIG,
+            default_restore_mode="DISABLED",
+        ),
+        **{
+            key: _switch_schema(
+                LitterRobot4SleepDayEnabledSwitch,
+                icon="mdi:calendar-clock",
+                entity_category=ENTITY_CATEGORY_CONFIG,
+            )
+            for key in DAY_TYPES
+        },
+        "power": _switch_schema(
+            LitterRobot4PowerSwitch,
+            icon="mdi:power",
+            default_restore_mode="DISABLED",
+        ),
+        "litter_hopper": _switch_schema(
+            LitterRobot4BoolSwitch,
+            icon="mdi:cup",
+            entity_category=ENTITY_CATEGORY_CONFIG,
+            default_restore_mode="DISABLED",
+        ),
+        "debug_mode": _switch_schema(
+            LitterRobot4BoolSwitch,
+            icon="mdi:bug",
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
+            default_restore_mode="DISABLED",
+        ),
     }
 )
 
@@ -128,3 +114,5 @@ async def to_code(config):
     await cg.register_parented(var, parent)
     if config[CONF_TYPE] in DAY_TYPES:
         cg.add(var.set_day(cg.RawExpression(DAY_TYPES[config[CONF_TYPE]])))
+    if config[CONF_TYPE] in _BOOL_REGISTERS:
+        cg.add(var.set_register(cg.RawExpression(_BOOL_REGISTERS[config[CONF_TYPE]])))

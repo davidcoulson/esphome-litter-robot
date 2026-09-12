@@ -12,7 +12,7 @@ namespace esphome::litter_robot4 {
 static const uint8_t FRAME_LENGTH = 7;
 static const uint8_t FRAME_TERMINATOR = 0xFF;
 static const uint8_t MAX_PENDING = 64;
-static const uint32_t PENDING_TIMEOUT = 50;
+static const uint32_t PENDING_TIMEOUT = 100;
 
 enum Direction : uint8_t {
   DIR_FROM_PIC = 0x01,
@@ -29,6 +29,7 @@ enum Operation : uint8_t {
 // Register addresses
 enum Register : uint8_t {
   REG_KEYPAD = 0x01,
+  REG_DEBUG = 0x05,
   REG_POWER_TYPE = 0x07,
   REG_CAT_WEIGHT = 0x09,
   REG_LITTER_HOPPER = 0x0C,
@@ -75,9 +76,15 @@ enum Register : uint8_t {
   REG_WASTE_DRAWER_PCT = 0x43,
   REG_WASTE_DRAWER_FULL = 0x44,
   REG_LITTER_LEVEL_RAW = 0x47,
-  REG_LASER_1 = 0x58,
-  REG_LASER_2 = 0x59,
-  REG_LASER_3 = 0x5A,
+  REG_CURTAIN_LEFT = 0x58,
+  REG_CURTAIN_CENTER = 0x59,
+  REG_CURTAIN_RIGHT = 0x5A,
+  REG_CALIBRATED_LITTER_LEVEL_RAW = 0x69,
+  REG_DEBUG_LIGHT_LEVEL = 0x84,
+  REG_DEBUG_WEIGHT = 0x89,
+  REG_DEBUG_CURTAIN_LEFT = 0x8B,
+  REG_DEBUG_CURTAIN_CENTER = 0x8C,
+  REG_DEBUG_CURTAIN_RIGHT = 0x8D,
 };
 
 enum RobotStatus : uint16_t {
@@ -89,9 +96,49 @@ enum RobotStatus : uint16_t {
   STATUS_CAT_DETECTED = 0x07,
   STATUS_CLEAN_CYCLE = 0x0A,
   STATUS_EMPTYING = 0x0B,
+  STATUS_EXPOSING_WASTE_DRAWER = 0x0C,
   STATUS_FILTER_REPLACEMENT = 0x0E,
   STATUS_START_CALIBRATION = 0x17,
   STATUS_CALIBRATING = 0x18,
+};
+
+enum GlobeFaultCode : uint16_t {
+  FAULT_CLEAR = 0x00,
+  FAULT_TIMEOUT = 0x01,
+  FAULT_GLOBE_DISCONNECT = 0x02,
+  FAULT_UNDERVOLTAGE = 0x03,
+  FAULT_GLOBE_OVERTORQUE_AMP = 0x04,
+  FAULT_GLOBE_OVERTORQUE_SLOPE = 0x05,
+  FAULT_PINCH = 0x06,
+  FAULT_ALL_SENSORS = 0x07,
+};
+
+enum LitterHopperState : uint16_t {
+  LITTER_HOPPER_DISABLED = 0x0000,
+  LITTER_HOPPER_ENABLE_CMD = 0x0001,
+  LITTER_HOPPER_ENABLED = 0x0020,
+  LITTER_HOPPER_NOT_CONNECTED = 0x0030,
+};
+
+static const uint16_t LITTER_HOPPER_START_HIGH = 0x01;
+static const uint16_t LITTER_HOPPER_STOPPED_HIGH = 0x20;
+
+enum NightLightMode : uint16_t {
+  NIGHT_LIGHT_OFF = 0,
+  NIGHT_LIGHT_ON = 1,
+  NIGHT_LIGHT_AUTO = 2,
+};
+
+enum BrightnessLevel : uint16_t {
+  BRIGHTNESS_LOW = 25,
+  BRIGHTNESS_MEDIUM = 50,
+  BRIGHTNESS_HIGH = 100,
+};
+
+enum PanelBrightnessDim : uint16_t {
+  PANEL_DIM_LOW = 15,
+  PANEL_DIM_MEDIUM = 40,
+  PANEL_DIM_HIGH = 90,
 };
 
 enum WifiStatus : uint16_t {
@@ -110,8 +157,8 @@ enum Command : uint16_t {
 };
 
 enum DetectionEvent : uint16_t {
-  DETECTION_EVENT_LASER_CLEAR = 0x10,
-  DETECTION_EVENT_LASER_DETECTED = 0x11,
+  DETECTION_EVENT_CURTAIN_CLEAR = 0x10,
+  DETECTION_EVENT_CURTAIN_DETECTED = 0x11,
   DETECTION_EVENT_WEIGHT_CLEAR = 0x20,
   DETECTION_EVENT_WEIGHT_DETECTED = 0x21,
 };
@@ -134,19 +181,16 @@ enum DayOfWeek : uint8_t {
   DAY_SAT,
 };
 
-struct RegisterInfo {
-  Register reg;
-  const char *name;
-};
-
-struct StatusInfo {
-  RobotStatus status;
-  const char *name;
-};
-
 const char *register_name(Register reg);
 const char *status_name(uint16_t status);
 const char *wifi_status_name(uint16_t status);
+uint16_t wifi_status_value(const char *name);
+const char *fault_name(uint16_t code);
+const char *brightness_name(uint16_t value);
+const char *night_light_mode_name(uint16_t value);
+uint16_t brightness_value(const char *name);
+uint16_t night_light_mode_value(const char *name);
+uint16_t panel_brightness_value(const char *name);
 const char *format_register_value(Register reg, uint16_t value);
 
 struct PendingOperation {

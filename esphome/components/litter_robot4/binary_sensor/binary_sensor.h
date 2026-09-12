@@ -6,60 +6,30 @@
 
 namespace esphome::litter_robot4 {
 
-class LitterRobot4WasteDrawerFullBinarySensor : public binary_sensor::BinarySensor,
-                                                public Component,
-                                                public Parented<LitterRobot4Component> {
+class LitterRobot4BoolBinarySensor : public binary_sensor::BinarySensor,
+                                     public Component,
+                                     public Parented<LitterRobot4Component> {
  public:
   void setup() override;
   void dump_config() override;
+  void set_register(Register reg) { this->register_ = reg; }
+  void set_invert(bool invert) { this->invert_ = invert; }
+
+ protected:
+  Register register_{};
+  bool invert_{false};
 };
 
-class LitterRobot4BonnetRemovedBinarySensor : public binary_sensor::BinarySensor,
-                                              public Component,
-                                              public Parented<LitterRobot4Component> {
+class LitterRobot4DetectionBinarySensor : public binary_sensor::BinarySensor,
+                                          public Component,
+                                          public Parented<LitterRobot4Component> {
  public:
   void setup() override;
   void dump_config() override;
-};
+  void set_weight(bool weight) { this->weight_ = weight; }
 
-class LitterRobot4NightLightBinarySensor : public binary_sensor::BinarySensor,
-                                           public Component,
-                                           public Parented<LitterRobot4Component> {
- public:
-  void setup() override;
-  void dump_config() override;
-};
-
-class LitterRobot4SleepingBinarySensor : public binary_sensor::BinarySensor,
-                                         public Component,
-                                         public Parented<LitterRobot4Component> {
- public:
-  void setup() override;
-  void dump_config() override;
-};
-
-class LitterRobot4LaserDetectBinarySensor : public binary_sensor::BinarySensor,
-                                            public Component,
-                                            public Parented<LitterRobot4Component> {
- public:
-  void setup() override;
-  void dump_config() override;
-};
-
-class LitterRobot4WeightDetectBinarySensor : public binary_sensor::BinarySensor,
-                                             public Component,
-                                             public Parented<LitterRobot4Component> {
- public:
-  void setup() override;
-  void dump_config() override;
-};
-
-class LitterRobot4HopperMotorBinarySensor : public binary_sensor::BinarySensor,
-                                            public Component,
-                                            public Parented<LitterRobot4Component> {
- public:
-  void setup() override;
-  void dump_config() override;
+ protected:
+  bool weight_{false};
 };
 
 }  // namespace esphome::litter_robot4
