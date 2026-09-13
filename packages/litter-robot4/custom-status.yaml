@@ -1,0 +1,70 @@
+text_sensor:
+  - platform: litter_robot4
+    id: !extend robot_status
+    on_value:
+      - script.execute: update_status
+  - platform: litter_robot4
+    id: !extend power_type
+    on_value:
+      - script.execute: update_status
+  - platform: litter_robot4
+    id: !extend fault
+    on_value:
+      - script.execute: update_status
+  - platform: template
+    id: status
+    name: "Status"
+    icon: "mdi:information"
+
+binary_sensor:
+  - platform: litter_robot4
+    id: !extend laser_detect
+    on_state:
+      - script.execute: update_status
+  - platform: litter_robot4
+    id: !extend weight_detect
+    on_state:
+      - script.execute: update_status
+  - platform: template
+    id: !extend cat_confirmed
+    on_state:
+      - script.execute: update_status
+
+select:
+  - platform: litter_robot4
+    id: !extend wifi_status
+    on_value:
+      then:
+        - script.execute: update_status
+
+script:
+  - id: update_status
+    then:
+      - lambda: |-
+          std::string result = id(robot_status).state;
+
+          if (result == "Cat detected" && !id(laser_detect).state && !id(weight_detect).state) {
+            result = "Waiting to cycle";
+          } else if (result == "Clean cycle in progress" && (id(laser_detect).state || id(weight_detect).state)) {
+            result = "Cycle interrupted";
+          }
+
+          if (!id(fault).state.empty() && id(fault).state != "None") {
+            result = "Fault detected";
+          }
+
+          if (id(power_type).state == "Battery") {
+            result = "On battery";
+          }
+
+          if (id(wifi_status).current_option() == "Off") {
+            result = "WiFi disabled";
+          }
+
+          if (id(smart_detection_enabled) && !id(cat_confirmed).state && (result == "Cat detected" || result == "Waiting to cycle")) {
+            return;
+          }
+
+          if (!result.empty() && result != id(status).state) {
+            id(status).publish_state(result);
+          }

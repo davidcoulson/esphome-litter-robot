@@ -12,10 +12,6 @@ globals:
     type: bool
     restore_value: yes
     initial_value: 'true'
-  - id: cat_confirmed
-    type: bool
-    restore_value: no
-    initial_value: 'false'
   - id: cat_clear_seconds
     type: uint32_t
     restore_value: no
@@ -38,12 +34,18 @@ switch:
           id: smart_detection_enabled
           value: 'false'
 
+binary_sensor:
+  - platform: template
+    id: cat_confirmed
+    name: "Cat Confirmed"
+    internal: true
+
 interval:
   - interval: 1s
     then:
       - lambda: |-
           if (!id(smart_detection_enabled)) {
-            id(cat_confirmed) = false;
+            id(cat_confirmed).publish_state(false);
             id(cat_clear_seconds) = 0;
             return;
           }
@@ -51,18 +53,18 @@ interval:
           const bool laser = id(laser_detect).state;
           const bool weight = id(weight_detect).state;
           if (!cat_detected) {
-            id(cat_confirmed) = false;
+            id(cat_confirmed).publish_state(false);
             id(cat_clear_seconds) = 0;
             return;
           }
           if (laser && weight) {
-            if (!id(cat_confirmed))
-              id(update_status)->execute();
-            id(cat_confirmed) = true;
+            // Both sensors agree: confirm the cat.
+            id(cat_confirmed).publish_state(true);
             id(cat_clear_seconds) = 0;
           } else if (!laser && !weight) {
+            // Neither sensor: count down (10s) before resetting the robot.
             id(cat_clear_seconds) += 1;
-            if (id(cat_clear_seconds) == 10 && !id(cat_confirmed)) {
+            if (id(cat_clear_seconds) == 10 && !id(cat_confirmed).state) {
               id(reset).press();
             }
           } else {

@@ -11,11 +11,6 @@ esphome:
     name: Joseph DiGiovanni.Litter Robot 4
     version: ${version}
 
-esp32:
-  board: esp32dev
-  framework:
-    type: esp-idf
-
 logger:
 
 api:
@@ -47,9 +42,10 @@ external_components:
     ref: LR4/${version}
 
 packages:
-  litter_robot4_base: !include packages/litter-robot4/base.yaml
+  base_config: !include packages/litter-robot4/base.yaml
   sleep_schedule: !include packages/litter-robot4/sleep-schedule.yaml
-  cat_tracking: !include { file: packages/cat-tracking.yaml, vars: { weight_sensor_id: last_cat_weight } }
   wifi: !include packages/litter-robot4/wifi.yaml
   hopper: !include packages/litter-robot4/hopper.yaml
   smart_detection: !include packages/litter-robot4/smart-detection.yaml
+  cat_tracking: !include { file: packages/cat-tracking.yaml, vars: { weight_sensor_id: last_cat_weight } }
+  custom_status: !include packages/litter-robot4/custom-status.yaml

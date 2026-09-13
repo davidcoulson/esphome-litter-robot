@@ -1,3 +1,8 @@
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
 uart:
   - id: uart_bus
     tx_pin: GPIO19
@@ -14,50 +19,14 @@ text_sensor:
     id: robot_status
     name: "Robot Status"
     internal: true
-    on_value:
-      - script.execute: update_status
   - platform: litter_robot4
     type: power_type
     id: power_type
     name: "Power Type"
-    on_value:
-      - script.execute: update_status
   - platform: litter_robot4
     type: fault
     id: fault
     name: "Fault"
-  - platform: template
-    id: status
-    name: "Status"
-    icon: "mdi:information"
-
-script:
-  - id: update_status
-    then:
-      - lambda: |-
-          std::string result;
-          if (id(wifi_status).current_option() == "Off") {
-            result = "WiFi disabled";
-          } else if (id(power_type).state == "Battery") {
-            result = "On battery";
-          } else if (!id(fault).state.empty() && id(fault).state != "None") {
-            result = "Fault detected";
-          } else {
-            const std::string &robot = id(robot_status).state;
-            if (robot == "Cat detected" && !id(laser_detect).state && !id(weight_detect).state) {
-              result = "Waiting to cycle";
-            } else if (robot == "Clean cycle in progress" && (id(laser_detect).state || id(weight_detect).state)) {
-              result = "Cycle interrupted";
-            } else {
-              result = robot;
-            }
-          }
-          if (id(smart_detection_enabled) && !id(cat_confirmed) && (result == "Cat detected" || result == "Waiting to cycle")) {
-            return;
-          }
-          if (!result.empty() && result != id(status).state) {
-            id(status).publish_state(result);
-          }
 
 button:
   - platform: litter_robot4
@@ -144,10 +113,9 @@ switch:
     id: power
     name: "Power"
   - platform: litter_robot4
-    type: litter_hopper
-    id: litter_hopper
-    name: "Hopper"
-    disabled_by_default: true
+    type: debug_mode
+    id: debug_mode
+    name: "Debug Mode"
 
 binary_sensor:
   - platform: litter_robot4
@@ -155,9 +123,9 @@ binary_sensor:
     id: waste_drawer_full
     name: "Waste Drawer Full"
   - platform: litter_robot4
-    type: bonnet_removed
-    id: bonnet_removed
-    name: "Bonnet Removed"
+    type: bonnet
+    id: bonnet
+    name: "Bonnet"
     disabled_by_default: true
   - platform: litter_robot4
     type: night_light
@@ -173,16 +141,7 @@ binary_sensor:
     type: laser_detect
     id: laser_detect
     name: "Laser Detect"
-    on_state:
-      - script.execute: update_status
   - platform: litter_robot4
     type: weight_detect
     id: weight_detect
     name: "Weight Detect"
-    on_state:
-      - script.execute: update_status
-  - platform: litter_robot4
-    type: hopper_motor
-    id: hopper_motor
-    name: "Hopper Motor"
-    disabled_by_default: true

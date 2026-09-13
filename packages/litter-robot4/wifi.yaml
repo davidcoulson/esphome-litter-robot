@@ -1,5 +1,5 @@
 script:
-  - id: sync_wifi_status
+  - id: set_robot_wifi_status
     then:
       - lambda: |-
           const char *target;
@@ -16,10 +16,24 @@ script:
             id(wifi_status).make_call().set_option(target).perform();
           }
 
+  - id: apply_wifi_status
+    then:
+      - if:
+          condition:
+            select.is:
+              id: wifi_status
+              options: ["Off"]
+          then:
+            - delay: 500ms # Give state time to publish before the link drops
+            - wifi.disable:
+          else:
+            - wifi.enable:
+            - script.execute: set_robot_wifi_status
+
 interval:
   - interval: 30s
     then:
-      - script.execute: sync_wifi_status
+      - script.execute: set_robot_wifi_status
 
 select:
   - platform: litter_robot4
@@ -29,23 +43,13 @@ select:
     disabled_by_default: true
     on_value:
       then:
-        - script.execute: update_status
-        - delay: 500ms
-        - if:
-            condition:
-              select.is:
-                id: wifi_status
-                options: ["Off"]
-            then:
-              - wifi.disable:
-            else:
-              - wifi.enable:
-              - script.execute: sync_wifi_status
+        # Defer to a script so the extended on_value actions run before wifi is disabled
+        - script.execute: apply_wifi_status
 
 wifi:
   on_connect:
     then:
-      - script.execute: sync_wifi_status
+      - script.execute: set_robot_wifi_status
   on_disconnect:
     then:
-      - script.execute: sync_wifi_status
+      - script.execute: set_robot_wifi_status
