@@ -67,7 +67,7 @@ script:
             result = "WiFi disabled";
           }
 
-          if (id(smart_detection_enabled) && !id(cat_confirmed).state && (result == "Cat detected" || result == "Waiting to cycle")) {
+          if (id(smart_cat_detection).state && !id(cat_confirmed).state && (result == "Cat detected" || result == "Waiting to cycle")) {
             return;
           }
 
