@@ -18,11 +18,11 @@ text_sensor:
 
 binary_sensor:
   - platform: litter_robot4
-    id: !extend laser_detect
+    id: !extend curtain_detected
     on_state:
       - script.execute: update_status
   - platform: litter_robot4
-    id: !extend weight_detect
+    id: !extend weight_detected
     on_state:
       - script.execute: update_status
   - platform: template
@@ -43,9 +43,9 @@ script:
       - lambda: |-
           std::string result = id(robot_status).state;
 
-          if (result == "Cat detected" && !id(laser_detect).state && !id(weight_detect).state) {
+          if (result == "Cat detected" && !id(curtain_detected).state && !id(weight_detected).state) {
             result = "Waiting to cycle";
-          } else if (result == "Clean cycle in progress" && (id(laser_detect).state || id(weight_detect).state)) {
+          } else if (result == "Clean cycle in progress" && (id(curtain_detected).state || id(weight_detected).state)) {
             result = "Cycle interrupted";
           }
 

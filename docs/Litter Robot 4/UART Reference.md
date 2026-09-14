@@ -10,7 +10,7 @@ The LR4 mainboard contains two microcontrollers plus a satellite board:
 
 	> Units manufactured after February 2026 (serial number starting with "LR4S") have a different mainboard revision which uses an STM microcontroller instead.
 
-- **Laserboard** - a satellite board handling ToF sensors for detecting cat presence as well as litter and waste drawer level.
+- **Laserboard** - a satellite board handling the curtain (ToF) sensors for detecting cat presence as well as litter and waste drawer level.
 
 ## 2. Physical Layer
 
@@ -80,9 +80,9 @@ Light sensor reading, 0-100. Used to control the [Night Light 0x3B](#night-light
 
 Live scale reading in decipounds (divide by 10 for pounds), signed. When a negative value is detected, the scale automatically tares back to 0 after a few seconds.
 
-#### Laser Board ToF 0x8B-0x8D
+#### Curtain Sensors 0x8B-0x8D
 
-Time-of-flight readings, mirroring [0x58-0x5A](#laser-board-tof-sensors-0x58-0x5a).
+Time-of-flight readings, mirroring [0x58-0x5A](#curtain-sensors-0x58-0x5a).
 
 ### LitterHopper 0x0C
 
@@ -216,12 +216,12 @@ Not all faults are well understood. Names used by the Whisker API are placeholde
 
 Potentially not just for detection events, but these are the only understood published values:
 
-| Value  | Meaning         |
-|--------|-----------------|
-| `0x10` | Laser clear     |
-| `0x11` | Laser triggered |
-| `0x20` | Weight clear    |
-| `0x21` | Weight detected |
+| Value  | Meaning           |
+|--------|-------------------|
+| `0x10` | Curtain clear     |
+| `0x11` | Curtain detected  |
+| `0x20` | Weight clear      |
+| `0x21` | Weight detected   |
 
 ### Bonnet Sensor 0x3A
 
@@ -273,9 +273,9 @@ Waste drawer full (`0x44`) is set to true after 3 consecutive readings of the wa
 
 The reset command will clear `0x44` and `0x42` but if the drawer was not actually emptied they will return to their previous states.
 
-### Laser Board ToF Sensors 0x58-0x5A
+### Curtain Sensors 0x58-0x5A
 
-Three time-of-flight distance sensors on the laser board, reported in millimeters. They are published alongside [detection events](#detection-event-0x37) as a cat enters or exits. Labeled based on position facing into the globe.
+Three time-of-flight curtain sensors on the laser board, reported in millimeters. They are published alongside [detection events](#detection-event-0x37) as a cat enters or exits. Labeled based on position facing into the globe.
 
 | Register | Sensor |
 |----------|--------|

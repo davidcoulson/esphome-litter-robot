@@ -50,18 +50,18 @@ interval:
             return;
           }
           const bool cat_detected = id(robot_status).state == "Cat detected";
-          const bool laser = id(laser_detect).state;
-          const bool weight = id(weight_detect).state;
+          const bool curtain = id(curtain_detected).state;
+          const bool weight = id(weight_detected).state;
           if (!cat_detected) {
             id(cat_confirmed).publish_state(false);
             id(cat_clear_seconds) = 0;
             return;
           }
-          if (laser && weight) {
+          if (curtain && weight) {
             // Both sensors agree: confirm the cat.
             id(cat_confirmed).publish_state(true);
             id(cat_clear_seconds) = 0;
-          } else if (!laser && !weight) {
+          } else if (!curtain && !weight) {
             // Neither sensor: count down (10s) before resetting the robot.
             id(cat_clear_seconds) += 1;
             if (id(cat_clear_seconds) == 10 && !id(cat_confirmed).state) {

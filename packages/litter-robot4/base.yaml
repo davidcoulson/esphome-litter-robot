@@ -138,10 +138,10 @@ binary_sensor:
     name: "Sleeping"
     disabled_by_default: true
   - platform: litter_robot4
-    type: laser_detect
-    id: laser_detect
-    name: "Laser Detect"
+    type: curtain_detected
+    id: curtain_detected
+    name: "Curtain Detected"
   - platform: litter_robot4
-    type: weight_detect
-    id: weight_detect
-    name: "Weight Detect"
+    type: weight_detected
+    id: weight_detected
+    name: "Weight Detected"

@@ -31,10 +31,10 @@ Every function of the original firmware/app is supported, with minor exceptions:
 
 Improvements include:
 
-- Less false cat detections and wasted clean cycles. "Smart Cat Detection" makes sure both weight _and_ curtain laser detections happen before confirming a cat visit.
+- Less false cat detections and wasted clean cycles. "Smart Cat Detection" makes sure both weight _and_ curtain sensor detections happen before confirming a cat visit.
 - Litter hopper can be enabled/disabled via automations. (Not possible with existing Home Assistant integration)
 - Sleep schedules can be set on a daily basis instead of only one time for weekday/weekend.
-- More direct access to the laser and weight detection sensors, for precise enter and exit tracking.
+- More direct access to the curtain and weight detection sensors, for precise enter and exit tracking.
 
 ## Is it reversible?
 
