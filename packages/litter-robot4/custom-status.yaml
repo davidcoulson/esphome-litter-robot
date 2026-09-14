@@ -25,6 +25,10 @@ binary_sensor:
     id: !extend weight_detected
     on_state:
       - script.execute: update_status
+  - platform: litter_robot4
+    id: !extend sleeping
+    on_state:
+      - script.execute: update_status
   - platform: template
     id: !extend cat_confirmed
     on_state:
@@ -47,6 +51,8 @@ script:
             result = "Waiting to cycle";
           } else if (result == "Clean cycle in progress" && (id(curtain_detected).state || id(weight_detected).state)) {
             result = "Cycle interrupted";
+          } else if (id(sleeping).state && result == "Ready") {
+            result = "Sleeping";
           }
 
           if (!id(fault).state.empty() && id(fault).state != "None") {
