@@ -136,7 +136,6 @@ binary_sensor:
     type: sleeping
     id: sleeping
     name: "Sleeping"
-    disabled_by_default: true
   - platform: litter_robot4
     type: curtain_detected
     id: curtain_detected
