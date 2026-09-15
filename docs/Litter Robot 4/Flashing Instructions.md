@@ -277,9 +277,9 @@ Once ESPHome is installed, future firmware updates can be applied over the air w
 
 1. Download the latest OTA update file (`.ota`) from the [releases page](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases).
 
-2. Open the device's web interface using the hostname or ip of the device in a browser.
+2. Open the device's web interface using the hostname or ip of the device in a browser. The default username is `user` and the password is `Wh1sk3rM30wM30w`.
 
-3. At the bottom, use the "OTA Update" file selector to select the downloaded OTA update file and click update. There may not be any visual feedback until the update completes which can take a few minutes. Be sure to not use the `.bin` file or the update will fail.
+3. At the bottom, use the "OTA Update" file selector to select the downloaded OTA update file and click update. Be sure to not use the `.bin` file or the update will fail.
 
 ---
 
