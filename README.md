@@ -42,7 +42,7 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 
 ## How do I install it?
 
-The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated ESP-Prog header on the mainboard. Since the pads are unpopulated you will need to either solder the appropriate header or solder wires directly to the pads to facilitate connection of the ESP Prog 2. Full instructions and required tools/parts can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated header on the mainboard. Since the pads are unpopulated you will need to either solder the appropriate header or solder wires directly to the pads to facilitate connection of the ESP Prog 2. Full instructions and required tools/parts can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
 
 The source code for the component can be found in my [ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4-dev) until it is potentially merged into ESPHome.
 
@@ -54,11 +54,11 @@ See the [Litter Robot 4 UART Reference](docs/Litter%20Robot%204/UART%20Reference
 
 ## Can I help?
 
-This project can almost certainly be ported to the Litter Robot 3 with little effort, but I don't have one to try it myself. If you have a Litter Robot 3 "Connect" with WiFi it would be helpful to capture serial packets between the PIC and ESP32 to understand the LR3 UART protocol. You can share your findings here or on [Discord](https://discord.gg/NrMdSAkPsx)!
+This project can almost certainly be ported to the Litter Robot 3 with little effort, but I don't have one to try it myself. If you have a Litter Robot 3 "Connect" with WiFi it would be helpful to capture serial packets between the PIC and ESP32 to understand the LR3 UART protocol.
 
 This [blog post](https://www.elttam.com/blog/re-of-lr3) goes into detail on some of the hardware on the LR3 mainboard and the first section will tell you how to get logs out of the ESP32. If the logs do not contain serial data then the physical TX/RX lines should be the middle 2 pads of the 4 labeled J8 on the mainboard.
 
-If you can't decipher the serial data or write code yourself, just send me any captures you get and I'll do the rest!
+If you can't decipher the serial data or write code yourself, just send me any captures you get and I'll do the rest! You can share your findings here or via [Discord](https://discord.gg/NrMdSAkPsx).
 
 ## Can I buy you a coffee?
 
