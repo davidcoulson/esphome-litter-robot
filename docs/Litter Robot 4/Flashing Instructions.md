@@ -10,37 +10,43 @@ Feel free to join the [Discord server](https://discord.gg/NrMdSAkPsx) for assist
 
 There are 2 known major revisions of the Litter Robot 4 mainboard. Both will work, but prepairing the mainboard for flashing is slightly different. Older units have a serial number starting with "LR4C", and newer units manufactured after February 2026 have a serial number starting with "LR4S". Take note of which one you have before purchasing any hardware.
 
-> For serial numbers startng with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
+> For serial numbers starting with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
 
 ---
 
-## What You'll Need
+## Recommended Hardware
 
-### Hardware
-
-- [**ESP-Prog-2 development board**](https://amzn.to/4vMhlyv) (affiliate link) - Includes a 1.27mm pitch ribbon cable despite not being mentioned in the listing
-
-- **Soldering iron** (fine/curved tip) and solder
-
-- **Phillips-head screwdriver**
+- [**ESP-Prog-2 development board**](https://amzn.to/4vMhlyv) (affiliate link) - Includes a 1.27mm pitch ribbon cable not mentioned in the listing
 
 - **[Fine fiberglass brush](https://amzn.to/4iqF6Je)** (affiliate link) or **razor blade** - Any sharp object to scratch off conformal coating
 
-- **USB-C cable** for the ESP-Prog-2
+- **Phillips-head screwdriver**
 
-#### Technically optional but highly recommended:
+- **USB-C cable**
 
-For serial numbers starting with "LR4C":
+### For serial numbers starting with "LR4C":
+
+- **Soldering iron** (fine/curved tip) and solder
 
 - [**1.27mm (0.05") pitch 2x3 6 position surface-mount header**](https://www.ebay.com/itm/336714254669) (sold directly by me in the US) - Also available from [Digikey](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412) globally.
+</details>
 
-For serial numbers starting with "LR4S":
+### For serial numbers starting with "LR4S":
+
+#### Option 1 - Solderless:
+
+- [**2.54mm (0.1") Single Row 5 Pin Test Clip**](https://amzn.to/4djYzIc) (affiliate link) - Includes jumper wire
+
+#### Option 2 - Soldered:
+
+- **Soldering iron** (fine/curved tip) and solder
 
 - [**2.54mm (0.1") pitch single row 5 position through-hole header**](https://www.digikey.com/en/products/detail/würth-elektronik/61300511121/4846831)
 
 - [**Female to female jumper wire**](https://www.digikey.com/en/products/detail/adafruit-industries-llc/1950/6827084)
+</details>
 
-### Software
+## Software
 
 - `esptool` - Install instructions can be found [here](https://docs.espressif.com/projects/esptool/en/latest/esp32/installation.html). If you're allergic to the terminal or command prompt you may be able to find a GUI alternative for your OS.
 
@@ -96,7 +102,7 @@ Unplug the larger power connector on the right side of the mainboard. Remove the
 
 > The following directions assume the mainboard is oriented with the control panel facing up with the LED indicators facing you as they do normally, and the ESP-Prog-2 with the pins facing you and the USB-C port on the right side.
 
-To connect the ESP-Prog-2 to the mainboard to backup/flash the firmware, some soldering is required. Follow the instructions based on the serial number of your Litter Robot:
+To connect the ESP-Prog-2 to the mainboard to backup/flash the firmware, follow the instructions based on the serial number of your Litter Robot:
 
 <details>
 <summary>For serial numbers starting with "LR4C"</summary>
@@ -129,15 +135,23 @@ The mainboard must be powered externally to read/write the flash of the ESP32. I
 <summary>For serial numbers starting with "LR4S"</summary>
 <br>
 
-The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them before soldering. A fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
+The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them to make electrical contact. A fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
 
 ![ESP-Prog header location](Images/LR4S/ESP-Prog%20Header%20Location.JPG)
 
-You can then either solder the 2.54mm pitch 5 pin header and connect the ESP-Prog-2 with jumper wires:
+You have two options:
 
-![ESP-Prog-2 connected](Images/LR4S/ESP-Prog-2%20Connected.JPG)
+- **Solderless:** Clip the 5 pin test clip onto the pads. The clip may have screws on the lower jaw, make sure they don't short anything out. You can cover them with tape if necessary.
 
-or solder wires directly from the ESP-Prog-2 to the mainboard. Either way you will have to follow this diagram when connecting the wires:
+> Please submit a photo of the test clip attached to the mainboard for use here in this guide, either via an issue on Codeberg or [Discord](https://discord.gg/NrMdSAkPsx)!
+
+- **Soldered:** Solder the 2.54mm pitch 5 pin header and connect the ESP-Prog-2 with jumper wires:
+
+    ![ESP-Prog-2 connected](Images/LR4S/ESP-Prog-2%20Connected.JPG)
+
+    or solder wires directly from the ESP-Prog-2 to the mainboard.
+
+Either way you will have to follow this diagram when connecting the wires:
 
 ![ESP-Prog wire diagram](Images/LR4S/ESP-Prog%20Wire%20Diagram.JPG)
 
@@ -147,7 +161,7 @@ The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrica
 
 The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the Litter Robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Resecure the mainboard with screws and plug the laser board and power cable back in.
 
->Thank you [@ghulands](https://codeberg.org/ghulands) for testing and photos
+> Thank you [@ghulands](https://codeberg.org/ghulands) for testing and photos
 </details>
 
 ---
