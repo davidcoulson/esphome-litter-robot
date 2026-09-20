@@ -21,9 +21,9 @@ text_sensor:
 
 sensor:
   - platform: litter_robot3
-    type: cycle_count
-    id: cycle_count
-    name: "Cycle Count"
+    type: waste_drawer_cycle_count
+    id: waste_drawer_cycle_count
+    name: "Waste Drawer Cycles"
 
 switch:
   - platform: litter_robot3
@@ -39,4 +39,4 @@ button:
   - platform: litter_robot3
     type: cycle
     id: cycle
-    name: "Clean Cycle"
+    name: "Manual Cycle"

@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import sensor
 import esphome.config_validation as cv
-from esphome.const import STATE_CLASS_TOTAL_INCREASING
+from esphome.const import STATE_CLASS_TOTAL
 
 from .. import (
     CONF_LITTER_ROBOT3_ID,
@@ -21,12 +21,12 @@ LitterRobot3CycleCountSensor = litter_robot3_ns.class_(
 
 CONFIG_SCHEMA = cv.typed_schema(
     {
-        "cycle_count": (
+        "waste_drawer_cycle_count": (
             sensor.sensor_schema(
                 LitterRobot3CycleCountSensor,
                 accuracy_decimals=0,
-                state_class=STATE_CLASS_TOTAL_INCREASING,
-                icon="mdi:counter",
+                state_class=STATE_CLASS_TOTAL,
+                icon="mdi:trash-can",
             )
             .extend(LITTER_ROBOT3_DEVICE_SCHEMA)
             .extend(cv.COMPONENT_SCHEMA)

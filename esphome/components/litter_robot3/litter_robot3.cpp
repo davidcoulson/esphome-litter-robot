@@ -41,19 +41,17 @@ const char *system_state_name(uint8_t state) {
     case 1:
       return "Ready";
     case 2:
-      return "Timing";
+      return "Cat detected";
     case 3:
-      return "Cycling";
-    case 4:
-      return "Cycle 50% or 100%";
+      return "Clean cycle in progress";
     case 5:
-      return "Cat Reentry";
+      return "Cycle interrupted";
     case 6:
       return "Cycle paused";
     case 7:
-      return "Bonnet Removed";
+      return "Bonnet removed";
     case 8:
-      return "Pinch Sensor";
+      return "Pinch detected";
     default:
       return nullptr;
   }

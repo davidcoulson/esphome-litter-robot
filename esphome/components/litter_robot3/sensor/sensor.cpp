@@ -13,6 +13,6 @@ void LitterRobot3CycleCountSensor::setup() {
   });
 }
 
-void LitterRobot3CycleCountSensor::dump_config() { LOG_SENSOR("", "Litter Robot 3 Cycle Count", this); }
+void LitterRobot3CycleCountSensor::dump_config() { LOG_SENSOR("", "Litter Robot 3 Waste Drawer Cycle Count", this); }
 
 }  // namespace esphome::litter_robot3
