@@ -1,7 +1,7 @@
 substitutions:
   name: litter-robot3
   friendly_name: Litter Robot 3
-  version: 2026.9.2
+  version: 2026.9.0-alpha.2
 
 esphome:
   name: "${name}"
@@ -32,7 +32,7 @@ web_server:
 captive_portal:
 
 dashboard_import:
-  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot3.yaml@main
+  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot3.yaml@LR3/testing
   import_full_config: false
 
 external_components:
