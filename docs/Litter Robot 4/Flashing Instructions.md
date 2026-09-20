@@ -8,7 +8,7 @@ Feel free to join the [Discord server](https://discord.gg/NrMdSAkPsx) for assist
 
 ## Mainboard Revision Notice
 
-There are 2 known major revisions of the Litter Robot 4 mainboard. Both will work, but prepairing the mainboard for flashing is slightly different. Older units have a serial number starting with "LR4C", and newer units manufactured after February 2026 have a serial number starting with "LR4S". Take note of which one you have before purchasing any hardware.
+There are 2 known major revisions of the Litter Robot 4 mainboard. Both will work, but preparing the mainboard for flashing is slightly different. Older units have a serial number starting with "LR4C", and newer units manufactured after February 2026 have a serial number starting with "LR4S". Take note of which one you have before purchasing any hardware.
 
 > For serial numbers starting with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
 
@@ -28,8 +28,7 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 - **Soldering iron** (fine/curved tip) and solder
 
-- [**1.27mm (0.05") pitch 2x3 6 position surface-mount header**](https://www.ebay.com/itm/336714254669) (sold directly by me in the US) - Also available from [Digikey](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412) globally.
-</details>
+- [**1.27mm (0.05") pitch 2x3 6 position surface-mount header**](https://www.ebay.com/itm/336714254669) (sold directly by me in the US) - Also available from [DigiKey](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412) globally.
 
 ### For serial numbers starting with "LR4S":
 
@@ -41,14 +40,13 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 - **Soldering iron** (fine/curved tip) and solder
 
-- [**2.54mm (0.1") pitch single row 5 position through-hole header**](https://www.digikey.com/en/products/detail/würth-elektronik/61300511121/4846831)
+- [**2.54mm (0.1") pitch single row 5 position through-hole header**](https://www.digikey.com/en/products/detail/wurth-elektronik/61300511121/4846831)
 
 - [**Female to female jumper wire**](https://www.digikey.com/en/products/detail/adafruit-industries-llc/1950/6827084)
-</details>
 
 ## Software
 
-- `esptool` - Install instructions can be found [here](https://docs.espressif.com/projects/esptool/en/latest/esp32/installation.html). If you're allergic to the terminal or command prompt you may be able to find a GUI alternative for your OS.
+- **esptool** - Install instructions can be found [here](https://docs.espressif.com/projects/esptool/en/latest/esp32/installation.html). If you're allergic to the terminal or command prompt you may be able to find a GUI alternative for your OS.
 
 - **Pre-compiled firmware binary** - download the `.bin` from the latest [LR4 release](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases?q=LR4%2F).
 
@@ -108,7 +106,7 @@ To connect the ESP-Prog-2 to the mainboard to backup/flash the firmware, follow 
 <summary>For serial numbers starting with "LR4C"</summary>
 <br>
 
-Plug the included 6 pin ribbon cable into the top right header on the ESP-Prog-2. It should be keyed to only plug in one way, with pin 1 (Indicated by a pink wire) on the left side.
+Plug the included 6 pin ribbon cable into the top right header on the ESP-Prog-2. It should be keyed to only plug in one way, with pin 1 (indicated by a pink wire) on the left side.
 
 ![ESP-Prog-2](Images/LR4C/ESP-Prog-2.JPG)
 
@@ -273,7 +271,7 @@ The precompiled firmware includes weight and visit-count entities for four cats.
 2. Rename each cat's weight and visit entities with the desired names.
 3. Set each cat's weight number entity to your best guess.
 
-The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, eventually replacing all user input weights with a real weight measurement. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Factory reset will clear all stored weights and reset visit counters along with other settings.
+The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, eventually replacing all user input weights with a real weight measurement. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Use the **Cat Tracker Reset** button to clear all stored weights and reset the visit counters (the Litter Robot's own Factory Reset does not clear the tracker data).
 
 ### Web Server
 
@@ -291,7 +289,7 @@ Once ESPHome is installed, future firmware updates can be applied over the air w
 
 1. Download the latest OTA update file (`.ota`) from the latest [LR4 release](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases?q=LR4%2F).
 
-2. Open the device's web interface using the hostname or ip of the device in a browser. The default username is `user` and the password is `Wh1sk3rM30wM30w`.
+2. Open the device's web interface using the hostname or IP of the device in a browser. The default username is `user` and the password is `Wh1sk3rM30wM30w`.
 
 3. At the bottom, use the "OTA Update" file selector to select the downloaded OTA update file and click update. Be sure to not use the `.bin` file or the update will fail.
 
