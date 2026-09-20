@@ -1,0 +1,42 @@
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+uart:
+  - id: uart_bus
+    tx_pin: GPIO19
+    rx_pin: GPIO5
+    baud_rate: 19200
+    rx_buffer_size: 2048
+
+litter_robot3:
+  id: my_litter_robot3
+
+text_sensor:
+  - platform: litter_robot3
+    type: status
+    id: robot_status
+    name: "Robot Status"
+
+sensor:
+  - platform: litter_robot3
+    type: cycle_count
+    id: cycle_count
+    name: "Cycle Count"
+
+switch:
+  - platform: litter_robot3
+    type: power
+    id: power
+    name: "Power"
+  - platform: litter_robot3
+    type: night_light
+    id: night_light
+    name: "Night Light"
+
+button:
+  - platform: litter_robot3
+    type: cycle
+    id: cycle
+    name: "Clean Cycle"
