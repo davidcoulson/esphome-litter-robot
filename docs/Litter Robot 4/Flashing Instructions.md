@@ -50,7 +50,7 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 - `esptool` - Install instructions can be found [here](https://docs.espressif.com/projects/esptool/en/latest/esp32/installation.html). If you're allergic to the terminal or command prompt you may be able to find a GUI alternative for your OS.
 
-- **Pre-compiled firmware binary** - download the latest release `.bin` from the [releases page](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases).
+- **Pre-compiled firmware binary** - download the `.bin` from the latest [LR4 release](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases?q=LR4%2F).
 
   - *Alternatively*, you can compile it from source using `litter-robot4.yaml`:
 
@@ -289,7 +289,7 @@ The configuration can be "adopted" into [ESPHome Device Builder](https://desktop
 
 Once ESPHome is installed, future firmware updates can be applied over the air without reopening the unit. This process is automated in the ESPHome Device Builder dashboard, but you can also update via the web server:
 
-1. Download the latest OTA update file (`.ota`) from the [releases page](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases).
+1. Download the latest OTA update file (`.ota`) from the latest [LR4 release](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases?q=LR4%2F).
 
 2. Open the device's web interface using the hostname or ip of the device in a browser. The default username is `user` and the password is `Wh1sk3rM30wM30w`.
 
