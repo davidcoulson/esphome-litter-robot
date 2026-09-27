@@ -18,12 +18,23 @@ text_sensor:
     type: status
     id: robot_status
     name: "Robot Status"
+  - platform: litter_robot3
+    type: power_type
+    id: power_type
+    name: "Power Type"
 
 sensor:
   - platform: litter_robot3
     type: waste_drawer_cycle_count
     id: waste_drawer_cycle_count
     name: "Waste Drawer Cycles"
+
+number:
+  - platform: litter_robot3
+    type: cycle_delay
+    id: cycle_delay
+    name: "Cycle Delay"
+    mode: slider
 
 switch:
   - platform: litter_robot3
@@ -34,9 +45,17 @@ switch:
     type: night_light
     id: night_light
     name: "Night Light"
+  - platform: litter_robot3
+    type: panel_lockout
+    id: panel_lockout
+    name: "Panel Lockout"
 
 button:
   - platform: litter_robot3
     type: cycle
     id: cycle
     name: "Manual Cycle"
+  - platform: litter_robot3
+    type: factory_reset
+    id: factory_reset
+    name: "Factory Reset"
