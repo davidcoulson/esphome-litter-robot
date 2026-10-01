@@ -13,8 +13,15 @@ sensor:
             return;
           id(waiting_for_level) = false;
           int litter_level_drop = id(previous_litter_level) - x;
-          id(hopper_needs_refill) = (litter_level_drop >= 2);
+          id(hopper_empty).publish_state(litter_level_drop >= 2);
           id(update_hopper_status)->execute();
+
+binary_sensor:
+  - platform: template
+    id: hopper_empty
+    name: "Hopper Empty"
+    icon: "mdi:cup-off-outline"
+    disabled_by_default: true
 
 text_sensor:
   - platform: litter_robot4
@@ -30,30 +37,27 @@ text_sensor:
           } else if (x != "Ready") {
             id(waiting_for_level) = false;
             if (x == "Disabled" || x == "Not connected")
-              id(hopper_needs_refill) = false;
+              id(hopper_empty).publish_state(false);
           }
           id(update_hopper_status)->execute();
   - platform: template
     id: hopper_status
     name: "Hopper Status"
     icon: "mdi:cup"
+    disabled_by_default: true
 
 script:
   - id: update_hopper_status
     then:
       - lambda: |-
           std::string value = id(hopper_status_raw).state;
-          if (id(hopper_needs_refill) && value == "Ready")
+          if (!id(waiting_for_level) && id(hopper_empty).state && value == "Ready")
             value = "Needs refill";
           if (!value.empty() && value != id(hopper_status).state)
             id(hopper_status).publish_state(value);
 
 globals:
   - id: waiting_for_level
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-  - id: hopper_needs_refill
     type: bool
     restore_value: no
     initial_value: 'false'
