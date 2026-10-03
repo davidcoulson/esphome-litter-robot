@@ -271,7 +271,7 @@ With no sensors or means of communication with the Litter Robot, the Hopper not 
 
 Waste drawer full (`0x44`) is set to true after 3 consecutive readings of the waste drawer percentage (`0x43`) over 80%. Each cycle after will increment cycles since full (`0x45`). After cycles since full is equal to 3 the robot will refuse to detect cats or cycle manually until the reset button is pushed. 
 
-The reset command will clear `0x44` and `0x42` but if the drawer was not actually emptied they will return to their previous states.
+The reset command clears `0x44` and `0x42` when the robot is in the [Ready](#robot-status-0x34) state; if the drawer was not actually emptied they will return to their previous states.
 
 ### Curtain Sensors 0x58-0x5A
 
