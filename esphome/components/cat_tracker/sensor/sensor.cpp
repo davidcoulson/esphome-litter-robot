@@ -5,13 +5,33 @@ namespace esphome::cat_tracker {
 
 static const char *const TAG = "cat_tracker.sensor";
 
-void CatVisitCountSensor::setup() {
-  if (this->cat_number_ == nullptr)
+void CatTrackerCountSensor::setup() {
+  if (this->cat_ == nullptr)
     return;
-  this->cat_number_->add_on_visit_callback([this](uint32_t count) { this->publish_state(count); });
-  this->publish_state(this->cat_number_->get_visit_count());
+  this->cat_->add_on_count_callback([this]() { this->publish_value_(); });
+  this->publish_value_();
 }
 
-void CatVisitCountSensor::dump_config() { LOG_SENSOR("", "Cat Tracker Cat Visit Count", this); }
+void CatTrackerCountSensor::publish_value_() {
+  switch (this->type_) {
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_VISITS_COUNT:
+      this->publish_state(this->cat_->get_count(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_VISITS));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_URINE_COUNT:
+      this->publish_state(this->cat_->get_count(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_URINE));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_FECES_COUNT:
+      this->publish_state(this->cat_->get_count(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_FECES));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_URINE_WEIGHT:
+      this->publish_state(this->cat_->get_waste_weight(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_URINE));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_FECES_WEIGHT:
+      this->publish_state(this->cat_->get_waste_weight(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_FECES));
+      break;
+  }
+}
+
+void CatTrackerCountSensor::dump_config() { LOG_SENSOR("", "Cat Tracker Cat Value", this); }
 
 }  // namespace esphome::cat_tracker

@@ -48,5 +48,5 @@ packages:
   hopper: !include packages/litter-robot4/hopper.yaml
   hopper_empty_detection: !include { file: packages/hopper-empty-detection.yaml, vars: { hopper_status_sensor_id: hopper_status, litter_level_sensor_id: litter_level } }
   smart_detection: !include packages/litter-robot4/smart-detection.yaml
-  cat_tracking: !include { file: packages/cat-tracking.yaml, vars: { weight_sensor_id: last_cat_weight } }
+  cat_tracking: !include { file: packages/cat-tracking/cat-tracking.yaml, vars: { weight_sensor_id: last_cat_weight } }
   custom_status: !include packages/litter-robot4/custom-status.yaml

@@ -2,6 +2,7 @@ import esphome.codegen as cg
 from esphome.components import button
 import esphome.config_validation as cv
 from esphome.const import ENTITY_CATEGORY_CONFIG
+from esphome.types import ConfigType
 
 from .. import CONF_CAT_TRACKER_ID, CatTrackerComponent, cat_tracker_ns
 
@@ -29,7 +30,7 @@ CONFIG_SCHEMA = (
 )
 
 
-async def to_code(config):
+async def to_code(config: ConfigType) -> None:
     parent = await cg.get_variable(config[CONF_CAT_TRACKER_ID])
     var = await button.new_button(config)
     await cg.register_component(var, config)
