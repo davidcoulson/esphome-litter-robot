@@ -1,9 +1,6 @@
 packages:
   sleep_override: !include sleep-override.yaml
 
-litter_robot4:
-  time_id: ha_time
-
 time:
   - platform: homeassistant
     timezone: America/New_York
@@ -12,7 +9,8 @@ time:
 interval:
   - interval: 24h
     then:
-      - litter_robot4.sync_time: my_litter_robot4
+      - litter_robot4.sync_time:
+          time_id: ha_time
 
 switch:
   - platform: litter_robot4
