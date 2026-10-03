@@ -1,0 +1,127 @@
+substitutions:
+  voc_sensor_id: "voc"
+  weight_detected_sensor_id: "weight_detected"
+  weight_sensor_id: "last_cat_weight"
+  feces_voc_delta: "150"
+  waste_detection_time: "60s"
+
+globals:
+  - id: waste_detection_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: visit_weight
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  - id: voc_baseline
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  - id: feces_detected
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+sensor:
+  # Mirrors the nested, non-extendable BME VOC onto a top-level id so the
+  # detection logic can hook its on_value.
+  - platform: copy
+    source_id: ${voc_sensor_id}
+    id: voc_detect
+    internal: true
+  - id: !extend voc_detect
+    on_value:
+      - lambda: |-
+          if (isnan(x))
+            return;
+          if (!id(waste_detection_active)) {
+            id(voc_baseline) = x;
+            return;
+          }
+          if (id(feces_detected))
+            return;
+          const float baseline = id(voc_baseline);
+          if (isnan(baseline))
+            return;
+          if (x - baseline >= ${feces_voc_delta}) {
+            ESP_LOGD("waste_sense", "Feces VOC spike: %.1f -> %.1f ppm", baseline, x);
+            id(feces_detected) = true;
+          }
+      - script.execute: record_visit_if_ready
+  - id: !extend ${weight_sensor_id}
+    on_value:
+      - lambda: |-
+          if (id(waste_detection_active) && !isnan(x) && x > 0.0f)
+            id(visit_weight) = x;
+      - script.execute: record_visit_if_ready
+
+binary_sensor:
+  - id: !extend ${weight_detected_sensor_id}
+    on_state:
+      - if:
+          condition:
+            lambda: "return x;"
+          then:
+            - script.stop: waste_detection_timeout
+            # A new entry while a visit is still open means the previous cat is
+            # done: record it now, then start a fresh visit for this one.
+            - if:
+                condition:
+                  lambda: "return id(waste_detection_active);"
+                then:
+                  - script.execute: record_waste_visit
+            - lambda: |-
+                id(waste_detection_active) = true;
+                id(feces_detected) = false;
+                id(visit_weight) = NAN;
+          else:
+            - script.execute: waste_detection_timeout
+
+script:
+  # Finalizes as soon as both the cat weight and the feces classification are
+  # known, regardless of which one arrived last.
+  - id: record_visit_if_ready
+    then:
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active) && id(feces_detected) && !isnan(id(visit_weight));"
+          then:
+            - script.stop: waste_detection_timeout
+            - script.execute: record_waste_visit
+            - lambda: "id(waste_detection_active) = false;"
+
+  # Records the currently buffered visit (cat weight + feces/urine).
+  - id: record_waste_visit
+    then:
+      - if:
+          condition:
+            lambda: "return isnan(id(visit_weight));"
+          then:
+            - logger.log:
+                level: WARN
+                format: "Waste visit skipped: no cat weight captured"
+          else:
+            - if:
+                condition:
+                  lambda: "return id(feces_detected);"
+                then:
+                  - cat_tracker.record_visit:
+                      weight: !lambda "return id(visit_weight);"
+                      waste_type: feces
+                else:
+                  - cat_tracker.record_visit:
+                      weight: !lambda "return id(visit_weight);"
+                      waste_type: urine
+
+  # Extends the visit window after the cat leaves, then records it.
+  - id: waste_detection_timeout
+    mode: restart
+    then:
+      - delay: ${waste_detection_time}
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active);"
+          then:
+            - lambda: "id(waste_detection_active) = false;"
+            - script.execute: record_waste_visit

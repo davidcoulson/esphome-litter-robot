@@ -1,0 +1,19 @@
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ap:
+    password: "Wh1sk3rM30wM30w"
+
+web_server:
+  auth:
+    type: digest
+    username: "user"
+    password: "Wh1sk3rM30wM30w"
+  port: 80
+
+captive_portal:

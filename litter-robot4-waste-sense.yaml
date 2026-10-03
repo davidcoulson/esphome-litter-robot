@@ -1,0 +1,31 @@
+esphome:
+  project:
+    name: "Joseph DiGiovanni.Litter Robot 4 with WasteSense™"
+    version: ${version}.waste-sense
+
+dashboard_import:
+  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot4-waste-sense.yaml@LR4/stable
+
+packages:
+  common: !include packages/common/default.yaml
+  base: !include packages/litter-robot4/default.yaml
+  waste_tracking: !include packages/cat-tracker/waste-tracking/default.yaml
+  waste_sense: !include packages/cat-tracker/waste-tracking/waste-sense.yaml
+
+i2c:
+  id: i2c_bus
+  sda: GPIO13
+  scl: GPIO14
+
+bme68x_bsec2_i2c:
+  id: bme680
+  model: bme680
+  address: 0x77
+
+sensor:
+  - platform: bme68x_bsec2
+    breath_voc_equivalent:
+      id: voc
+      name: "VOC"
+      entity_category: diagnostic
+      disabled_by_default: true

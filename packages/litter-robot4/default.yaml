@@ -1,3 +1,31 @@
+substitutions:
+  name: litter-robot4
+  friendly_name: Litter Robot 4
+  version: 2026.9.2
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: Joseph DiGiovanni.Litter Robot 4
+    version: ${version}
+
+external_components:
+  source:
+    type: git
+    url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
+    ref: LR4/${version}
+
+packages:
+  sleep_schedule: !include sleep-schedule.yaml
+  wifi: !include wifi.yaml
+  hopper: !include hopper.yaml
+  hopper_empty_detection: !include { file: ../common/hopper-empty-detection.yaml, vars: { hopper_status_sensor_id: hopper_status, litter_level_sensor_id: litter_level } }
+  smart_detection: !include smart-detection.yaml
+  cat_tracking: !include ../cat-tracker/default.yaml
+  custom_status: !include custom-status.yaml
+
 esp32:
   board: esp32dev
   framework:

@@ -1,6 +1,3 @@
-substitutions:
-  weight_sensor_id: "last_cat_weight"
-
 cat_tracker:
   id: cat_tracker_hub
   weight_tolerance: 0.6
@@ -29,10 +26,6 @@ number:
     disabled_by_default: true
 
 sensor:
-  - id: !extend ${weight_sensor_id}
-    on_value:
-      - cat_tracker.record_visit:
-          weight: !lambda "return x;"
   - platform: cat_tracker
     cat: cat1
     visits_count:

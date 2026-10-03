@@ -1,52 +1,7 @@
-substitutions:
-  name: litter-robot4
-  friendly_name: Litter Robot 4
-  version: 2026.9.2
-
-esphome:
-  name: "${name}"
-  friendly_name: "${friendly_name}"
-  name_add_mac_suffix: true
-  project:
-    name: Joseph DiGiovanni.Litter Robot 4
-    version: ${version}
-
-logger:
-
-api:
-
-ota:
-  - platform: esphome
-
-wifi:
-  ap:
-    password: "Wh1sk3rM30wM30w"
-
-web_server:
-  auth:
-    type: digest
-    username: "user"
-    password: "Wh1sk3rM30wM30w"
-  port: 80
-
-captive_portal:
-
 dashboard_import:
   package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot4.yaml@LR4/stable
-  import_full_config: false
-
-external_components:
-  source:
-    type: git
-    url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
-    ref: LR4/${version}
 
 packages:
-  base_config: !include packages/litter-robot4/base.yaml
-  sleep_schedule: !include packages/litter-robot4/sleep-schedule.yaml
-  wifi: !include packages/litter-robot4/wifi.yaml
-  hopper: !include packages/litter-robot4/hopper.yaml
-  hopper_empty_detection: !include { file: packages/hopper-empty-detection.yaml, vars: { hopper_status_sensor_id: hopper_status, litter_level_sensor_id: litter_level } }
-  smart_detection: !include packages/litter-robot4/smart-detection.yaml
-  cat_tracking: !include { file: packages/cat-tracking/cat-tracking.yaml, vars: { weight_sensor_id: last_cat_weight } }
-  custom_status: !include packages/litter-robot4/custom-status.yaml
+  common: !include packages/common/default.yaml
+  litter_robot4: !include packages/litter-robot4/default.yaml
+  weight_visits: !include packages/cat-tracker/weight-detection.yaml

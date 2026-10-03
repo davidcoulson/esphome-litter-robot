@@ -1,0 +1,8 @@
+substitutions:
+  weight_sensor_id: "last_cat_weight"
+
+sensor:
+  - id: !extend ${weight_sensor_id}
+    on_value:
+      - cat_tracker.record_visit:
+          weight: !lambda "return x;"

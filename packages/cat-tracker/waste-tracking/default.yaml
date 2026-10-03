@@ -1,0 +1,41 @@
+sensor:
+  - platform: cat_tracker
+    cat: cat1
+    feces_count:
+      id: cat1_feces_count
+      name: "Cat 1 Feces Count"
+      disabled_by_default: true
+    urine_count:
+      id: cat1_urine_count
+      name: "Cat 1 Urine Count"
+      disabled_by_default: true
+  - platform: cat_tracker
+    cat: cat2
+    feces_count:
+      id: cat2_feces_count
+      name: "Cat 2 Feces Count"
+      disabled_by_default: true
+    urine_count:
+      id: cat2_urine_count
+      name: "Cat 2 Urine Count"
+      disabled_by_default: true
+  - platform: cat_tracker
+    cat: cat3
+    feces_count:
+      id: cat3_feces_count
+      name: "Cat 3 Feces Count"
+      disabled_by_default: true
+    urine_count:
+      id: cat3_urine_count
+      name: "Cat 3 Urine Count"
+      disabled_by_default: true
+  - platform: cat_tracker
+    cat: cat4
+    feces_count:
+      id: cat4_feces_count
+      name: "Cat 4 Feces Count"
+      disabled_by_default: true
+    urine_count:
+      id: cat4_urine_count
+      name: "Cat 4 Urine Count"
+      disabled_by_default: true
