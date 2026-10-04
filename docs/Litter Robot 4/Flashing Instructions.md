@@ -271,7 +271,7 @@ The precompiled firmware includes weight and visit-count entities for four cats.
 2. Rename each cat's weight and visit entities with the desired names.
 3. Set each cat's weight number entity to your best guess.
 
-The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, eventually replacing all user input weights with a real weight measurement. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Use the **Cat Tracker Reset** button to clear all stored weights and reset the visit counters (the Litter Robot's own Factory Reset does not clear the tracker data).
+The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, eventually replacing all user input weights with a real weight measurement. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Use a cat's reset button (e.g. **Cat 1 Tracker Reset**) to clear that cat's stored weight and counters (the Litter Robot's own Factory Reset does not clear the tracker data).
 
 ### Web Server
 
