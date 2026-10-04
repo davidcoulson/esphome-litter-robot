@@ -1,4 +1,9 @@
 globals:
+  # User's enable/disable intent, independent of whether the BME is present.
+  - id: odor_control_enabled
+    type: bool
+    restore_value: yes
+    initial_value: 'true'
   - id: suppress_ready
     type: bool
     restore_value: no
@@ -10,8 +15,13 @@ switch:
     name: "Odor Control"
     icon: "mdi:scent-off"
     entity_category: config
-    optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: DISABLED
+    lambda: |-
+      return id(odor_control_enabled) && !id(bme680).is_failed();
+    turn_on_action:
+      - lambda: "id(odor_control_enabled) = true;"
+    turn_off_action:
+      - lambda: "id(odor_control_enabled) = false;"
     on_turn_off:
       - script.stop: odor_control_cycle
 
