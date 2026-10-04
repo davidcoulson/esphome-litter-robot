@@ -26,14 +26,20 @@ Only the Litter Robot 4 is supported at this time. Though I suspect the Litter R
 
 Every function of the original firmware/app is supported, with minor exceptions:
 
-- Some device faults are not detected or descriptively named. They will still show a light pattern on the LED panel as usual.
+- Some device faults are not yet detected or descriptively named. The unit will still respond to them and show a light pattern on the LED panel as usual.
 - Updating mainboard/laserboard firmware is not possible.
 
-Improvements include:
+There are actually quite a few improvements over the stock firmware/app.
 
-- Less false cat detections and wasted clean cycles. "Smart Cat Detection" makes sure both weight _and_ curtain sensor detections happen before confirming a cat visit.
+**Major improvements include:**
+
+- Smart Cat Detection - Less false cat detections and wasted clean cycles. Makes sure both weight _and_ curtain sensor detections happen before confirming a cat visit.
+
+**Minor improvements:**
+
 - Litter hopper can be enabled/disabled via automations. (Not possible with existing Home Assistant integration)
 - Sleep schedules can be set on a daily basis instead of only one time for weekday/weekend.
+    - Sleep can be toggled with a manual "Sleep Override" switch for more advanced non-time based events.
 - More direct access to the curtain and weight detection sensors, for precise enter and exit tracking.
 
 ## Is it reversible?
@@ -51,14 +57,6 @@ The source code for the component can be found in my [ESPHome fork](https://gith
 Feel free to join the [Discord](https://discord.gg/NrMdSAkPsx) for assistance or discussion, before and after install!
 
 See the [Litter Robot 4 UART Reference](docs/Litter%20Robot%204/UART%20Reference.md) for a full breakdown of the mainboard serial protocol.
-
-## Can I help?
-
-This project can almost certainly be ported to the Litter Robot 3 with little effort, but I don't have one to try it myself. If you have a Litter Robot 3 "Connect" with WiFi it would be helpful to capture serial packets between the PIC and ESP32 to understand the LR3 UART protocol.
-
-This [blog post](https://www.elttam.com/blog/re-of-lr3) goes into detail on some of the hardware on the LR3 mainboard and the first section will tell you how to get logs out of the ESP32. If the logs do not contain serial data then the physical TX/RX lines should be the middle 2 pads of the 4 labeled J8 on the mainboard.
-
-If you can't decipher the serial data or write code yourself, just send me any captures you get and I'll do the rest! You can share your findings here or via [Discord](https://discord.gg/NrMdSAkPsx).
 
 ## Can I buy you a coffee?
 
