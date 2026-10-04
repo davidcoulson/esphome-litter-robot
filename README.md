@@ -34,6 +34,8 @@ There are actually quite a few improvements over the stock firmware/app.
 **Major improvements include:**
 
 - Smart Cat Detection - Less false cat detections and wasted clean cycles. Makes sure both weight _and_ curtain sensor detections happen before confirming a cat visit.
+- WasteSense™ - Waste identification and odor control, similar to Whisker's "WasteID" found on the Litter Robot 5 and 5 Pro.
+	- Requires soldering a sensor to the mainboard. [Instructions here](docs/Litter%20Robot%204/WasteSense%20Install.md).
 
 **Minor improvements:**
 
@@ -49,6 +51,8 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 ## How do I install it?
 
 The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated header on the mainboard. Units manufactured after February 2026 (Serial starting with "LR4S") can be flashed without soldering, but older units will require soldering. Full instructions and required tools/parts can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+
+Additionally, you can [add a BME680 sensor](docs/Litter%20Robot%204/WasteSense%20Install.md) to enable WasteSense™, an alternative to Whisker's "WasteID" found on the Litter Robot 5.
 
 The source code for the component can be found in my [ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4-dev) until it is potentially merged into ESPHome.
 
