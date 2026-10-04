@@ -80,6 +80,7 @@ script:
           condition:
             and:
               - lambda: "return id(odor_control).state;"
+              - lambda: "return id(auto_cycle).state;"
               - lambda: 'return id(robot_status).state == "Cat detected";'
               - lambda: "return !id(curtain_detected).state && !id(weight_detected).state;"
               - lambda: "return !id(sleeping).state;"

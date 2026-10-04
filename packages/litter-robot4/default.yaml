@@ -23,6 +23,7 @@ packages:
   hopper: !include hopper.yaml
   hopper_empty_detection: !include { file: ../common/hopper-empty-detection.yaml, vars: { hopper_status_sensor_id: hopper_status, litter_level_sensor_id: litter_level } }
   smart_detection: !include smart-detection.yaml
+  auto_cycle: !include auto-cycle.yaml
   cat_tracking: !include ../cat-tracker/default.yaml
   custom_status: !include custom-status.yaml
 
