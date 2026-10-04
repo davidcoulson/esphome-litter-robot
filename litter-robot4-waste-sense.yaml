@@ -25,8 +25,34 @@ bme68x_bsec2_i2c:
 
 sensor:
   - platform: bme68x_bsec2
+    bme68x_bsec2_id: bme680
+    temperature:
+      id: temperature
+      name: "Temperature"
+      disabled_by_default: true
+      filters:
+        - offset: -2.78 # ~5 degress fahrenheit
+    humidity:
+      id: humidity
+      name: "Humidity"
+      disabled_by_default: true
+    iaq:
+      id: indoor_air_quality
+      name: "Indoor Air Quality"
+      disabled_by_default: true
+    iaq_accuracy:
+      id: iaq_accuracy
+      name: "IAQ Accuracy"
+      disabled_by_default: true
+    pressure:
+      id: pressure
+      name: "Pressure"
+      disabled_by_default: true
+    co2_equivalent:
+      id: co2
+      name: "CO2 Equivalent"
+      disabled_by_default: true
     breath_voc_equivalent:
       id: voc
-      name: "VOC"
-      entity_category: diagnostic
+      name: "Breath VOC Equivalent"
       disabled_by_default: true
