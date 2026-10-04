@@ -5,47 +5,63 @@ cat_tracker:
 
 number:
   - platform: cat_tracker
-    id: cat1_weight
-    name: "Cat 1 Weight"
+    id: cat1_weight_set
+    name: "Set Cat 1 Weight"
     cat: cat1
     disabled_by_default: true
   - platform: cat_tracker
-    id: cat2_weight
-    name: "Cat 2 Weight"
+    id: cat2_weight_set
+    name: "Set Cat 2 Weight"
     cat: cat2
     disabled_by_default: true
   - platform: cat_tracker
-    id: cat3_weight
-    name: "Cat 3 Weight"
+    id: cat3_weight_set
+    name: "Set Cat 3 Weight"
     cat: cat3
     disabled_by_default: true
   - platform: cat_tracker
-    id: cat4_weight
-    name: "Cat 4 Weight"
+    id: cat4_weight_set
+    name: "Set Cat 4 Weight"
     cat: cat4
     disabled_by_default: true
 
 sensor:
   - platform: cat_tracker
     cat: cat1
+    weight:
+      id: cat1_weight
+      name: "Cat 1 Weight"
+      disabled_by_default: true
     visits_count:
       id: cat1_visits
       name: "Cat 1 Visits"
       disabled_by_default: true
   - platform: cat_tracker
     cat: cat2
+    weight:
+      id: cat2_weight
+      name: "Cat 2 Weight"
+      disabled_by_default: true
     visits_count:
       id: cat2_visits
       name: "Cat 2 Visits"
       disabled_by_default: true
   - platform: cat_tracker
     cat: cat3
+    weight:
+      id: cat3_weight
+      name: "Cat 3 Weight"
+      disabled_by_default: true
     visits_count:
       id: cat3_visits
       name: "Cat 3 Visits"
       disabled_by_default: true
   - platform: cat_tracker
     cat: cat4
+    weight:
+      id: cat4_weight
+      name: "Cat 4 Weight"
+      disabled_by_default: true
     visits_count:
       id: cat4_visits
       name: "Cat 4 Visits"

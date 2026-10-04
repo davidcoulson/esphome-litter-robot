@@ -1,6 +1,11 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import STATE_CLASS_MEASUREMENT, STATE_CLASS_TOTAL_INCREASING
+from esphome.const import (
+    DEVICE_CLASS_WEIGHT,
+    STATE_CLASS_MEASUREMENT,
+    STATE_CLASS_TOTAL_INCREASING,
+    UNIT_POUND,
+)
 from esphome.types import ConfigType
 
 from esphome.components import sensor
@@ -24,6 +29,16 @@ def _sub_sensor(**traits) -> cv.Schema:
 
 # Sub-key -> (schema, sensor type). The sub-key IS the type.
 SUB_SENSORS = {
+    "weight": (
+        _sub_sensor(
+            unit_of_measurement=UNIT_POUND,
+            accuracy_decimals=2,
+            device_class=DEVICE_CLASS_WEIGHT,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:scale-bathroom",
+        ),
+        CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_WEIGHT,
+    ),
     "visits_count": (
         _sub_sensor(
             accuracy_decimals=0,

@@ -9,6 +9,9 @@ void CatTrackerCountSensor::setup() {
   if (this->cat_ == nullptr)
     return;
   this->cat_->add_on_count_callback([this]() { this->publish_value_(); });
+  if (this->type_ == CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_WEIGHT) {
+    this->cat_->add_on_weight_callback([this](float) { this->publish_value_(); });
+  }
   this->publish_value_();
 }
 
@@ -28,6 +31,9 @@ void CatTrackerCountSensor::publish_value_() {
       break;
     case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_FECES_WEIGHT:
       this->publish_state(this->cat_->get_waste_weight(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_FECES));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_WEIGHT:
+      this->publish_state(this->cat_->get_weight());
       break;
   }
 }

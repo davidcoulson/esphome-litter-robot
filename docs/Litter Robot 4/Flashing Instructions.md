@@ -265,13 +265,13 @@ Enable the days you want to schedule and set their sleep and wake times. The sch
 
 #### Multi-Cat Tracking
 
-The precompiled firmware includes weight and visit-count entities for four cats. To track a cat:
+The precompiled firmware includes weight, visit-count, and reset entities for four cats. To track a cat:
 
-1. Enable the needed cat's weight and visit entities.
-2. Rename each cat's weight and visit entities with the desired names.
-3. Set each cat's weight number entity to your best guess.
+1. Rename the cat's entities with the desired names.
+2. To seed a starting weight, enable the cat's **Set Cat N Weight** number and set your best guess. Enable the matching **Cat N Weight** sensor to see the value the tracker is currently using.
+3. Enable the cat's visit entities if you want to see and chart them.
 
-The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, eventually replacing all user input weights with a real weight measurement. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Use a cat's reset button (e.g. **Cat 1 Tracker Reset**) to clear that cat's stored weight and counters (the Litter Robot's own Factory Reset does not clear the tracker data).
+The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, replacing the guessed weight with a real measurement over time. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Use a cat's reset button (e.g. **Cat 1 Reset**) to clear that cat's stored weight and counters (the Litter Robot's own Factory Reset does not clear the tracker data).
 
 ### Web Server
 
