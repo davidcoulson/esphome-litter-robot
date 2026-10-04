@@ -1,3 +1,5 @@
+import re
+
 from esphome import automation
 import esphome.codegen as cg
 import esphome.config_validation as cv
@@ -15,6 +17,7 @@ CONF_CAT = "cat"
 CONF_CATS = "cats"
 CONF_WASTE_TYPE = "waste_type"
 CONF_WASTE_WEIGHT = "waste_weight"
+CONF_LEGACY_OBJECT_ID = "legacy_object_id"
 
 cat_tracker_ns = cg.esphome_ns.namespace("cat_tracker")
 CatTrackerComponent = cat_tracker_ns.class_("CatTrackerComponent", cg.Component)
@@ -32,14 +35,18 @@ WASTE_TYPES = {
 CAT_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(CatTrackerCat),
+        cv.Optional(CONF_LEGACY_OBJECT_ID): cv.string,
     }
 )
 
 
 def _validate_cat(value: object) -> ConfigType:
-    if not isinstance(value, str):
-        raise cv.Invalid("Each cat must be a bare id, e.g. 'cat1'")
-    return CAT_SCHEMA({CONF_ID: value})
+    config = CAT_SCHEMA({CONF_ID: value} if isinstance(value, str) else value)
+    if CONF_LEGACY_OBJECT_ID not in config:
+        # Default to the 2026.9.2 "Cat N Weight" entity name when the id matches it.
+        if match := re.fullmatch(r"cat(\d+)", str(config[CONF_ID])):
+            config[CONF_LEGACY_OBJECT_ID] = f"Cat {match.group(1)} Weight"
+    return config
 
 
 CONFIG_SCHEMA = cv.Schema(
@@ -60,6 +67,8 @@ async def to_code(config: ConfigType) -> None:
     for cat_conf in config[CONF_CATS]:
         cat = cg.new_Pvariable(cat_conf[CONF_ID], str(cat_conf[CONF_ID]))
         await cg.register_component(cat, cat_conf)
+        if (legacy_object_id := cat_conf.get(CONF_LEGACY_OBJECT_ID)) is not None:
+            cg.add(cat.set_legacy_object_id(legacy_object_id))
         cg.add(var.register_cat(cat))
     for conf in config.get(CONF_ON_VISIT, []):
         await automation.build_callback_automation(

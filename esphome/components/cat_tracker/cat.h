@@ -21,6 +21,10 @@ class CatTrackerCat : public Component {
   void setup() override;
   void dump_config() override;
 
+  // Entity name the legacy (2026.9.2) NVS key was derived from, e.g. "Cat 1 Weight".
+  // Empty/null disables the one-time legacy state import.
+  void set_legacy_object_id(const char *legacy_object_id) { this->legacy_object_id_ = legacy_object_id; }
+
   void set_weight(float weight);
   float get_weight() const { return this->weight_; }
 
@@ -40,8 +44,11 @@ class CatTrackerCat : public Component {
 
  protected:
   void save_state_();
+  // Imports weight/visits from the 2026.9.2 per-entity NVS key (one-time).
+  void migrate_legacy_state_();
 
   const char *id_name_;
+  const char *legacy_object_id_{nullptr};
   float weight_{NAN};
   std::array<uint32_t, 3> counts_{};
   std::array<float, 3> waste_weight_{};

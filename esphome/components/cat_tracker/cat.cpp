@@ -1,6 +1,9 @@
 #include "cat.h"
 #include "esphome/core/log.h"
 
+#include <cinttypes>
+#include <cstring>
+
 namespace esphome::cat_tracker {
 
 static const char *const TAG = "cat_tracker.cat";
@@ -9,6 +12,12 @@ struct CatTrackerCatRestoreState {
   float weight;
   uint32_t counts[3];
   float waste_weight[3];
+};
+
+// State layout used by the 2026.9.2 cat tracker (stored per weight-number entity).
+struct LegacyTrackedCatRestoreState {
+  float last_weight;
+  uint32_t visit_count;
 };
 
 void CatTrackerCat::setup() {
@@ -21,9 +30,27 @@ void CatTrackerCat::setup() {
       this->counts_[i] = state.counts[i];
       this->waste_weight_[i] = state.waste_weight[i];
     }
+  } else {
+    this->migrate_legacy_state_();
   }
   this->weight_callback_.call(this->weight_);
   this->count_callback_.call();
+}
+
+void CatTrackerCat::migrate_legacy_state_() {
+  if (this->legacy_object_id_ == nullptr || this->legacy_object_id_[0] == '\0')
+    return;
+  auto legacy = global_preferences->make_preference<LegacyTrackedCatRestoreState>(
+      fnv1_hash_object_id(this->legacy_object_id_, strlen(this->legacy_object_id_)));
+  LegacyTrackedCatRestoreState old_state{};
+  if (!legacy.load(&old_state))
+    return;
+  ESP_LOGI(TAG, "Imported legacy state for cat '%s': weight %.2f, visits %" PRIu32, this->id_name_,
+           old_state.last_weight, old_state.visit_count);
+  this->weight_ = old_state.last_weight;
+  this->counts_[static_cast<size_t>(CatTrackerCountType::CAT_TRACKER_COUNT_TYPE_VISITS)] = old_state.visit_count;
+  this->save_state_();
+  global_preferences->sync();
 }
 
 void CatTrackerCat::set_weight(float weight) {
