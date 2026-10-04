@@ -11,6 +11,7 @@ packages:
   base: !include packages/litter-robot4/default.yaml
   waste_tracking: !include packages/cat-tracker/waste-tracking/default.yaml
   waste_sense: !include packages/cat-tracker/waste-tracking/waste-sense.yaml
+  odor_control: !include packages/litter-robot4/odor-control.yaml
 
 i2c:
   id: i2c_bus
