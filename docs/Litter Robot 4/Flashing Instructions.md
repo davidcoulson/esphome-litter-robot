@@ -16,9 +16,11 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 ## Recommended Hardware
 
-- [**ESP-Prog-2 development board**](https://amzn.to/4vMhlyv) (affiliate link) - Includes a 1.27mm pitch ribbon cable not mentioned in the listing
+> All Amazon links in this guide are affiliate links.
 
-- **[Fine fiberglass brush](https://amzn.to/4iqF6Je)** (affiliate link) or **razor blade** - Any sharp object to scratch off conformal coating
+- [**ESP-Prog-2 development board**](https://amzn.to/4vMhlyv) - Includes a 1.27mm pitch ribbon cable not mentioned in the listing
+
+- **[Fine fiberglass brush](https://amzn.to/3TKakku)** or **razor blade** - Any sharp object to scratch off conformal coating
 
 - **Phillips-head screwdriver**
 
@@ -34,7 +36,7 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 #### Option 1 - Solderless:
 
-- [**2.54mm (0.1") Single Row 5 Pin Test Clip**](https://amzn.to/4djYzIc) (affiliate link) - Includes jumper wire
+- [**2.54mm (0.1") Single Row 5 Pin Test Clip**](https://amzn.to/4djYzIc) - Includes jumper wire
 
 #### Option 2 - Soldered:
 
