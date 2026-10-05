@@ -122,7 +122,7 @@ Determines how long to wait before starting a clean cycle after a cat has no lon
 
 ### Control Panel Lockout 0x17
 
-State of the control panel lock. Panel inputs will be ignored, including [simulated ones](#51-simulated-control-panel-input).
+State of the control panel lock. Panel inputs will be ignored, including [simulated ones](#5-1-simulated-control-panel-input).
 
 ### Night Light Options 0x18/0x19
 
@@ -199,7 +199,7 @@ Boolean value indicating the current time is within a [sleep schedule](#sleep-sc
 
 ### Globe Fault Status 0x35
 
-Not all faults are well understood. Names used by the Whisker API are placeholders for a better confirmed meaning.
+Not all faults are well understood. Names used by the Whisker API are placeholders until a better meaning is confirmed.
 
 | Value  | Meaning                   |
 |--------|---------------------------|
@@ -229,7 +229,7 @@ Boolean, inverted; 0 = OK, 1 = bonnet removed. Tracks the same state as status `
 
 ### Night Light 0x3B
 
-Boolean; current state of the night light inside the globe. Controlled via the [night light mode](#night-light-options-0x180x19).
+Boolean; current state of the night light inside the globe. Controlled via the [night light mode](#night-light-options-0x18-0x19).
 
 ### USB Power 0x04
 
@@ -247,7 +247,7 @@ Boolean; current state of the night light inside the globe. Controlled via the [
 
 `0x01XX` and `0x10XX`/`0x20XX` are published in order during the hopper motor run but their values and meaning are unclear. The high byte is the only consistent pattern.
 
-With no sensors or means of communication with the Litter Robot, the Hopper not dispensing litter or being empty must be inferred from the [litter level reading](#litter--drawer-level) not recovering after a few cycles.
+With no sensors or means of communication with the Litter Robot, the Hopper not dispensing litter or being empty must be inferred from the [litter level reading](#litter-drawer-level) not recovering after a few cycles.
 
 ### Odometers
 
@@ -269,7 +269,7 @@ With no sensors or means of communication with the Litter Robot, the Hopper not 
 | `0x47`   | Litter level            | Raw distance value. 480=empty, 435<=full |
 | `0x69`   | Calibrated litter level | Raw distance value. Used by hopper logic |
 
-Waste drawer full (`0x44`) is set to true after 3 consecutive readings of the waste drawer percentage (`0x43`) over 80%. Each cycle after will increment cycles since full (`0x45`). After cycles since full is equal to 3 the robot will refuse to detect cats or cycle manually until the reset button is pushed. 
+Waste drawer full (`0x44`) is set to true after 3 consecutive readings of the waste drawer percentage (`0x43`) over 80%. Each subsequent cycle increments cycles since full (`0x45`). Once cycles since full reaches 3, the robot will refuse to detect cats or cycle manually until the reset button is pressed.
 
 The reset command clears `0x44` and `0x42` when the robot is in the [Ready](#robot-status-0x34) state; if the drawer was not actually emptied they will return to their previous states.
 

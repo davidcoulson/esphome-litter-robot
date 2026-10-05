@@ -1,6 +1,6 @@
 # Litter Robot 4 - WasteSense™ Sensor Install Guide
 
-This small modification makes your Litter Robot 4 capable of identifying the type of waste, similar to Whisker's "WasteID". This information is used to better control odors by cycling much sooner when feces is detected.
+This small modification makes your Litter Robot 4 capable of identifying the type of waste, similar to Whisker's "WasteID". This information is used to better control odors by cycling much sooner after a feces visit.
 
 > Disclaimer: This project is not affiliated with, endorsed by, or associated with Whisker, Litter Robot, or Automated Pet Care Products. Modifying your device involves hardware disassembly and modification which may void your warranty and carries a risk of permanent damage. Proceed at your own risk.
 
@@ -123,4 +123,4 @@ The following sensors are also available, but disabled by default:
 
 There is also a disabled slider called `Odor Control Delay` to configure the specific cycle delay for feces when `Odor Control` is enabled.
 
-Feces is confirmed by the sensor, but urine is only assumed. If your cat does both at the same time frequently, disable `Odor Control` so the urine has time to clump during the normal cycle delay.
+Feces is confirmed by the sensor, but urine is only assumed. If your cat does both at the same time frequently, increase `Odor Control Delay` so urine has some time to clump before cycling.

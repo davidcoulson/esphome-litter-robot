@@ -1,6 +1,6 @@
 # Litter Robot 4 - Firmware Flashing Guide
 
-This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible and you can restore the original firmware at any time. After ESPHome is on the device, future updates can be delivered wirelessly ([OTA](#updating-the-firmware-ota)).
+This guide covers replacing the stock ESP32 firmware on the Litter Robot 4 mainboard with custom ESPHome firmware. The process is fully reversible and you can restore the original firmware at any time. After ESPHome is on the device, future updates can be delivered wirelessly ([OTA](User%20Guide.md#updating-the-firmware-ota)).
 
 Feel free to join the [Discord server](https://discord.gg/NrMdSAkPsx) for assistance or discussion, before and after install!
 
@@ -26,13 +26,13 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 - **USB-C cable**
 
-### For serial numbers starting with "LR4C":
+### For Serial Numbers Starting with "LR4C":
 
 - **Soldering iron** (fine/curved tip) and solder
 
 - [**1.27mm (0.05") pitch 2x3 6 position surface-mount header**](https://www.ebay.com/itm/336714254669) (sold directly by me in the US) - Also available from [DigiKey](https://www.digikey.com/en/products/detail/sullins-connector-solutions/GRPB032VWQS-RC/1786412) globally.
 
-### For serial numbers starting with "LR4S":
+### For Serial Numbers Starting with "LR4S":
 
 #### Option 1 - Solderless:
 
@@ -59,6 +59,8 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
   ```
 
   The compiled binary will be in `./.esphome/build/litter-robot4/build/firmware.factory.bin` relative to the `.yaml` file.
+
+> If you intend to do the [WasteSense™](WasteSense%20Install.md) hardware modification, you should flash the `waste-sense` variant of the firmware from the precompiled release or build it with `litter-robot4-waste-sense.yaml`. You can also update to it later.
 
 ---
 
@@ -105,7 +107,7 @@ Unplug the larger power connector on the right side of the mainboard. Remove the
 To connect the ESP-Prog-2 to the mainboard to backup/flash the firmware, follow the instructions based on the serial number of your Litter Robot:
 
 <details>
-<summary>For serial numbers starting with "LR4C"</summary>
+<summary>For Serial Numbers Starting with "LR4C"</summary>
 <br>
 
 Plug the included 6 pin ribbon cable into the top right header on the ESP-Prog-2. It should be keyed to only plug in one way, with pin 1 (indicated by a pink wire) on the left side.
@@ -132,7 +134,7 @@ The mainboard must be powered externally to read/write the flash of the ESP32. I
 </details>
 
 <details>
-<summary>For serial numbers starting with "LR4S"</summary>
+<summary>For Serial Numbers Starting with "LR4S"</summary>
 <br>
 
 The mainboard has 5 unpopulated through-hole pads on the left side next to the ESP32, it is labeled "J3". You will need to scrape off the thin layer of conformal coating on them to make electrical contact. A fine fiberglass brush is ideal for this, but you can do it gently with a razor blade or other sharp object. Just be careful not to cut any traces.
@@ -232,68 +234,13 @@ Hard resetting via RTS pin...
 
 ---
 
-## First Boot & Setup
+## Reassembly
 
-On first boot, the ESPHome firmware will start in **WiFi access point mode** with a captive portal:
+Now that the new firmware is flashed, you can once again follow [Whisker's official video guide for replacing the laser board](https://youtu.be/m9pkoDCwM14?t=128) from 2:08 to reassemble, or just follow the disassembly instructions in reverse.
 
-1. Connect to the WiFi network `litter-robot4-XXXXXX` (password: `Wh1sk3rM30wM30w`).
+## Next Steps
 
-2. A captive portal should appear. If it doesn't, navigate to `http://192.168.4.1` in a browser.
-
-3. Select your home WiFi network and enter its password. The LR4 will reboot and connect to your network.
-
-### Reassembly
-
-Now that you've verified the new firmware is working, you can once again follow [Whisker's official video guide for replacing the laser board](https://youtu.be/m9pkoDCwM14?t=128) from 2:08 to reassemble, or just follow the disassembly instructions in reverse.
-
-### Adding to Home Assistant
-
-The device should be auto-discovered by the ESPHome integration. If it doesn't appear, add it manually with the device's hostname or IP address.
-
-> The hostname is usually the same name as the access point earlier. You can find the hostname or IP in your router device list.
-
-All entities will now be available in Home Assistant. Some may be disabled by default to avoid cluttering your dashboard. You can enable them in the device page.
-
-![Home Assistant](Images/Home%20Assistant.JPG)
-
-#### Sleep Schedules
-
-Independent sleep schedules for every day of the week are supported. Each day has three entities:
-
-- A day-enable switch (e.g. "Sunday Sleep Schedule") that turns that day's schedule on or off.
-- A sleep time and a wake time (e.g. "Sunday Sleep Time" and "Sunday Wake Time").
-
-Enable the days you want to schedule and set their sleep and wake times. The schedule runs on the mainboard's real-time clock, which is kept in sync with local time from Home Assistant.
-
-#### Multi-Cat Tracking
-
-The precompiled firmware includes weight, visit-count, and reset entities for four cats. To track a cat:
-
-1. Rename the cat's entities with the desired names.
-2. To seed a starting weight, enable the cat's **Set Cat N Weight** number and set your best guess. Enable the matching **Cat N Weight** sensor to see the value the tracker is currently using.
-3. Enable the cat's visit entities if you want to see and chart them.
-
-The firmware matches each new weight reading to the nearest configured cat weight and increments that cat's visit counter, replacing the guessed weight with a real measurement over time. There is a 0.6 pound detection tolerance to avoid obviously false readings by default. Use a cat's reset button (e.g. **Cat 1 Reset**) to clear that cat's stored weight and counters (the Litter Robot's own Factory Reset does not clear the tracker data).
-
-### Web Server
-
-The default configuration hosts a web server from the device IP address. The default username is `user` and the password is `Wh1sk3rM30wM30w`.
-
-### Adopting in ESPHome Dashboard
-
-The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. The auto-generated config imports the `litter-robot4.yaml` from this repository as a base package.
-
----
-
-## Updating the Firmware (OTA)
-
-Once ESPHome is installed, future firmware updates can be applied over the air without reopening the unit. This process is automated in the ESPHome Device Builder dashboard, but you can also update via the web server:
-
-1. Download the latest OTA update file (`.ota`) from the latest [LR4 release](https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot/releases?q=LR4%2F).
-
-2. Open the device's web interface using the hostname or IP of the device in a browser. The default username is `user` and the password is `Wh1sk3rM30wM30w`.
-
-3. At the bottom, use the "OTA Update" file selector to select the downloaded OTA update file and click update. Be sure to not use the `.bin` file or the update will fail.
+Power the unit back on and continue with the [User Guide](User%20Guide.md) to provision the device and add it to Home Assistant.
 
 ---
 
