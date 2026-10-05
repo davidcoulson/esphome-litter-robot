@@ -37,7 +37,7 @@ There are two ways to attach the sensor:
 
   - **1.27mm (0.05") pitch dual row surface-mount header** - You technically only need 2x2, but the full header is 2x5.
 
-  - **1.27mm ribbon cable** - I recommend using the 10 pin JTAG cable that comes with the [ESP-Prog-2](https://amzn.to/4vMhlyv) if you already got one for flashing and don't plan on using it.
+  - **1.27mm ribbon cable** - I recommend using the 10 pin JTAG cable that comes with the [ESP-Prog-2](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) if you already got one for flashing and don't plan on using it.
 
 ## Modification
 

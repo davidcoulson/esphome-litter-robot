@@ -58,7 +58,7 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 
 ## How do I install it?
 
-The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://amzn.to/4vMhlyv) (Affiliate Link) to an unpopulated header on the mainboard. Units manufactured after February 2026 (serial numbers starting with "LR4S") can be flashed without soldering, but older units will require soldering. Full instructions and required tools/parts can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) to an unpopulated header on the mainboard. Units manufactured after February 2026 (serial numbers starting with "LR4S") can be flashed without soldering, but older units will require soldering. Full instructions and required tools/parts can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
 
 Additionally, you can [add a BME680 sensor](docs/Litter%20Robot%204/WasteSense%20Install.md) to enable WasteSense™, an alternative to Whisker's "WasteID" found on the Litter Robot 5.
 
