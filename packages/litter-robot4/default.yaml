@@ -1,7 +1,7 @@
 substitutions:
   name: litter-robot4
   friendly_name: Litter Robot 4
-  version: 2026.9.2
+  version: 2026.10.0
 
 esphome:
   name: "${name}"
