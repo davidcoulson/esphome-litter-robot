@@ -8,7 +8,7 @@ The LR4 mainboard contains two microcontrollers plus a satellite board:
 
 - **Mainboard MCU** (PIC18F47Q43-I/PT, "PIC") - runs all robot logic: motor control, sensor processing, the cycle state machine, RTC, sleep scheduling, and all safety interlocks (anti-pinch, weight-pause, over-current). This board survives independently of the ESP32 and can even cut power to the ESP32 completely for power saving on battery.
 
-	> Units manufactured after February 2026 (serial number starting with "LR4S") have a different mainboard revision which uses an STM microcontroller instead.
+	> Units manufactured after February 2026 (serial number starting with "LR4S") have a different mainboard revision which uses an STM microcontroller instead of the PIC stated above. This reference will refer to both as "PIC".
 
 - **Laserboard** - a satellite board handling the curtain (ToF) sensors for detecting cat presence as well as litter and waste drawer level.
 
@@ -23,7 +23,7 @@ The bus is full-duplex with 7 bytes per frame:
 
 | Field      | Description                                                    |
 |------------|----------------------------------------------------------------|
-| Direction  | `0x02` = ESP→PIC, `0x01` = PIC→ESP                             |
+| Direction  | `0x01` = PIC to ESP, `0x02` = ESP to PIC                       |
 | Operation  | `0x01`=read, `0x02`=write, `0x03`=read-reply, `0x04`=write-ack |
 | Register   | register number, 1 byte                                        |
 | Value high | Most significant byte of 16-bit big-endian value               |

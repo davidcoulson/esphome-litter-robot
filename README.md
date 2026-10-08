@@ -24,18 +24,20 @@ Flashing the Litter Robot with ESPHome-based firmware eliminates the dependency 
 
 ## Is it safe?
 
-The ESP32 in the Litter Robot 3 and 4 serves as a WiFi-to-UART bridge that relays commands between the cloud and the mainboard PIC microcontroller (units manufactured after February 2026 use an STM microcontroller instead; "PIC" here refers to either). All hardware control and safety-critical logic comes from this separate microcontroller, so replacing the ESP32 firmware should not compromise safety mechanisms of the device in any way.
+The ESP32 in the Litter Robot serves as a WiFi-to-UART bridge that relays commands between the cloud and the mainboard PIC/STM microcontroller. All hardware control and safety-critical logic comes from this separate microcontroller, so replacing the ESP32 firmware should not compromise safety mechanisms of the device in any way.
 
 ## What devices are supported?
 
-Only the Litter Robot 4 is supported at this time. Though I suspect the Litter Robot 3 is very similar, I do not have one to test on. Contributions are appreciated!
+Only the Litter Robot 4 is supported at this time. Litter Robot 3 and 5 support is coming soon.
 
 ## What features are supported?
 
 Every function of the original firmware/app is supported, with minor exceptions:
 
 - Some device faults are not yet detected or descriptively named. The unit will still respond to them and show a light pattern on the LED panel as usual.
-- Updating mainboard/laserboard firmware is not possible.
+- Updating firmware of other internal components is not possible.
+
+> For serial numbers starting with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
 
 There are actually quite a few improvements over the stock firmware/app.
 
