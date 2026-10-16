@@ -10,7 +10,7 @@ Before starting, you should already be comfortable with the mainboard removal in
 
 ## How It Works
 
-A **Bosch BME680** environmental sensor is connected to the mainboard so the firmware can classify waste by the VOC signature of a visit. GPIO 13 and 14 are used to communicate with the sensor, and are most easily accessible via the **unpopulated JTAG pads** (J5). The BME680 also needs 3.3V and ground, which are available nearby.
+A **Bosch BME688** environmental sensor is connected to the mainboard so the firmware can classify waste by the VOC signature of a visit. GPIO 13 and 14 are used to communicate with the sensor, and are most easily accessible via the **unpopulated JTAG pads** (J5). The BME688 also needs 3.3V and ground, which are available nearby.
 
 > Note: Feces is confirmed by the sensor, but urine is only assumed by the lack of feces. False urine identifications are likely if your cat tends to enter the Litter Robot without urinating.
 
@@ -25,7 +25,7 @@ There are two ways to attach the sensor:
 
 > All Amazon links in this guide are affiliate links.
 
-- **[BME680 breakout board](https://amzn.to/3Voztlu)** with `VCC`, `GND`, `SCL`, `SDA` pads/pins.
+- **[BME688 breakout board](https://amzn.to/4imVx8R)** with `VCC`, `GND`, `SCL`, `SDA` pads/pins.
 
 - **Soldering iron** (fine/curved tip) and solder.
 
@@ -53,7 +53,7 @@ There are two ways to attach the sensor:
 
 2. Scrape the conformal coating off the 2 top left J5 pads with the fiberglass brush or a razor blade. Be careful not to cut any traces. J7's through-hole pads should not have any conformal coating.
 
-3. Solder 4 wires from the BME680 to the matching pads on the mainboard labelled below.
+3. Solder 4 wires from the BME688 to the matching pads on the mainboard labelled below.
 
    ![I2C pads](Images/Waste%20Sense/LR4C/I2C.JPG)
 
@@ -78,9 +78,9 @@ There are two ways to attach the sensor:
 
 4. Plug the **1.27mm JTAG ribbon cable** into the JTAG header with the pink wire on the left.
 
-5. Cut the other end off of the **JTAG ribbon cable** and solder it to the **BME680 breakout board**. Allow at least 3 inches or 80mm of length.
+5. Cut the other end off of the **JTAG ribbon cable** and solder it to the **BME688 breakout board**. Allow at least 3 inches or 80mm of length.
 
-   ![BME680 breakout](Images/Waste%20Sense/LR4C/BME680.JPG)
+   ![BME688 breakout](Images/Waste%20Sense/LR4C/BME680.JPG)
 
    - Counting from the pink wire, wires 1-4 carry `VCC`, `SCL`, `GND`, and `SDA` in that order. Solder each to the matching pin labeled on your breakout board. My breakout board (pictured above) swaps the order of `SCL` and `GND`.
 
@@ -91,13 +91,13 @@ The complete setup should look something like the above image. The remaining rib
 </details>
 <br>
 
-The WasteSense™ firmware uses `0x77` as the default BME680 I2C Address. If your breakout board defaults to `0x76` you will need to change it. This is usually done by bridging `SDO` and `GND`.
+The WasteSense™ firmware uses `0x77` as the default BME688 I2C Address. If your breakout board defaults to `0x76` you will need to change it. This is usually done by bridging `SDO` and `GND`.
 
 ## Mounting
 
 ![Sensor installed](Images/Waste%20Sense/LR4C/Installed.JPG)
 
-The BME680 should be mounted near the laser board as shown. I used VHB tape to mount it, though any means will work as long as you don't cover the sensor itself.
+The BME688 should be mounted near the laser board as shown. I used VHB tape to mount it, though any means will work as long as you don't cover the sensor itself.
 
 I left most of the full length of the ribbon cable, but you can cut it shorter for a cleaner install.
 
@@ -107,9 +107,9 @@ I left most of the full length of the ribbon cable, but you can cut it shorter f
 
 2. After it boots and is added to Home Assistant, open the device page and you will see "Litter Robot 4 with WasteSense™" under device info and `Odor Control` toggle under configuration.
 
-3. If `Odor Control` cannot be enabled, the BME680 was not detected. Check your wiring and make sure your breakout board is set to I2C address `0x77`.
+3. If `Odor Control` cannot be enabled, the BME688 was not detected. Check your wiring and make sure your breakout board is set to I2C address `0x77`.
 
-> The BME680 sensor needs a few minutes to warm up after power on before its readings stabilize. Allow a few minutes after boot before relying on `Odor Control`.
+> The BME688 sensor needs a few minutes to warm up after power on before its readings stabilize. Allow a few minutes after boot before relying on `Odor Control`.
 
 The following sensors are also available, but disabled by default:
 

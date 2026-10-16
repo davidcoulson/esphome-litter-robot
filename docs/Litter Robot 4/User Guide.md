@@ -62,14 +62,14 @@ A specific implementation is beyond the scope of this guide - if you build a blu
 
 ## WasteSense™ and Odor Control
 
-[WasteSense™](WasteSense%20Install.md) utilizes an optional BME680 sensor to classify waste as feces or urine, similar to Whisker's "WasteID". It requires flashing the **`litter-robot4-waste-sense.yaml`** firmware and soldering the sensor to the mainboard.
+[WasteSense™](WasteSense%20Install.md) utilizes an optional BME688 sensor to classify waste as feces or urine, similar to Whisker's "WasteID". It requires flashing the **`litter-robot4-waste-sense.yaml`** firmware and soldering the sensor to the mainboard.
 
 - **Odor Control** - when enabled, the robot cycles much sooner after a feces visit, rather than waiting for the full clean cycle delay.
 - **Odor Control Delay** - how long that faster cycle should be (default 1 minute).
 
 Feces is confirmed by the sensor, but urine is only assumed when no feces is detected. You will get false urine identifications if a cat enters without urinating. If your cat regularly does both in one visit, increase `Odor Control Delay` so urine has some time to clump before cycling.
 
-> The BME680 sensor needs a few minutes to warm up after power on before its readings stabilize. Allow a few minutes after boot before relying on `Odor Control`.
+> The BME688 sensor needs a few minutes to warm up after power on before its readings stabilize. Allow a few minutes after boot before relying on `Odor Control`.
 
 ## Web Server
 
