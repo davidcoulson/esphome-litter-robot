@@ -124,3 +124,9 @@ The following sensors are also available, but disabled by default:
 There is also a disabled slider called `Odor Control Delay` to configure the specific cycle delay for feces when `Odor Control` is enabled.
 
 Feces is confirmed by the sensor, but urine is only assumed. If your cat does both at the same time frequently, increase `Odor Control Delay` so urine has some time to clump before cycling.
+
+### Replacing the Sensor
+
+The BSEC2 library learns the sensor's gas baseline over time and saves it to flash. A replacement BME688 would inherit the old sensor's calibration. If it is ever replaced, press the `WasteSense Calibration Reset` button in the diagnostic category. It clears only the saved BSEC2 calibration and restarts the device.
+
+The new sensor then calibrates from scratch: `IAQ Accuracy` sits low for a while and feces detection is unreliable until it reaches 3. Bosch recommends letting a new sensor run for about 24 hours before trusting its readings.

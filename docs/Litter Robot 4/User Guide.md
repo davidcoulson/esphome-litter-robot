@@ -66,6 +66,7 @@ A specific implementation is beyond the scope of this guide - if you build a blu
 
 - **Odor Control** - when enabled, the robot cycles much sooner after a feces visit, rather than waiting for the full clean cycle delay.
 - **Odor Control Delay** - how long that faster cycle should be (default 1 minute).
+- **WasteSense Calibration Reset** - clears the sensor's saved calibration and restarts the device. Use it after replacing the BME688; see [Replacing the Sensor](WasteSense%20Install.md#replacing-the-sensor).
 
 Feces is confirmed by the sensor, but urine is only assumed when no feces is detected. You will get false urine identifications if a cat enters without urinating. If your cat regularly does both in one visit, increase `Odor Control Delay` so urine has some time to clump before cycling.
 

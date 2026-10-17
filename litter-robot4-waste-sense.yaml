@@ -2,6 +2,9 @@ esphome:
   project:
     name: "Joseph DiGiovanni.Litter Robot 4 with WasteSense™"
     version: ${version}.waste-sense
+  # nvs_erase_key() for the WasteSense Calibration Reset button.
+  includes:
+    - <nvs.h>
 
 dashboard_import:
   package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot4-waste-sense.yaml@LR4/stable
@@ -22,6 +25,33 @@ bme68x_bsec2_i2c:
   id: bme680
   model: bme680
   address: 0x77
+
+button:
+  # Clears only the saved BSEC2 calibration, e.g. after swapping the sensor:
+  # the state is keyed by I2C address, so a new sensor would inherit it.
+  - platform: template
+    id: waste_sense_calibration_reset
+    name: "WasteSense Calibration Reset"
+    icon: "mdi:database-refresh"
+    entity_category: diagnostic
+    on_press:
+      - lambda: |-
+          // Flush queued writes first so a pending BSEC2 state save cannot land
+          // after the erase; safe_reboot() runs no loop() that could queue another.
+          global_preferences->sync();
+          // The I2C subclass overrides get_hash() privately; it is public on the base.
+          char key[UINT32_MAX_STR_SIZE];
+          uint32_to_str(key, static_cast<bme68x_bsec2::BME68xBSEC2Component *>(id(bme680))->get_hash());
+          const uint32_t handle = global_preferences->nvs_handle;
+          esp_err_t err = nvs_erase_key(handle, key);
+          if (err == ESP_OK)
+            err = nvs_commit(handle);
+          if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) {
+            ESP_LOGE("waste_sense", "Clearing BSEC2 state failed: %s", esp_err_to_name(err));
+            return;
+          }
+          ESP_LOGI("waste_sense", "BSEC2 state cleared, restarting");
+          App.safe_reboot();
 
 sensor:
   - platform: bme68x_bsec2
