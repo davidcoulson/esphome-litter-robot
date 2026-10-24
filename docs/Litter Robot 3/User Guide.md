@@ -40,6 +40,14 @@ While the switch is on, the firmware keeps refreshing the robot's sleep timer so
 
 The **Weight Detected** sensor turns on when the cat sensor rises 5 or more above the current baseline. It clears and re-tares when the reading drops back below that threshold for 3 seconds, or when the robot reports Ready.
 
+## Waste Drawer and Clean Cycles
+
+The robot does not measure how full the waste drawer is, so the **Waste Drawer Cycles** sensor counts clean cycles since the last time the robot went from Waste drawer full to Ready, giving an estimate of how much waste has been added. The count is stored in flash and survives reboots. It is automatically reset when reset button is pressed after the robot indicates a full waste drawer. The **Reset Waste Drawer** button sets the estimate back to zero manually.
+
+The **Waste Drawer Full** sensor mirrors the robot's drawer-full state.
+
+The **Clean Cycles** sensor is the robot's lifetime clean-cycle total.
+
 ## Web Server
 
 The firmware hosts a lightweight web server on the device's IP address for basic control and OTA updates. The default username is `user` and the password is `Wh1sk3rM30wM30w`. You can find the device IP in your router's device list.

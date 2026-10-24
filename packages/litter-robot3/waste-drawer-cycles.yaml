@@ -1,0 +1,82 @@
+# Independent waste drawer cycle estimate.
+#
+# The LR3 does not report a waste drawer level or a separate waste-drawer
+# cycle count; the only drawer-full indication is system state 9/A/B. This package
+# counts clean cycles since the last time the status went from "Waste drawer full"
+# to "Ready", and stores the count in flash so it survives reboots.
+
+globals:
+  - id: waste_drawer_cycles
+    type: uint32_t
+    restore_value: yes
+    initial_value: "0"
+  - id: total_clean_cycle_count
+    type: uint32_t
+    restore_value: yes
+    initial_value: "0"
+  - id: has_total_clean_cycle_count
+    type: bool
+    restore_value: yes
+    initial_value: "false"
+  - id: drawer_full_latched
+    type: bool
+    restore_value: yes
+    initial_value: "false"
+
+sensor:
+  - platform: template
+    id: waste_drawer_cycles_sensor
+    name: "Waste Drawer Cycles"
+    icon: "mdi:trash-can"
+    accuracy_decimals: 0
+    state_class: total
+    update_interval: never
+
+  # The native "Clean Cycles" sensor from base.yaml is the lifetime count and
+  # already publishes only when the robot reports a new value.
+  - platform: litter_robot3
+    id: !extend clean_cycle_count
+    on_value:
+      - lambda: |-
+          if (id(has_total_clean_cycle_count) && x > id(total_clean_cycle_count)) {
+            id(waste_drawer_cycles) += static_cast<uint32_t>(x) - id(total_clean_cycle_count);
+            id(waste_drawer_cycles_sensor).publish_state(id(waste_drawer_cycles));
+          }
+          id(total_clean_cycle_count) = static_cast<uint32_t>(x);
+          id(has_total_clean_cycle_count) = true;
+
+text_sensor:
+  - platform: litter_robot3
+    id: !extend robot_status
+    on_value:
+      - lambda: |-
+          const bool full = x == "Waste drawer full";
+          id(waste_drawer_full).publish_state(full);
+          if (full) {
+            id(drawer_full_latched) = true;
+          } else if (x == "Ready" && id(drawer_full_latched)) {
+            id(drawer_full_latched) = false;
+            id(waste_drawer_cycles) = 0;
+            id(waste_drawer_cycles_sensor).publish_state(0);
+          }
+          // The first status packet after boot republishes the stored counts
+          if (id(has_total_clean_cycle_count) && !id(clean_cycle_count).has_state())
+            id(clean_cycle_count).publish_state(id(total_clean_cycle_count));
+          if (!id(waste_drawer_cycles_sensor).has_state())
+            id(waste_drawer_cycles_sensor).publish_state(id(waste_drawer_cycles));
+
+binary_sensor:
+  - platform: template
+    id: waste_drawer_full
+    name: "Waste Drawer Full"
+    icon: "mdi:inbox-full"
+
+button:
+  - platform: template
+    id: reset_waste_drawer
+    name: "Reset Waste Drawer"
+    icon: "mdi:delete-empty"
+    on_press:
+      - lambda: |-
+          id(waste_drawer_cycles) = 0;
+          id(waste_drawer_cycles_sensor).publish_state(0);
