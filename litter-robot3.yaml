@@ -43,3 +43,4 @@ external_components:
 
 packages:
   base_config: !include packages/litter-robot3/base.yaml
+  weight_detection: !include packages/litter-robot3/weight-detection.yaml

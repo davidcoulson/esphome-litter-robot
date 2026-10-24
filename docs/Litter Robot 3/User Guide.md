@@ -36,6 +36,10 @@ While the switch is on, the firmware keeps refreshing the robot's sleep timer so
 
 > This is a manual control, not a schedule. The robot cannot be told to start sleeping later; turn the switch on when the sleep window should begin. For example, to sleep from 8pm to 6am, use a Home Assistant automation that turns the **Sleep** switch on at 8pm and off at 6am.
 
+## Weight Detection
+
+The **Weight Detected** sensor turns on when the cat sensor rises 5 or more above the current baseline. It clears and re-tares when the reading drops back below that threshold for 3 seconds, or when the robot reports Ready.
+
 ## Web Server
 
 The firmware hosts a lightweight web server on the device's IP address for basic control and OTA updates. The default username is `user` and the password is `Wh1sk3rM30wM30w`. You can find the device IP in your router's device list.

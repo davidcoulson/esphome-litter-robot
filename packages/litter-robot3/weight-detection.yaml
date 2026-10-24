@@ -1,0 +1,86 @@
+# Weight detection derived from the LR3 cat sensor.
+#
+# The binary sensor turns on when the cat sensor rises 5 or more above the
+# current baseline. A sustained drop back below that detection threshold for
+# 3 seconds re-tares the baseline and clears the sensor. It also clears and
+# re-tares when the robot reports "Ready".
+
+globals:
+  - id: weight_detected_state
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: cat_sensor_baseline
+    type: float
+    restore_value: no
+    initial_value: "0"
+  - id: cat_sensor_has_baseline
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: cat_sensor_reduction_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+script:
+  - id: cat_sensor_reduction_timer
+    mode: restart
+    then:
+      - delay: 3s
+      - lambda: |-
+          id(cat_sensor_reduction_active) = false;
+          if (!id(cat_sensor).has_state())
+            return;
+          id(cat_sensor_baseline) = id(cat_sensor).state;
+          id(weight_detected_state) = false;
+
+sensor:
+  - platform: litter_robot3
+    id: !extend cat_sensor
+    on_value:
+      - lambda: |-
+          if (!id(cat_sensor_has_baseline)) {
+            id(cat_sensor_baseline) = x;
+            id(cat_sensor_has_baseline) = true;
+            return;
+          }
+          const float threshold = id(cat_sensor_baseline) + 5;
+          if (x >= threshold) {
+            id(weight_detected_state) = true;
+            id(cat_sensor_reduction_active) = false;
+            id(cat_sensor_reduction_timer)->stop();
+          } else if (id(weight_detected_state) || x < id(cat_sensor_baseline)) {
+            if (!id(cat_sensor_reduction_active)) {
+              id(cat_sensor_reduction_active) = true;
+              id(cat_sensor_reduction_timer)->execute();
+            }
+          } else {
+            id(cat_sensor_reduction_active) = false;
+            id(cat_sensor_reduction_timer)->stop();
+          }
+
+text_sensor:
+  - platform: litter_robot3
+    id: !extend robot_status
+    on_value:
+      - lambda: |-
+          if (x != "Ready")
+            return;
+          id(cat_sensor_reduction_active) = false;
+          id(cat_sensor_reduction_timer)->stop();
+          id(weight_detected_state) = false;
+          if (id(cat_sensor).has_state()) {
+            id(cat_sensor_baseline) = id(cat_sensor).state;
+            id(cat_sensor_has_baseline) = true;
+          } else {
+            id(cat_sensor_has_baseline) = false;
+          }
+
+binary_sensor:
+  - platform: template
+    id: weight_detected
+    name: "Weight Detected"
+    icon: "mdi:scale"
+    device_class: occupancy
+    lambda: "return id(weight_detected_state);"
