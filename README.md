@@ -28,7 +28,7 @@ The ESP32 in the Litter Robot serves as a WiFi-to-UART bridge that relays comman
 
 ## What devices are supported?
 
-Only the Litter Robot 4 is supported at this time. Litter Robot 3 and 5 support is coming soon.
+Litter Robot 3 Connect models and Litter Robot 4 are supported. Litter Robot 5 support is coming soon.
 
 ## What features are supported?
 
@@ -39,20 +39,23 @@ Every function of the original firmware/app is supported, with minor exceptions:
 
 > For serial numbers starting with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
 
-There are actually quite a few improvements over the stock firmware/app.
+There are actually quite a few improvements over the stock firmware/app:
 
-**Major improvements include:**
+**Litter Robot 4:**
 
 - Smart Cat Detection - Fewer false cat detections and wasted clean cycles. Makes sure both weight _and_ curtain sensor detections happen before confirming a cat visit.
 - WasteSense™ - Waste identification and odor control, similar to Whisker's "WasteID" found on the Litter Robot 5.
 	- Requires soldering a sensor to the mainboard. [Instructions here](docs/Litter%20Robot%204/WasteSense%20Install.md).
-
-**Minor improvements:**
-
 - Litter hopper can be enabled/disabled via automations. (Not possible with existing Home Assistant integration)
 - Sleep schedules can be set on a daily basis instead of only one time for weekday/weekend.
     - Sleep can be toggled with a manual "Sleep Override" switch for more advanced non-time-based events.
 - More direct access to the curtain and weight detection sensors, for precise enter and exit tracking.
+
+**Litter Robot 3:**
+
+- Full control of the sleep instead of a fixed repeating 8 hour window every day. Can be toggled manually or triggered by automations.
+- More direct access to the weight detection sensor, for precise enter and exit tracking.
+
 
 ## Is it reversible?
 
@@ -60,19 +63,17 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 
 ## How do I install it?
 
-The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) to an unpopulated header on the mainboard. Units manufactured after February 2026 (serial numbers starting with "LR4S") can be flashed without soldering, but older units will require soldering. Full instructions and required tools/parts can be found in the [Firmware Flashing Guide](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) to the mainboard. Litter Robot 4 units manufactured after February 2026 (serial numbers starting with "LR4S") can be flashed without soldering, but otherwise soldering is required. Full instructions and required tools/parts can be found in the **Firmware Flashing Guide** for both the [Litter Robot 3](docs/Litter%20Robot%203/Flashing%20Instructions.md) and [Litter Robot 3](docs/Litter%20Robot%204/Flashing%20Instructions.md).
 
-Additionally, you can [add a BME688 sensor](docs/Litter%20Robot%204/WasteSense%20Install.md) to enable WasteSense™, an alternative to Whisker's "WasteID" found on the Litter Robot 5.
-
-The source code for the component can be found in my [ESPHome fork](https://github.com/Joseph-DiGiovanni/esphome/tree/LR4-dev) until it is potentially merged into ESPHome.
+Additionally, you can [add a BME688 sensor](docs/Litter%20Robot%204/WasteSense%20Install.md) to the Litter Robot 4 to enable WasteSense™, an alternative to Whisker's "WasteID" found on the Litter Robot 5.
 
 ## Where can I learn more?
 
 Feel free to join the [Discord](https://discord.gg/NrMdSAkPsx) for assistance or discussion, before and after install!
 
-See the [Litter Robot 4 User Guide](docs/Litter%20Robot%204/User%20Guide.md) for how to use the firmware's features.
+See the **User Guide** for the [Litter Robot 3](docs/Litter%20Robot%203/User%20Guide.md) and [Litter Robot 4](docs/Litter%20Robot%204/User%20Guide.md) to learn how to use the firmware's features.
 
-See the [Litter Robot 4 UART Reference](docs/Litter%20Robot%204/UART%20Reference.md) for a full breakdown of the mainboard serial protocol.
+See the **UART Reference** for the [Litter Robot 3](docs/Litter%20Robot%203/UART%20Reference.md) and [Litter Robot 4](docs/Litter%20Robot%204/UART%20Reference.md) for a full breakdown of the mainboard serial protocol.
 
 ## Can I buy you a coffee?
 

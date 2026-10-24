@@ -53,21 +53,22 @@ Observed in stock firmware logs: the ESP32 receives AWS IoT/MQTT commands prefix
 
 ### 5.2 Command Table
 
-| Command | Action                           | Value                                                             |
-|---------|----------------------------------|-------------------------------------------------------------------|
-| `C`     | Start clean cycle                | none                                                              |
-| `D`     | Factory reset                    | none                                                              |
-| `F`     | WiFi provisioning state          | `0`=not provisioning, `1`=provisioning                            |
-| `L`     | Panel lockout                    | `0`=off, `1`=on                                                   |
-| `N`     | Night light                      | `0`=off, `1`=on                                                   |
-| `P`     | Power                            | `0`=off, `1`=on                                                   |
-| `R`     | Reset gauge (waste drawer level) | none                                                              |
-| `S`     | Sleep mode                       | `0`=off; `1hh:mm:ss`=on, current position relative to sleep start |
-| `W`     | Cycle delay                      | `3`=3 min, `7`=7 min, `F`=15 min                                  |
+| Command | Action                         | Value                                                             |
+|---------|--------------------------------|-------------------------------------------------------------------|
+| `C`     | Start clean cycle              | none                                                              |
+| `D`     | Factory reset                  | none                                                              |
+| `F`     | WiFi provisioning state        | `0`=not provisioning, `1`=provisioning                            |
+| `L`     | Panel lockout                  | `0`=off, `1`=on                                                   |
+| `N`     | Night light                    | `0`=off, `1`=on                                                   |
+| `P`     | Power                          | `0`=off, `1`=on                                                   |
+| `R`     | Reset (simulated button press) | none                                                              |
+| `S`     | Sleep mode                     | `0`=off; `1hh:mm:ss`=on, current position relative to sleep start |
+| `W`     | Cycle delay                    | `3`=3 min, `7`=7 min, `F`=15 min                                  |
 
 - The PIC sends `)F0`/`)F1` when the WiFi provisioning state changes. The ESP echoes the same frame; the PIC acknowledges with `(FAOK`.
 - For `S`, the offset is the current position relative to the sleep start, not a future start time. `00:00:00` starts the sleep window and `08:00:00` ends it; the robot is awake for the rest of the 24-hour cycle. To start sleeping later, send `)S100:00:00` at the desired start time.
 - For `W`, values `4`-`E` were tested and rejected by the PIC.
+- `R` for the most part acts the same as a physical press of the reset button, with the exception that a press will not stop/cancel a cycle.
 
 ### 5.3 Responses
 
@@ -76,17 +77,15 @@ Observed in stock firmware logs: the ESP32 receives AWS IoT/MQTT commands prefix
 | `({cmd}AOK`  | Command accepted                       |
 | `({cmd}NOK#` | Command rejected; `#` is a reason code |
 
-Observed `NOK` reason codes appear to represent: power off, invalid command, invalid format, invalid mode, dev id already set, and unknown error.
-
 ### 5.4 Non-Status Events
 
-| Event    | Meaning                                                                       |
-|----------|-------------------------------------------------------------------------------|
-| `)F0`    | WiFi provisioning inactive; the ESP echoes `)F0`                              |
-| `)F1`    | WiFi provisioning active; the ESP echoes `)F1`                                |
-| `)Y####` | Waste drawer cycle count, 4 hex digits, sent at the midpoint of a clean cycle |
+| Event    | Meaning                                                                         |
+|----------|---------------------------------------------------------------------------------|
+| `)F0`    | WiFi provisioning disabled; the ESP echoes `)F0` and the power LED is blue      |
+| `)F1`    | WiFi provisioning enabled; the ESP echoes `)F1` and the power LED is turned off |
+| `)Y####` | Total clean cycle count, 4 hex digits, sent at the midpoint of a clean cycle    |
 
-The cycle count persists when the waste drawer is emptied/reset and across a factory reset.
+Total clean cycle count persists across a factory reset.
 
 ## 6. Status Packet
 

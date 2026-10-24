@@ -1,0 +1,45 @@
+substitutions:
+  name: litter-robot3
+  friendly_name: Litter Robot 3
+  version: 2026.10.0-alpha.1
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: Joseph DiGiovanni.Litter Robot 3
+    version: ${version}
+
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ap:
+    password: "Wh1sk3rM30wM30w"
+
+web_server:
+  auth:
+    type: digest
+    username: "user"
+    password: "Wh1sk3rM30wM30w"
+  port: 80
+
+captive_portal:
+
+dashboard_import:
+  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot3.yaml@LR3/stable
+  import_full_config: false
+
+external_components:
+  source:
+    type: git
+    url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
+    ref: LR3/${version}
+
+packages:
+  base_config: !include packages/litter-robot3/base.yaml

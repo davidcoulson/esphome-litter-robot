@@ -1,0 +1,97 @@
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+uart:
+  - id: uart_bus
+    tx_pin: GPIO19
+    rx_pin: GPIO5
+    baud_rate: 19200
+    rx_buffer_size: 2048
+
+litter_robot3:
+  id: my_litter_robot3
+
+text_sensor:
+  - platform: litter_robot3
+    type: status
+    id: robot_status
+    name: "Status"
+  - platform: litter_robot3
+    type: power_type
+    id: power_type
+    name: "Power Type"
+
+sensor:
+  - platform: litter_robot3
+    type: clean_cycle_count
+    id: clean_cycle_count
+    name: "Clean Cycles"
+  - platform: litter_robot3
+    type: cat_sensor
+    id: cat_sensor
+    name: "Cat Sensor"
+    disabled_by_default: true
+
+select:
+  - platform: litter_robot3
+    type: cycle_delay
+    id: cycle_delay
+    name: "Cycle Delay"
+
+switch:
+  - platform: litter_robot3
+    type: power
+    id: power
+    name: "Power"
+  - platform: litter_robot3
+    type: night_light
+    id: night_light
+    name: "Night Light"
+  - platform: litter_robot3
+    type: panel_lockout
+    id: panel_lockout
+    name: "Panel Lockout"
+  - platform: litter_robot3
+    type: sleep
+    id: sleep_switch
+    name: "Sleep"
+
+button:
+  - platform: litter_robot3
+    type: cycle
+    id: cycle
+    name: "Manual Cycle"
+  - platform: litter_robot3
+    type: factory_reset
+    id: factory_reset
+    name: "Factory Reset"
+  - platform: litter_robot3
+    type: reset
+    id: reset
+    name: "Reset"
+
+# The Sleep switch starts an 8-hour sleep window. While the switch is on,
+# refresh the timer so the robot stays asleep until the switch is turned off.
+interval:
+  - interval: 1h
+    then:
+      - if:
+          condition:
+            switch.is_on: sleep_switch
+          then:
+            - litter_robot3.set_sleep:
+                offset: 0
+
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - delay: 30s
+      - if:
+          condition:
+            switch.is_on: sleep_switch
+          then:
+            - litter_robot3.set_sleep:
+                offset: 0
