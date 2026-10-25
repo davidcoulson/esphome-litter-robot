@@ -18,7 +18,7 @@ Some earlier Connect units have the WiFi chip on a separate secondary board. Thi
 
 > All Amazon links in this guide are affiliate links.
 
-- [**ESP-Prog-2 development board**](https://amzn.to/4vMhlyv)
+- [**ESP-Prog-2 development board**](https://www.digikey.com/en/products/detail/espressif-systems/ESP-PROG-2/27544876)
 
 - **[Fine fiberglass brush](https://amzn.to/3TKakku)** or **razor blade** - Any sharp object to scratch off conformal coating
 

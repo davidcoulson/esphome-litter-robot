@@ -18,7 +18,7 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 > All Amazon links in this guide are affiliate links.
 
-- [**ESP-Prog-2 development board**](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) - Includes a 1.27mm pitch ribbon cable not mentioned in the listing
+- [**ESP-Prog-2 development board**](https://www.digikey.com/en/products/detail/espressif-systems/ESP-PROG-2/27544876) - Includes a 1.27mm pitch ribbon cable not mentioned in the listing
 
 - **[Fine fiberglass brush](https://amzn.to/3TKakku)** or **razor blade** - Any sharp object to scratch off conformal coating
 
