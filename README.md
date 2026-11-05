@@ -53,7 +53,7 @@ There are actually quite a few improvements over the stock firmware/app:
 
 **Litter Robot 3:**
 
-- Full control of the sleep instead of a fixed repeating 8 hour window every day. Can be toggled manually or triggered by automations.
+- Full control of sleep mode instead of a fixed repeating 8 hour window every day. Can be toggled manually or triggered by automations.
 - More direct access to the weight detection sensor, for precise enter and exit tracking.
 
 
@@ -63,7 +63,7 @@ The original firmware can be flashed back to the ESP32 to fully restore the devi
 
 ## How do I install it?
 
-The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) to the mainboard. Litter Robot 4 units manufactured after February 2026 (serial numbers starting with "LR4S") can be flashed without soldering, but otherwise soldering is required. Full instructions and required tools/parts can be found in the **Firmware Flashing Guide** for both the [Litter Robot 3](docs/Litter%20Robot%203/Flashing%20Instructions.md) and [Litter Robot 3](docs/Litter%20Robot%204/Flashing%20Instructions.md).
+The initial firmware flashing requires connecting an [ESP-Prog-2 development board](https://www.mouser.com/en/ProductDetail/Espressif-Systems/ESP-Prog-2?qs=HMhDvBYWqvPF20t9F8LmIA%3D%3D) to the mainboard. Litter Robot 4 units manufactured after February 2026 (serial numbers starting with "LR4S") can be flashed without soldering, but otherwise soldering is required. Full instructions and required tools/parts can be found in the **Firmware Flashing Guide** for both the [Litter Robot 3](docs/Litter%20Robot%203/Flashing%20Instructions.md) and [Litter Robot 4](docs/Litter%20Robot%204/Flashing%20Instructions.md).
 
 Additionally, you can [add a BME688 sensor](docs/Litter%20Robot%204/WasteSense%20Install.md) to the Litter Robot 4 to enable WasteSense™, an alternative to Whisker's "WasteID" found on the Litter Robot 5.
 
