@@ -15,7 +15,9 @@ substitutions:
   # ...and while below it, followed faster so the baseline recovers from a
   # visit's spike instead of lagging above the clean air.
   feces_voc_baseline_fall_alpha: "0.6"
-  waste_detection_time: "30s"
+  # Default minutes to keep watching for a feces VOC spike after the cat
+  # leaves before recording the visit as urine.
+  odor_control_timeout: "2"
   # Home Assistant slider position on the 1-10 scale that leaves the threshold
   # above unchanged. The stock threshold is already quite sensitive, so lower
   # values mostly trade sensitivity away; higher values detect smaller rises.
@@ -58,6 +60,21 @@ number:
     optimistic: true
     restore_value: true
     initial_value: ${odor_control_sensitivity}
+  # Runtime adjustment for how long the visit stays open after the cat leaves.
+  - platform: template
+    id: odor_control_timeout
+    name: "Odor Control Timeout"
+    icon: "mdi:timer-sand"
+    entity_category: config
+    disabled_by_default: true
+    unit_of_measurement: "min"
+    mode: slider
+    min_value: 0.5
+    max_value: 5
+    step: 0.5
+    optimistic: true
+    restore_value: true
+    initial_value: ${odor_control_timeout}
 
 sensor:
   # Mirrors the nested, non-extendable BME VOC onto a top-level id so the
@@ -174,7 +191,7 @@ script:
   - id: waste_detection_timeout
     mode: restart
     then:
-      - delay: ${waste_detection_time}
+      - delay: !lambda "return (uint32_t) (id(odor_control_timeout).state * 60000.0f);"
       - if:
           condition:
             lambda: "return id(waste_detection_active);"

@@ -4,6 +4,16 @@ globals:
     type: bool
     restore_value: yes
     initial_value: 'true'
+  # A feces visit waiting to be cycled once the cat is clear of the robot.
+  - id: odor_control_pending
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  # The cat has been clear of the robot for at least the odor control delay.
+  - id: odor_control_settled
+    type: bool
+    restore_value: no
+    initial_value: 'false'
   - id: suppress_ready
     type: bool
     restore_value: no
@@ -23,9 +33,11 @@ switch:
     turn_off_action:
       - lambda: "id(odor_control_enabled) = false;"
     on_turn_off:
-      - script.stop: odor_control_cycle
+      - lambda: "id(odor_control_pending) = false;"
 
 number:
+  # Minimum time the cat must be clear before a feces cycle, so the robot does
+  # not start turning the moment the cat steps out.
   - platform: template
     id: odor_control_delay
     name: "Odor Control Delay"
@@ -35,8 +47,8 @@ number:
     unit_of_measurement: "min"
     mode: slider
     min_value: 0
-    max_value: 30
-    step: 1
+    max_value: 10
+    step: 0.5
     optimistic: true
     restore_value: true
     initial_value: 1
@@ -50,6 +62,12 @@ text_sensor:
           if (id(suppress_ready) && x == "Ready")
             return {};
           return x;
+    on_value:
+      # Any other state means the robot cycled or was reset on its own.
+      - lambda: |-
+          if (x != "Cat detected")
+            id(odor_control_pending) = false;
+      - script.execute: evaluate_odor_control
 
 binary_sensor:
   - id: !extend weight_detected
@@ -59,45 +77,73 @@ binary_sensor:
             lambda: "return x;"
           then:
             # A new visit supersedes any pending odor control cycle.
+            - lambda: "id(odor_control_pending) = false;"
             - script.stop: odor_control_cycle
+            - lambda: "id(suppress_ready) = false;"
           else:
-            # Cat has left a feces visit: start the shorter odor control delay.
             - if:
                 condition:
                   lambda: "return id(feces_detected) && id(odor_control).state;"
                 then:
-                  - script.execute: odor_control_cycle
+                  - lambda: "id(odor_control_pending) = true;"
+      - script.execute: evaluate_odor_control
+  - id: !extend curtain_detected
+    on_state:
+      - script.execute: evaluate_odor_control
 
 script:
-  # Feces classified after the cat already left, so start the cycle now
+  # Feces is recorded as soon as it is classified, possibly while the cat is
+  # still inside, so the cycle waits for the cat to clear.
   - id: !extend record_waste_visit
     then:
       - if:
           condition:
             lambda: "return id(feces_detected) && id(odor_control).state;"
           then:
-            - script.execute: odor_control_cycle
+            - lambda: "id(odor_control_pending) = true;"
+            - script.execute: evaluate_odor_control
 
-  # Cycles sooner than the robot's configured clean-cycle delay for feces by
-  # timing it ourselves. While a cycle is pending the robot stays in the
-  # "Cat detected" state, where a manual cycle is ignored, so press reset first
-  # to clear it, then cycle. Skipped while asleep.
-  - id: odor_control_cycle
-    mode: restart
+  # Cycles a pending feces visit once the cat has been clear for the odor
+  # control delay, rather than waiting for the robot's configured clean-cycle
+  # delay. The delay runs from when the cat clears, so feces detected later
+  # cycles right away. Skipped while asleep or with auto cycle off, leaving the
+  # visit to the robot.
+  - id: evaluate_odor_control
+    then:
+      - lambda: |-
+          const bool clear = id(odor_control).state &&
+                             id(robot_status).state == "Cat detected" &&
+                             !id(curtain_detected).state && !id(weight_detected).state;
+          if (!clear) {
+            id(odor_control_settled) = false;
+            id(odor_control_settle).stop();
+          } else if (!id(odor_control_settled) && !id(odor_control_settle).is_running()) {
+            id(odor_control_settle).execute();
+          }
+          if (!id(odor_control_pending))
+            return;
+          if (id(sleeping).state || !id(auto_cycle).state) {
+            id(odor_control_pending) = false;
+            return;
+          }
+          if (clear && id(odor_control_settled)) {
+            id(odor_control_pending) = false;
+            id(odor_control_cycle).execute();
+          }
+
+  - id: odor_control_settle
     then:
       - delay: !lambda "return (uint32_t) (id(odor_control_delay).state * 60000.0f);"
-      - if:
-          condition:
-            and:
-              - lambda: "return id(odor_control).state;"
-              - lambda: "return id(auto_cycle).state;"
-              - lambda: 'return id(robot_status).state == "Cat detected";'
-              - lambda: "return !id(curtain_detected).state && !id(weight_detected).state;"
-              - lambda: "return !id(sleeping).state;"
-          then:
-            - lambda: "id(suppress_ready) = true;"
-            - button.press: reset
-            - delay: 1s
-            - button.press: cycle
-            - delay: 1s
-            - lambda: "id(suppress_ready) = false;"
+      - lambda: "id(odor_control_settled) = true;"
+      - script.execute: evaluate_odor_control
+
+  # While a cycle is pending the robot stays in the "Cat detected" state, where
+  # a manual cycle is ignored, so press reset first to clear it, then cycle.
+  - id: odor_control_cycle
+    then:
+      - lambda: "id(suppress_ready) = true;"
+      - button.press: reset
+      - delay: 1s
+      - button.press: cycle
+      - delay: 1s
+      - lambda: "id(suppress_ready) = false;"
