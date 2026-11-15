@@ -24,6 +24,7 @@ switch:
       - lambda: "id(odor_control_enabled) = false;"
     on_turn_off:
       - script.stop: odor_control_cycle
+      - lambda: "id(suppress_ready) = false;"
 
 number:
   - platform: template
@@ -60,6 +61,7 @@ binary_sensor:
           then:
             # A new visit supersedes any pending odor control cycle.
             - script.stop: odor_control_cycle
+            - lambda: "id(suppress_ready) = false;"
           else:
             # Cat has left a feces visit: start the shorter odor control delay.
             - if:
@@ -85,6 +87,8 @@ script:
   - id: odor_control_cycle
     mode: restart
     then:
+      # A restart can interrupt the reset/cycle sequence below.
+      - lambda: "id(suppress_ready) = false;"
       - delay: !lambda "return (uint32_t) (id(odor_control_delay).state * 60000.0f);"
       - if:
           condition:
@@ -98,6 +102,11 @@ script:
             - lambda: "id(suppress_ready) = true;"
             - button.press: reset
             - delay: 1s
-            - button.press: cycle
-            - delay: 1s
+            # Re-check: a cat may have stepped in during the reset.
+            - if:
+                condition:
+                  lambda: "return !id(curtain_detected).state && !id(weight_detected).state && !id(sleeping).state;"
+                then:
+                  - button.press: cycle
+                  - delay: 1s
             - lambda: "id(suppress_ready) = false;"
