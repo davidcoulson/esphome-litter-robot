@@ -175,3 +175,38 @@ binary_sensor:
     type: weight_detected
     id: weight_detected
     name: "Weight Detected"
+
+globals:
+  - id: relock_panel
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+script:
+  # Simulated panel presses are ignored while Control Panel Lockout is on, so
+  # automations press Reset/Cycle through this script, which briefly unlocks.
+  - id: press_panel_button
+    mode: queued
+    parameters:
+      cycle: bool
+    then:
+      - lambda: "id(relock_panel) = id(control_panel_lockout).state;"
+      - if:
+          condition:
+            lambda: "return id(relock_panel);"
+          then:
+            - switch.turn_off: control_panel_lockout
+            - delay: 500ms
+      - if:
+          condition:
+            lambda: "return cycle;"
+          then:
+            - button.press: cycle
+          else:
+            - button.press: reset
+      - if:
+          condition:
+            lambda: "return id(relock_panel);"
+          then:
+            - delay: 500ms
+            - switch.turn_on: control_panel_lockout

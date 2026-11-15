@@ -53,4 +53,7 @@ script:
                      id(robot_status).state == "Cat detected" &&
                      !id(curtain_detected).state && !id(weight_detected).state;
           then:
-            - button.press: reset
+            - script.execute:
+                id: press_panel_button
+                cycle: false
+            - script.wait: press_panel_button
