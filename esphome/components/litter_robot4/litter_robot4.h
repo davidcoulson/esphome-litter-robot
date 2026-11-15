@@ -228,6 +228,7 @@ class LitterRobot4Component final : public uart::UARTDevice, public Component {
   void push_queue_(Operation op, Register reg, uint16_t value);
   void pop_queue_();
   void check_timeouts_();
+  bool is_poll_register_(Register reg) const;
 
   uint8_t rx_buf_[FRAME_LENGTH];
   uint8_t rx_count_{0};

@@ -25,11 +25,8 @@ void LitterRobot4Component::loop() {
 void LitterRobot4Component::dump_config() { ESP_LOGCONFIG(TAG, "Litter Robot 4:"); }
 
 void LitterRobot4Component::add_poll_register(Register reg) {
-  for (auto existing : this->poll_registers_) {
-    if (existing == reg)
-      return;
-  }
-  this->poll_registers_.push_back(reg);
+  if (!this->is_poll_register_(reg))
+    this->poll_registers_.push_back(reg);
 }
 
 void LitterRobot4Component::request_poll() {
@@ -182,6 +179,10 @@ void LitterRobot4Component::handle_read_reply_(Register reg, uint16_t value) {
              reg_name(reg, actual_name, sizeof(actual_name)),
              format_register_value(reg, value, value_str, sizeof(value_str)),
              reg_name(pending_op.reg, expected_name, sizeof(expected_name)), reg, value, pending_op.reg);
+    // A late reply to an earlier (timed out) read: the value is real, but it doesn't
+    // answer the pending read, so keep waiting for that one.
+    this->on_register_update_callback_.call(reg, value);
+    return;
   }
 
   char name[FORMAT_BUFFER_SIZE];
@@ -199,8 +200,32 @@ void LitterRobot4Component::handle_write_ack_(Register reg, uint16_t value) {
   ESP_LOGD(TAG, "PIC acknowledged %s as %s", reg_name(reg, name, sizeof(name)),
            format_register_value(reg, value, value_str, sizeof(value_str)));
 
+  if (this->pending_count_ == 0 || this->pending_queue_[this->pending_head_].op != OP_WRITE ||
+      this->pending_queue_[this->pending_head_].reg != reg) {
+    // Usually a late ack for a write that already timed out: don't pop someone else's
+    // operation, but still fetch the register's real value.
+    ESP_LOGW(TAG, "Unexpected ack for %s (0x%02X=0x%04X)", reg_name(reg, name, sizeof(name)), reg, value);
+    if (this->is_poll_register_(reg))
+      this->queue_register_read(reg);
+    return;
+  }
   this->pop_queue_();
-  this->on_register_update_callback_.call(reg, value);
+
+  // Commands share register 0x34 with Robot Status, so an ack of e.g. "start clean" (0x0A)
+  // would read as "Clean cycle". Ack values also aren't guaranteed to be what the PIC kept,
+  // so read polled registers back for the real state.
+  if (reg != REG_ROBOT_STATUS)
+    this->on_register_update_callback_.call(reg, value);
+  if (this->is_poll_register_(reg))
+    this->queue_register_read(reg);
+}
+
+bool LitterRobot4Component::is_poll_register_(Register reg) const {
+  for (auto existing : this->poll_registers_) {
+    if (existing == reg)
+      return true;
+  }
+  return false;
 }
 
 void LitterRobot4Component::pop_queue_() {
