@@ -12,6 +12,8 @@ There are 2 known major revisions of the Litter Robot 4 mainboard. Both will wor
 
 > For serial numbers starting with "LR4C", stock firmware should be updated to 1175.5021.292 (July 2024) or later prior to install, otherwise the litter hopper accessory will not function.
 
+> Install any pending firmware update from the Whisker app before you start, on every unit. After ESPHome is installed, firmware for the mainboard microcontroller and other internal components can no longer be updated, and the backup you take below will restore whatever version is installed today.
+
 ---
 
 ## Recommended Hardware
@@ -130,6 +132,8 @@ You now have two options:
 
 The mainboard must be powered externally to read/write the flash of the ESP32. It's easiest to just put it back in the Litter Robot at this point. Make sure the ESP-Prog-2 is properly and securely connected. Double check the ribbon cable is centered and oriented properly on the mainboard since it isn't keyed. Resecure the mainboard with screws and plug the laser board and power cable back in.
 
+> The 6 pin ribbon cable also connects the ESP-Prog-2 "VPROG" power pin to the mainboard, which is already powered by the Litter Robot. **Remove the ESP-Prog-2 "VPROG" jumper before connecting** so the two supplies are never tied together.
+
 ![ESP-Prog-2 connected](Images/LR4C/ESP-Prog-2%20Connected.JPG)
 </details>
 
@@ -194,17 +198,26 @@ If you get permission errors you may need to add your user to the `dialout` grou
 sudo chown $USER /dev/ttyACM0
 ```
 
-You should see information about the ESP32, including the flash size. Mine is 8MB, so we'll be sure to back up all of it:
+You should see information about the ESP32, including the flash size (`Detected flash size: ...`). Mine is 8MB, so we'll be sure to back up all of it. Using `ALL` as the size reads the whole detected flash, whatever its size:
 
 ```bash
-esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 0x800000 LR4_stock_firmware_backup.bin
+esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 ALL LR4_stock_firmware_backup.bin
 ```
 
 > If you encounter communication errors, try lowering the baud rate (e.g., `--baud 460800` or `--baud 115200`)
 
-If all went well you should have a ~8MB file called `LR4_stock_firmware_backup.bin` in the current directory.
+If all went well you should have a file called `LR4_stock_firmware_backup.bin` in the current directory, the same size as the detected flash.
 
-**Keep this backup file safe.** You'll need it if you ever want to restore the original firmware.
+Read the flash a second time and compare the two files. They must be identical before you continue, because the next step erases the original firmware:
+
+```bash
+esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 ALL LR4_stock_firmware_backup_2.bin
+sha256sum LR4_stock_firmware_backup.bin LR4_stock_firmware_backup_2.bin
+```
+
+If the hashes differ, lower the baud rate and read again until two reads match.
+
+**Keep this backup file safe and private.** You'll need it if you ever want to restore the original firmware, and it contains the unit's WiFi credentials and its Whisker cloud identity, so don't share it.
 
 ---
 
@@ -222,7 +235,7 @@ Write the ESPHome firmware starting at address 0x0:
 esptool --port /dev/ttyACM0 --baud 921600 write_flash 0x0 /path/to/firmware.bin
 ```
 
-> Be sure to use the `.bin` file and not `.ota`.
+> Be sure to use the factory `.bin` file (in ESPHome Builder: Install → Manual download → Factory format) and not the `.ota` file. An OTA/app-only image will not boot when written at 0x0.
 
 A successful flash will end with output similar to:
 
