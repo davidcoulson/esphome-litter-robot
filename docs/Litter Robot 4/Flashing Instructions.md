@@ -124,7 +124,7 @@ You now have two options:
 
 	![ESP-Prog header installed](Images/LR4C/ESP-Prog%20Header%20Installed.JPG)
 
-- Solder the wires directly between the ESP-Prog-2 and the mainboard. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
+- Solder the wires directly between the ESP-Prog-2 and the mainboard. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. It is the programmer's 3.3V pin, and on the LR4C board it isn't connected to the ESP32, so the ESP-Prog-2 cannot power the mainboard through J3. The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
 
 	![ESP-Prog wire diagram](Images/LR4C/ESP-Prog%20Wire%20Diagram.JPG)
 
@@ -194,15 +194,24 @@ If you get permission errors you may need to add your user to the `dialout` grou
 sudo chown $USER /dev/ttyACM0
 ```
 
-You should see information about the ESP32, including the flash size. Mine is 8MB, so we'll be sure to back up all of it:
+You should see information about the ESP32, including the flash size (`Detected flash size: ...`). Mine is 8MB, so we'll be sure to back up all of it. Using `ALL` as the size reads the whole detected flash, whatever its size:
 
 ```bash
-esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 0x800000 LR4_stock_firmware_backup.bin
+esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 ALL LR4_stock_firmware_backup.bin
 ```
 
-> If you encounter communication errors, try lowering the baud rate (e.g., `--baud 460800` or `--baud 115200`)
+> If you encounter communication errors (e.g. `Corrupt data`), try lowering the baud rate (e.g., `--baud 460800` or `--baud 115200`)
 
-If all went well you should have a ~8MB file called `LR4_stock_firmware_backup.bin` in the current directory.
+If all went well you should have a file called `LR4_stock_firmware_backup.bin` in the current directory, the same size as the detected flash.
+
+Read the flash a second time at the same baud rate and compare the two files. They must be identical before you continue, because the next step erases the original firmware:
+
+```bash
+esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 ALL LR4_stock_firmware_backup_2.bin
+sha256sum LR4_stock_firmware_backup.bin LR4_stock_firmware_backup_2.bin
+```
+
+If the hashes differ, lower the baud rate and read again until two reads match.
 
 **Keep this backup file safe.** You'll need it if you ever want to restore the original firmware.
 
@@ -222,7 +231,7 @@ Write the ESPHome firmware starting at address 0x0:
 esptool --port /dev/ttyACM0 --baud 921600 write_flash 0x0 /path/to/firmware.bin
 ```
 
-> Be sure to use the `.bin` file and not `.ota`.
+> Be sure to use the factory `.bin` file (in ESPHome Builder: Install → Manual download → Factory format) and not the `.ota` file.
 
 A successful flash will end with output similar to:
 
