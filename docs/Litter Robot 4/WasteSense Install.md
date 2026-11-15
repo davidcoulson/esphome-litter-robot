@@ -91,7 +91,7 @@ The complete setup should look something like the above image. The remaining rib
 </details>
 <br>
 
-The WasteSense™ firmware uses `0x77` as the default BME688 I2C Address. If your breakout board defaults to `0x76` you will need to change it. This is usually done by bridging `SDO` and `GND`.
+The WasteSense™ firmware uses `0x77` as the default BME688 I2C Address. If your breakout board defaults to `0x76` you will need to change it. This is usually done by connecting `SDO` to `VDDIO` (3.3V). Bridging `SDO` to `GND` selects `0x76`.
 
 ## Mounting
 
