@@ -24,6 +24,23 @@ switch:
              id(sleep_sat).hour == 0 && id(sleep_sat).minute == 0 &&
              id(wake_sat).hour == 0 && id(wake_sat).minute == 0;
     turn_on_action:
+      # Remember the schedule so turning the override off can put it back.
+      - lambda: |-
+          if (id(sleep_override).state)
+            return;
+          datetime::TimeEntity *times[14] = {id(sleep_sun), id(wake_sun), id(sleep_mon), id(wake_mon), id(sleep_tue), id(wake_tue), id(sleep_wed),
+                                         id(wake_wed), id(sleep_thu), id(wake_thu), id(sleep_fri), id(wake_fri), id(sleep_sat),
+                                         id(wake_sat)};
+          switch_::Switch *days[7] = {id(sleep_schedule_sun), id(sleep_schedule_mon), id(sleep_schedule_tue), id(sleep_schedule_wed),
+                                id(sleep_schedule_thu), id(sleep_schedule_fri), id(sleep_schedule_sat)};
+          for (int i = 0; i < 14; i++)
+            id(saved_sleep_times)[i] = times[i]->hour * 60 + times[i]->minute;
+          uint8_t mask = 0;
+          for (int i = 0; i < 7; i++)
+            if (days[i]->state)
+              mask |= 1 << i;
+          id(saved_sleep_days) = mask;
+          id(saved_sleep_valid) = true;
       - datetime.time.set:
           id: sleep_sun
           time: "00:00:00"
@@ -81,3 +98,35 @@ switch:
       - switch.turn_off: sleep_schedule_thu
       - switch.turn_off: sleep_schedule_fri
       - switch.turn_off: sleep_schedule_sat
+      # Restore the schedule saved when the override was turned on (days off, times, then days).
+      - lambda: |-
+          if (!id(saved_sleep_valid))
+            return;
+          datetime::TimeEntity *times[14] = {id(sleep_sun), id(wake_sun), id(sleep_mon), id(wake_mon), id(sleep_tue), id(wake_tue), id(sleep_wed),
+                                         id(wake_wed), id(sleep_thu), id(wake_thu), id(sleep_fri), id(wake_fri), id(sleep_sat),
+                                         id(wake_sat)};
+          switch_::Switch *days[7] = {id(sleep_schedule_sun), id(sleep_schedule_mon), id(sleep_schedule_tue), id(sleep_schedule_wed),
+                                id(sleep_schedule_thu), id(sleep_schedule_fri), id(sleep_schedule_sat)};
+          for (int i = 0; i < 14; i++) {
+            auto call = times[i]->make_call();
+            call.set_hour(id(saved_sleep_times)[i] / 60);
+            call.set_minute(id(saved_sleep_times)[i] % 60);
+            call.set_second(0);
+            call.perform();
+          }
+          for (int i = 0; i < 7; i++)
+            if (id(saved_sleep_days) & (1 << i))
+              days[i]->turn_on();
+          id(saved_sleep_valid) = false;
+
+globals:
+  - id: saved_sleep_times
+    type: std::array<uint16_t, 14>
+    restore_value: true
+  - id: saved_sleep_days
+    type: uint8_t
+    restore_value: true
+  - id: saved_sleep_valid
+    type: bool
+    restore_value: true
+    initial_value: "false"

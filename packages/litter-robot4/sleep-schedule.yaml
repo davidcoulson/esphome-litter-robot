@@ -1,10 +1,17 @@
 packages:
   sleep_override: !include sleep-override.yaml
 
+substitutions:
+  # Override in your own config, e.g. substitutions: { timezone: Europe/London }
+  timezone: America/New_York
+
 time:
   - platform: homeassistant
-    timezone: America/New_York
+    timezone: ${timezone}
     id: ha_time
+    on_time_sync:
+      - litter_robot4.sync_time:
+          time_id: ha_time
 
 interval:
   - interval: 24h
