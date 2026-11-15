@@ -1,0 +1,62 @@
+# Records WasteSense results with the cat tracker.
+substitutions:
+  weight_sensor_id: "last_cat_weight"
+
+globals:
+  - id: visit_weight
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  # -1 not yet classified, 0 urine, 1 feces.
+  - id: visit_waste
+    type: int
+    restore_value: no
+    initial_value: "-1"
+
+sensor:
+  - id: !extend ${weight_sensor_id}
+    on_value:
+      - lambda: |-
+          if (!isnan(x) && x > 0.0f)
+            id(visit_weight) = x;
+      - script.execute: record_waste_visit
+
+script:
+  - id: !extend waste_sense_classified
+    then:
+      - lambda: "id(visit_waste) = feces ? 1 : 0;"
+      - script.execute: record_waste_visit
+
+  - id: !extend waste_sense_visit_start
+    then:
+      - if:
+          condition:
+            lambda: "return id(visit_waste) >= 0;"
+          then:
+            - logger.log:
+                level: WARN
+                format: "Waste visit skipped: no cat weight captured"
+      - lambda: |-
+          id(visit_weight) = NAN;
+          id(visit_waste) = -1;
+
+  - id: record_waste_visit
+    then:
+      - if:
+          condition:
+            lambda: "return id(visit_waste) >= 0 && !isnan(id(visit_weight));"
+          then:
+            - if:
+                condition:
+                  lambda: "return id(visit_waste) == 1;"
+                then:
+                  - cat_tracker.record_visit:
+                      weight: !lambda "return id(visit_weight);"
+                      waste_type: feces
+                else:
+                  - cat_tracker.record_visit:
+                      weight: !lambda "return id(visit_weight);"
+                      waste_type: urine
+            - lambda: |-
+                id(visit_weight) = NAN;
+                id(visit_waste) = -1;

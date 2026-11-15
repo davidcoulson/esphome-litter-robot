@@ -1,0 +1,64 @@
+# Litter Robot 4 trigger and cycle for WasteSense.
+globals:
+  - id: suppress_ready
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+text_sensor:
+  # Hide the transient "Ready" between the reset and cycle presses.
+  - id: !extend robot_status
+    filters:
+      - lambda: |-
+          if (id(suppress_ready) && x == "Ready")
+            return {};
+          return x;
+    on_value:
+      - if:
+          condition:
+            lambda: 'return x != "Cat detected";'
+          then:
+            - script.execute: odor_control_cancel
+      - script.execute: update_odor_control_clear
+
+binary_sensor:
+  - id: !extend weight_detected
+    on_state:
+      - if:
+          condition:
+            lambda: "return x;"
+          then:
+            - script.execute: waste_sense_visit_start
+            - script.stop: odor_control_cycle
+            - lambda: "id(suppress_ready) = false;"
+          else:
+            - script.execute: waste_sense_visit_end
+      - script.execute: update_odor_control_clear
+  - id: !extend curtain_detected
+    on_state:
+      - script.execute: update_odor_control_clear
+
+script:
+  - id: update_odor_control_clear
+    then:
+      - script.execute:
+          id: odor_control_update
+          clear: !lambda |-
+            return id(robot_status).state == "Cat detected" &&
+                   !id(curtain_detected).state && !id(weight_detected).state;
+
+  # A manual cycle is ignored in "Cat detected", so reset first.
+  - id: odor_control_cycle
+    then:
+      - if:
+          condition:
+            lambda: "return id(sleeping).state || !id(auto_cycle).state;"
+          then:
+            - logger.log: "Odor control cycle skipped: asleep or auto cycle off"
+          else:
+            - lambda: "id(suppress_ready) = true;"
+            - button.press: reset
+            - delay: 1s
+            - button.press: cycle
+            - delay: 1s
+            - lambda: "id(suppress_ready) = false;"
