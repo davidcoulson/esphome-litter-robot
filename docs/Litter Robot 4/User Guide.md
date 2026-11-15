@@ -65,11 +65,11 @@ A specific implementation is beyond the scope of this guide - if you build a blu
 [WasteSense™](WasteSense%20Install.md) utilizes an optional BME688 sensor to classify waste as feces or urine, similar to Whisker's "WasteID". It requires flashing the **`litter-robot4-waste-sense.yaml`** firmware and soldering the sensor to the mainboard.
 
 - **Odor Control** - when enabled, the robot cycles much sooner after a feces visit, rather than waiting for the full clean cycle delay.
-- **Odor Control Timeout** - how long to keep watching for feces after the cat leaves before recording the visit as urine (0.5-5 minutes, default 2 minutes).
+- **WasteSense Timeout** - how long to keep watching for feces after the cat leaves before recording the visit as urine (0.5-5 minutes, default 2 minutes).
 - **Odor Control Delay** - how long the cat must be gone before a feces cycle starts (0-10 minutes, default 1 minute). If feces is detected after this has passed, the robot cycles right away.
 - **WasteSense Calibration Reset** - clears the sensor's saved calibration and restarts the device. Use it after replacing the BME688; see [Replacing the Sensor](WasteSense%20Install.md#replacing-the-sensor).
 
-Feces is confirmed by the sensor, but urine is only assumed when no feces is detected within `Odor Control Timeout`. You will get false urine identifications if a cat enters without urinating. If feces visits are being recorded as urine because the odor rises slowly, increase `Odor Control Timeout`. If your cat regularly does both in one visit, increase `Odor Control Delay` so urine has some time to clump before cycling.
+Feces is confirmed by the sensor, but urine is only assumed when no feces is detected within `WasteSense Timeout`. You will get false urine identifications if a cat enters without urinating. If feces visits are being recorded as urine because the odor rises slowly, increase `WasteSense Timeout`. If your cat regularly does both in one visit, increase `Odor Control Delay` so urine has some time to clump before cycling.
 
 > The BME688 sensor needs a few minutes to warm up after power on before its readings stabilize. Allow a few minutes after boot before relying on `Odor Control`.
 

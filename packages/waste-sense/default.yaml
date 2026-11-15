@@ -22,7 +22,7 @@ substitutions:
   # values mostly trade sensitivity away; higher values detect smaller rises.
   odor_control_sensitivity: "5"
   # Minutes.
-  odor_control_timeout: "2"
+  waste_sense_timeout: "2"
   odor_control_delay: "1"
 
 globals:
@@ -93,8 +93,8 @@ number:
     restore_value: true
     initial_value: ${odor_control_sensitivity}
   - platform: template
-    id: odor_control_timeout
-    name: "Odor Control Timeout"
+    id: waste_sense_timeout
+    name: "WasteSense Timeout"
     icon: "mdi:timer-sand"
     entity_category: config
     disabled_by_default: true
@@ -105,7 +105,7 @@ number:
     step: 0.5
     optimistic: true
     restore_value: true
-    initial_value: ${odor_control_timeout}
+    initial_value: ${waste_sense_timeout}
   - platform: template
     id: odor_control_delay
     name: "Odor Control Delay"
@@ -199,7 +199,7 @@ script:
   - id: waste_detection_timeout
     mode: restart
     then:
-      - delay: !lambda "return (uint32_t) (id(odor_control_timeout).state * 60000.0f);"
+      - delay: !lambda "return (uint32_t) (id(waste_sense_timeout).state * 60000.0f);"
       - if:
           condition:
             lambda: "return id(waste_detection_active);"

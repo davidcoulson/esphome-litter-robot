@@ -121,14 +121,14 @@ The following sensors are also available, but disabled by default:
    - **CO2 Equivalent**
    - **Breath VOC Equivalent**
 
-There are also two disabled sliders that tune `Odor Control`:
+There are also two disabled sliders:
 
-- `Odor Control Timeout` (`0.5`-`5` minutes) sets how long to keep watching for feces after the cat leaves. If none is detected within the timeout, the visit is recorded as urine.
+- `WasteSense Timeout` (`0.5`-`5` minutes) sets how long to keep watching for feces after the cat leaves. If none is detected within the timeout, the visit is recorded as urine.
 - `Odor Control Delay` (`0`-`10` minutes) sets how long the cat must be gone before a feces cycle starts. If feces is detected after this has passed, the robot cycles right away.
 
 The `Odor Control Sensitivity` slider under configuration scales the VOC rise needed to classify a visit as feces on a `1`-`10` scale. `5` matches the stock threshold, lower values require a larger rise (fewer feces detections), and higher values detect smaller rises. The stock setting is already quite sensitive, so lower it first if urine is being recorded as feces.
 
-Feces is confirmed by the sensor, but urine is only assumed. If feces visits are being recorded as urine because the odor rises slowly, increase `Odor Control Timeout`. If your cat does both at the same time frequently, increase `Odor Control Delay` so urine has some time to clump before cycling.
+Feces is confirmed by the sensor, but urine is only assumed. If feces visits are being recorded as urine because the odor rises slowly, increase `WasteSense Timeout`. If your cat does both at the same time frequently, increase `Odor Control Delay` so urine has some time to clump before cycling.
 
 ### Replacing the Sensor
 
