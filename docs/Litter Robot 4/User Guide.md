@@ -72,6 +72,17 @@ Feces is confirmed by the sensor, but urine is only assumed when no feces is det
 
 > The BME688 sensor needs a few minutes to warm up after power on before its readings stabilize. Allow a few minutes after boot before relying on `Odor Control`.
 
+## Sleep Schedule
+
+Sleep schedules run on the robot's clock, which is set from Home Assistant in the `America/New_York` timezone by default. If you live elsewhere, set your timezone in the [adopted config](#adopting-in-esphome-device-builder):
+
+```yaml
+substitutions:
+  timezone: Europe/London
+```
+
+Turning on `Sleep Override` keeps the robot asleep until it is turned off, which restores the previous schedule.
+
 ## Web Server
 
 The firmware hosts a lightweight web server on the device's IP address for basic control and OTA updates. The default username is `user` and the password is `Wh1sk3rM30wM30w`. You can find the device IP in your router's device list.
