@@ -126,7 +126,7 @@ You now have two options:
 
 	![ESP-Prog header installed](Images/LR4C/ESP-Prog%20Header%20Installed.JPG)
 
-- Solder the wires directly between the ESP-Prog-2 and the mainboard. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
+- Solder the wires directly between the ESP-Prog-2 and the mainboard. If both boards are in the orientation stated above, the pinout will match exactly. The top left pin/pad does not need to be connected. It is the programmer's 3.3V pin, and on the LR4C board it isn't connected to the ESP32, so the ESP-Prog-2 cannot power the mainboard through J3. The pins of the large and small 6 pin connectors on the ESP-Prog-2 are electrically identical.
 
 	![ESP-Prog wire diagram](Images/LR4C/ESP-Prog%20Wire%20Diagram.JPG)
 
@@ -204,7 +204,7 @@ You should see information about the ESP32, including the flash size (`Detected 
 esptool --port /dev/ttyACM0 --baud 921600 read_flash 0x0 ALL LR4_stock_firmware_backup.bin
 ```
 
-> If you encounter communication errors, try lowering the baud rate (e.g., `--baud 460800` or `--baud 115200`)
+> If you encounter communication errors (e.g. `Corrupt data`), try lowering the baud rate (e.g., `--baud 460800` or `--baud 115200`)
 
 If all went well you should have a file called `LR4_stock_firmware_backup.bin` in the current directory, the same size as the detected flash.
 
