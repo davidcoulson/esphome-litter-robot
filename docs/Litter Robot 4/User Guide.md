@@ -80,6 +80,30 @@ The firmware hosts a lightweight web server on the device's IP address for basic
 
 The configuration can be "adopted" into [ESPHome Device Builder](https://desktop.esphome.io/) for further configuration. It should automatically show up at the top of the dashboard in a "Discovered Devices" tab. The auto-generated config imports the `litter-robot4.yaml` from this repository as a base package, so you can layer your own customizations on top without losing upstream updates.
 
+## Securing the Device
+
+Out of the box the native API is unencrypted, ESPHome OTA has no password, and the web server and setup hotspot use the shared default password above. Anyone on your network can then press any button (including `Factory Reset`) or flash new firmware. After adopting the device, add the following to its config in ESPHome Device Builder and the matching values to your `secrets.yaml`:
+
+```yaml
+api:
+  encryption:
+    key: !secret litter_robot4_api_key # generate one at https://esphome.io/components/api/
+
+ota:
+  - id: !extend esphome_ota
+    password: !secret litter_robot4_ota_password
+
+wifi:
+  ap:
+    password: !secret litter_robot4_ap_password
+
+web_server:
+  auth:
+    password: !secret litter_robot4_web_password
+```
+
+Install the update once over the existing unencrypted connection, then re-add the device in Home Assistant with the new encryption key.
+
 ## Updating the Firmware (OTA)
 
 Once ESPHome is installed, future firmware updates can be applied over the air without reopening the unit. This process is automated in the ESPHome Device Builder dashboard, but you can also update via the web server:

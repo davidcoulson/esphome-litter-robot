@@ -4,6 +4,7 @@ api:
 
 ota:
   - platform: esphome
+    id: esphome_ota # lets user configs !extend it to add a password
 
 wifi:
   ap:
