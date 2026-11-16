@@ -206,7 +206,7 @@ class LitterRobot4Component final : public uart::UARTDevice, public Component {
   void dump_config() override;
   void queue_register_read(Register reg) { this->push_queue_(OP_READ, reg, 0); }
   void queue_register_read(Register reg, uint16_t value) { this->push_queue_(OP_READ, reg, value); }
-  void queue_register_write(Register reg, uint16_t value) { this->push_queue_(OP_WRITE, reg, value); }
+  void queue_register_write(Register reg, uint16_t value);
 
   // Registers registered here are read on link-up. Entities declare the telemetry they depend on.
   void add_poll_register(Register reg);
@@ -226,6 +226,7 @@ class LitterRobot4Component final : public uart::UARTDevice, public Component {
   void handle_read_reply_(Register reg, uint16_t value);
   void handle_write_ack_(Register reg, uint16_t value);
   void push_queue_(Operation op, Register reg, uint16_t value);
+  void notify_register_update_(Register reg, uint16_t value);
   void pop_queue_();
   void check_timeouts_();
 
@@ -240,6 +241,9 @@ class LitterRobot4Component final : public uart::UARTDevice, public Component {
   StaticVector<Register, MAX_POLL_REGISTERS> poll_registers_;
 
   bool pic_ready_{false};
+  bool panel_lockout_{false};
+  // Queue pops left until the relock of a keypad lockout bypass completes; lockout frames are masked meanwhile.
+  uint8_t lockout_bypass_pops_{0};
 };
 
 }  // namespace esphome::litter_robot4

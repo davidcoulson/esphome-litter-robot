@@ -37,6 +37,25 @@ void LitterRobot4Component::request_poll() {
     this->queue_register_read(reg);
 }
 
+void LitterRobot4Component::queue_register_write(Register reg, uint16_t value) {
+  if (reg == REG_PANEL_LOCKOUT) {
+    this->panel_lockout_ = value != 0;
+  } else if (reg == REG_KEYPAD && this->panel_lockout_) {
+    // The PIC ignores simulated presses while the panel is locked, so unlock around the press.
+    // All three must fit, otherwise a dropped relock would leave the panel unlocked.
+    if (MAX_PENDING - this->pending_count_ < 3) {
+      ESP_LOGW(TAG, "Queue full, dropping keypad press");
+      return;
+    }
+    this->push_queue_(OP_WRITE, REG_PANEL_LOCKOUT, 0);
+    this->push_queue_(OP_WRITE, reg, value);
+    this->push_queue_(OP_WRITE, REG_PANEL_LOCKOUT, 1);
+    this->lockout_bypass_pops_ = this->pending_count_;
+    return;
+  }
+  this->push_queue_(OP_WRITE, reg, value);
+}
+
 void LitterRobot4Component::push_queue_(Operation op, Register reg, uint16_t value) {
   bool is_write = op == OP_WRITE;
   if (this->pending_count_ >= MAX_PENDING) {
@@ -149,11 +168,11 @@ void LitterRobot4Component::handle_write_(Register reg, uint16_t value) {
   ESP_LOGD(TAG, "PIC reported %s as %s", reg_name(reg, name, sizeof(name)),
            format_register_value(reg, value, value_str, sizeof(value_str)));
   this->send_frame_(OP_WRITE_ACK, reg, value);
+  this->notify_register_update_(reg, value);
   if (this->pending_count_ > 0 && this->pending_queue_[this->pending_head_].op == OP_WRITE &&
       this->pending_queue_[this->pending_head_].reg == reg) {
     this->pop_queue_();
   }
-  this->on_register_update_callback_.call(reg, value);
 }
 
 void LitterRobot4Component::handle_read_reply_(Register reg, uint16_t value) {
@@ -189,7 +208,7 @@ void LitterRobot4Component::handle_read_reply_(Register reg, uint16_t value) {
   ESP_LOGD(TAG, "PIC replied %s is %s", reg_name(reg, name, sizeof(name)),
            format_register_value(reg, value, value_str, sizeof(value_str)));
 
-  this->on_register_update_callback_.call(reg, value);
+  this->notify_register_update_(reg, value);
   this->pop_queue_();
 }
 
@@ -199,7 +218,17 @@ void LitterRobot4Component::handle_write_ack_(Register reg, uint16_t value) {
   ESP_LOGD(TAG, "PIC acknowledged %s as %s", reg_name(reg, name, sizeof(name)),
            format_register_value(reg, value, value_str, sizeof(value_str)));
 
+  this->notify_register_update_(reg, value);
   this->pop_queue_();
+}
+
+void LitterRobot4Component::notify_register_update_(Register reg, uint16_t value) {
+  if (reg == REG_PANEL_LOCKOUT) {
+    // Lockout frames during a bypass are transient; report the user-facing state so the switch doesn't flicker.
+    if (this->lockout_bypass_pops_ == 0)
+      this->panel_lockout_ = value != 0;
+    value = this->panel_lockout_;
+  }
   this->on_register_update_callback_.call(reg, value);
 }
 
@@ -207,6 +236,8 @@ void LitterRobot4Component::pop_queue_() {
   if (this->pending_count_ == 0) {
     return;
   }
+  if (this->lockout_bypass_pops_ > 0)
+    this->lockout_bypass_pops_--;
   this->pending_head_ = (this->pending_head_ + 1) % MAX_PENDING;
   this->pending_count_--;
 
