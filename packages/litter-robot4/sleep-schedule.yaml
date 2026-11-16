@@ -9,9 +9,6 @@ time:
   - platform: homeassistant
     timezone: ${timezone}
     id: ha_time
-    on_time_sync:
-      - litter_robot4.sync_time:
-          time_id: ha_time
 
 interval:
   - interval: 24h

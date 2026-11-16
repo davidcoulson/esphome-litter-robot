@@ -100,19 +100,14 @@ script:
               - lambda: "return !id(sleeping).state;"
           then:
             - lambda: "id(suppress_ready) = true;"
-            - script.execute:
-                id: press_panel_button
-                cycle: false
-            - script.wait: press_panel_button
+            - script.execute: press_reset_unlocked
+            - script.wait: press_reset_unlocked
             - delay: 1s
             # Re-check: a cat may have stepped in during the reset.
             - if:
                 condition:
                   lambda: "return !id(curtain_detected).state && !id(weight_detected).state && !id(sleeping).state;"
                 then:
-                  - script.execute:
-                      id: press_panel_button
-                      cycle: true
-                  - script.wait: press_panel_button
+                  - button.press: cycle
                   - delay: 1s
             - lambda: "id(suppress_ready) = false;"

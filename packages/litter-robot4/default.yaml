@@ -183,12 +183,11 @@ globals:
     initial_value: 'false'
 
 script:
-  # Simulated panel presses are ignored while Control Panel Lockout is on, so
-  # automations press Reset/Cycle through this script, which briefly unlocks.
-  - id: press_panel_button
+  # The PIC ignores a simulated Reset press while Control Panel Lockout is on
+  # (Manual Cycle is a status write and works), so automations press Reset
+  # through this script, which briefly unlocks.
+  - id: press_reset_unlocked
     mode: queued
-    parameters:
-      cycle: bool
     then:
       - lambda: "id(relock_panel) = id(control_panel_lockout).state;"
       - if:
@@ -197,13 +196,7 @@ script:
           then:
             - switch.turn_off: control_panel_lockout
             - delay: 500ms
-      - if:
-          condition:
-            lambda: "return cycle;"
-          then:
-            - button.press: cycle
-          else:
-            - button.press: reset
+      - button.press: reset
       - if:
           condition:
             lambda: "return id(relock_panel);"
