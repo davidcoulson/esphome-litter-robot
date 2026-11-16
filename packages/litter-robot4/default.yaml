@@ -24,7 +24,8 @@ packages:
   hopper_empty_detection: !include { file: ../common/hopper-empty-detection.yaml, vars: { hopper_status_sensor_id: hopper_status, litter_level_sensor_id: litter_level } }
   smart_detection: !include smart-detection.yaml
   auto_cycle: !include auto-cycle.yaml
-  cat_tracking: !include ../cat-tracker/default.yaml
+  # dc fork: cats are defined by the device config (litter-robot4-cats.yaml), one HA
+  # sub-device per cat, so upstream's cat-tracker/default.yaml is not included here.
   custom_status: !include custom-status.yaml
 
 esp32:
