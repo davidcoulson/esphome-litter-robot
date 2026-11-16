@@ -1,0 +1,93 @@
+# Maintenance forecast for the Litter Robot 3. The LR3 has no drawer level, so the
+# forecast is based on the cycle count at which the drawer reached "full" last time(s).
+# Requires waste-drawer-cycles.yaml (waste_drawer_cycles_sensor, waste_drawer_full).
+#
+# Include it after waste-drawer-cycles.yaml:
+#   packages:
+#     maintenance: !include packages/litter-robot3/maintenance.yaml
+
+substitutions:
+  drawer_warn_percent: "80"     # "Needs Attention" warns at this share of the learned capacity
+
+globals:
+  - id: mt_capacity_cycles      # learned cycles per full drawer (0 = not learned yet)
+    type: float
+    restore_value: yes
+    initial_value: "0"
+  - id: mt_hours                # powered-on hours since the drawer was last emptied
+    type: uint32_t
+    restore_value: yes
+    initial_value: "0"
+
+interval:
+  - interval: 1h
+    then:
+      - lambda: "id(mt_hours)++;"
+      - script.execute: mt_update
+
+sensor:
+  - platform: template
+    id: mt_capacity_sensor
+    name: "Cycles Per Full Drawer"
+    icon: "mdi:chart-line"
+    accuracy_decimals: 0
+    update_interval: never
+  - platform: template
+    id: mt_cycles_to_full
+    name: "Drawer Cycles Until Full"
+    icon: "mdi:delete-variant"
+    accuracy_decimals: 0
+    update_interval: never
+  - platform: template
+    id: mt_days_to_full
+    name: "Days Until Drawer Full"
+    icon: "mdi:calendar-clock"
+    unit_of_measurement: "d"
+    accuracy_decimals: 1
+    update_interval: never
+
+  - id: !extend waste_drawer_cycles_sensor
+    on_value:
+      - lambda: "if (x == 0) id(mt_hours) = 0;"
+      - script.execute: mt_update
+
+binary_sensor:
+  - id: !extend waste_drawer_full
+    on_press:
+      - lambda: |-
+          // Cycles counted since the last reset = this drawer's capacity; ignore
+          // short counts from manual resets.
+          const float n = id(waste_drawer_cycles);
+          if (n >= 20) {
+            id(mt_capacity_cycles) = id(mt_capacity_cycles) > 0 ? 0.5f * (id(mt_capacity_cycles) + n) : n;
+          }
+      - script.execute: mt_update
+
+text_sensor:
+  - platform: template
+    id: mt_needs_attention
+    name: "Needs Attention"
+    icon: "mdi:alert-circle-outline"
+
+script:
+  - id: mt_update
+    mode: restart
+    then:
+      - lambda: |-
+          std::string att;
+          const float cap = id(mt_capacity_cycles);
+          const float used = id(waste_drawer_cycles);
+          if (cap > 0) id(mt_capacity_sensor).publish_state(cap);
+
+          if (id(waste_drawer_full).state) {
+            att = "Waste drawer full";
+            id(mt_cycles_to_full).publish_state(0);
+            id(mt_days_to_full).publish_state(0);
+          } else if (cap > 0) {
+            const float left = cap > used ? cap - used : 0;
+            id(mt_cycles_to_full).publish_state(left);
+            if (id(mt_hours) >= 24 && used > 0)
+              id(mt_days_to_full).publish_state(left / (used / (id(mt_hours) / 24.0f)));
+            if (used * 100.0f >= cap * ${drawer_warn_percent}) att = "Waste drawer nearly full";
+          }
+          id(mt_needs_attention).publish_state(att.empty() ? "OK" : att);

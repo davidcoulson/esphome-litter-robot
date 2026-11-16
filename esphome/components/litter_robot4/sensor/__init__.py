@@ -36,6 +36,12 @@ LitterRobot4CatWeightSensor = litter_robot4_ns.class_(
     cg.Component,
     cg.Parented.template(LitterRobot4Component),
 )
+LitterRobot4GlobeWeightSensor = litter_robot4_ns.class_(
+    "LitterRobot4GlobeWeightSensor",
+    sensor.Sensor,
+    cg.Component,
+    cg.Parented.template(LitterRobot4Component),
+)
 LitterRobot4RegisterSensor = litter_robot4_ns.class_(
     "LitterRobot4RegisterSensor",
     sensor.Sensor,
@@ -113,6 +119,13 @@ CONFIG_SCHEMA = cv.typed_schema(
             acc_decimals=2,
             device_class=DEVICE_CLASS_WEIGHT,
             icon="mdi:weight",
+        ),
+        "globe_weight": _sensor_schema(
+            LitterRobot4GlobeWeightSensor,
+            acc_decimals=1,
+            unit=UNIT_POUND,
+            device_class=DEVICE_CLASS_WEIGHT,
+            icon="mdi:scale",
         ),
         "clean_cycle_count": _sensor_schema(
             LitterRobot4RegisterSensor,

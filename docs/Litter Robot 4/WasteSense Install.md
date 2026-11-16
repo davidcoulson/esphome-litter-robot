@@ -132,3 +132,16 @@ Feces is confirmed by the sensor, but urine is only assumed. If your cat does bo
 The BSEC2 library learns the sensor's gas baseline over time and saves it to flash. A replacement BME688 would inherit the old sensor's calibration. If it is ever replaced, press the `WasteSense Calibration Reset` button in the diagnostic category. It clears only the saved BSEC2 calibration and restarts the device.
 
 The new sensor then calibrates from scratch: `IAQ Accuracy` sits low for a while and feces detection is unreliable until it reaches 3. Bosch recommends letting a new sensor run for about 24 hours before trusting its readings.
+
+## Waste mass (experimental)
+
+An optional package estimates how much waste a visit left, from the globe weight before the cat enters versus after it leaves. It is **unproven** and for diagnosis only: it does not change how poop and pee are classified. The scale resolves 0.1 lb (about 45 g), so a pee clump is only one or two steps, and the scale's automatic tare can hide small changes.
+
+To include it, add this to your config next to the `waste_sense` package:
+
+```yaml
+packages:
+  waste_mass: !include packages/cat-tracker/waste-tracking/waste-mass.yaml
+```
+
+It needs **Debug Mode** switched on, since the globe weight is only reported then (it adds a UART message per second). It adds `Last Waste Mass` (g), `Waste Mass Detected`, the `Waste Mass Threshold` and `Waste Mass Settle Time` settings, and a disabled `Globe Weight` diagnostic sensor. Each visit is logged at INFO level under `waste_mass` with the before and after weights, so you can compare them with what was really in the drawer. Visits are skipped, with a warning, if the weight did not settle or no readings arrived. Keep `Waste Mass Settle Time` shorter than the cycle delay.

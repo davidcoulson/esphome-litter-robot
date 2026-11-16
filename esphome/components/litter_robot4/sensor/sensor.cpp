@@ -32,6 +32,16 @@ void LitterRobot4CatWeightSensor::setup() {
 
 void LitterRobot4CatWeightSensor::dump_config() { LOG_SENSOR("", "Litter Robot 4 Cat Weight", this); }
 
+void LitterRobot4GlobeWeightSensor::setup() {
+  this->parent_->add_on_register_update_callback([this](Register reg, uint16_t value) {
+    if (reg == REG_DEBUG_WEIGHT) {
+      this->publish_state(static_cast<int16_t>(value) / 10.0f);
+    }
+  });
+}
+
+void LitterRobot4GlobeWeightSensor::dump_config() { LOG_SENSOR("", "Litter Robot 4 Globe Weight", this); }
+
 void LitterRobot4RegisterSensor::setup() {
   this->parent_->add_poll_register(this->register_);
   this->parent_->add_on_register_update_callback([this](Register reg, uint16_t value) {

@@ -12,6 +12,7 @@ void CatTrackerCountSensor::setup() {
   if (this->type_ == CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_WEIGHT) {
     this->cat_->add_on_weight_callback([this](float) { this->publish_value_(); });
   }
+  this->cat_->add_on_history_callback([this]() { this->publish_value_(); });
   this->publish_value_();
 }
 
@@ -34,6 +35,16 @@ void CatTrackerCountSensor::publish_value_() {
       break;
     case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_WEIGHT:
       this->publish_state(this->cat_->get_weight());
+      break;
+    // Last 7 full days (yesterday back); today is partial. Weight averages over visits, including today.
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_VISITS_PER_DAY_7D:
+      this->publish_state(this->cat_->visits_per_day(1, 7));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_AVG_WEIGHT_7D:
+      this->publish_state(this->cat_->avg_weight(0, 7));
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_HOURS_SINCE_VISIT:
+      this->publish_state(this->cat_->hours_since_visit());
       break;
   }
 }

@@ -1,0 +1,169 @@
+# EXPERIMENTAL, DIAGNOSTIC ONLY. Estimates the mass of a visit's waste from the
+# globe weight before the cat enters versus after it leaves. It does not feed
+# the poop/pee classifier in waste-sense.yaml. Needs Debug Mode (register 0x89,
+# one reading per second) switched on. Unproven: the scale resolves 0.1 lb
+# (~45 g), so a pee clump is only 1-2 steps.
+substitutions:
+  # Readings in the rolling window; its median is the weight estimate.
+  waste_mass_window: "9"
+  # A window counts as settled when its readings span no more than this (lb).
+  waste_mass_max_span_lb: "0.15"
+  # Idle-baseline changes bigger than this (lb) are not waste: a cat stepping on
+  # before the detection fires, or litter added/removed. They are only adopted
+  # after waste_mass_jump_samples settled readings in a row (~seconds).
+  waste_mass_jump_lb: "0.3"
+  waste_mass_jump_samples: "60"
+
+globals:
+  - id: globe_buf
+    type: std::vector<float>
+  - id: globe_median
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  - id: globe_span
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  - id: globe_last_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+  - id: globe_stable_run
+    type: int
+    restore_value: no
+    initial_value: "0"
+  # Settled globe weight while no cat is present (lb).
+  - id: globe_idle_baseline
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  # The idle baseline frozen when the current visit started (lb).
+  - id: globe_visit_baseline
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+
+number:
+  - platform: template
+    id: waste_mass_threshold
+    name: "Waste Mass Threshold"
+    icon: "mdi:scale-balance"
+    entity_category: config
+    unit_of_measurement: "g"
+    mode: box
+    min_value: 45
+    max_value: 500
+    step: 5
+    optimistic: true
+    restore_value: true
+    initial_value: 90
+  # How long after the cat leaves the globe is left to settle before measuring.
+  # Must stay shorter than the cycle delay, or the clean cycle starts first.
+  - platform: template
+    id: waste_mass_settle
+    name: "Waste Mass Settle Time"
+    icon: "mdi:timer-sand"
+    entity_category: config
+    unit_of_measurement: "s"
+    mode: box
+    min_value: 10
+    max_value: 300
+    step: 5
+    optimistic: true
+    restore_value: true
+    initial_value: 30
+
+sensor:
+  - platform: litter_robot4
+    type: globe_weight
+    id: globe_weight
+    name: "Globe Weight"
+    entity_category: diagnostic
+    disabled_by_default: true
+    on_value:
+      - lambda: |-
+          if (isnan(x))
+            return;
+          id(globe_last_ms) = millis();
+          auto &buf = id(globe_buf);
+          buf.push_back(x);
+          if (buf.size() > ${waste_mass_window})
+            buf.erase(buf.begin());
+          if (buf.size() < ${waste_mass_window}) {
+            id(globe_median) = NAN;
+            id(globe_span) = NAN;
+            return;
+          }
+          std::vector<float> sorted(buf);
+          std::sort(sorted.begin(), sorted.end());
+          id(globe_median) = sorted[sorted.size() / 2];
+          id(globe_span) = sorted.back() - sorted.front();
+          // Track the idle baseline from settled windows while nobody is inside.
+          if (id(weight_detected).state || id(globe_span) > ${waste_mass_max_span_lb} + 0.001f) {
+            id(globe_stable_run) = 0;
+            return;
+          }
+          const float base = id(globe_idle_baseline);
+          if (isnan(base) || fabsf(id(globe_median) - base) <= ${waste_mass_jump_lb} + 0.001f) {
+            id(globe_idle_baseline) = id(globe_median);
+            id(globe_stable_run) = 0;
+          } else if (++id(globe_stable_run) >= ${waste_mass_jump_samples}) {
+            ESP_LOGI("waste_mass", "Idle globe weight jumped %.1f -> %.1f lb and stayed there; adopting it", base, id(globe_median));
+            id(globe_idle_baseline) = id(globe_median);
+            id(globe_stable_run) = 0;
+          }
+
+  - platform: template
+    id: last_waste_mass
+    name: "Last Waste Mass"
+    icon: "mdi:poop"
+    unit_of_measurement: "g"
+    accuracy_decimals: 0
+    state_class: measurement
+    update_interval: never
+
+binary_sensor:
+  - platform: template
+    id: waste_mass_detected
+    name: "Waste Mass Detected"
+    icon: "mdi:poop"
+  - id: !extend weight_detected
+    on_state:
+      - if:
+          condition:
+            lambda: "return x;"
+          then:
+            - script.stop: waste_mass_measure
+            - lambda: |-
+                id(globe_visit_baseline) = id(globe_idle_baseline);
+                ESP_LOGI("waste_mass", "Visit started, globe baseline %.1f lb", id(globe_visit_baseline));
+          else:
+            - script.execute: waste_mass_measure
+
+script:
+  - id: waste_mass_measure
+    mode: restart
+    then:
+      - delay: !lambda "return (uint32_t) (id(waste_mass_settle).state * 1000.0f);"
+      - lambda: |-
+          const float before = id(globe_visit_baseline);
+          const float after = id(globe_median);
+          if (millis() - id(globe_last_ms) > 5000) {
+            ESP_LOGW("waste_mass", "Visit skipped: no globe weight readings (is Debug Mode on?)");
+            return;
+          }
+          if (isnan(before) || isnan(after)) {
+            ESP_LOGW("waste_mass", "Visit skipped: baseline %.1f lb, after %.1f lb (not enough readings)", before, after);
+            return;
+          }
+          if (id(globe_span) > ${waste_mass_max_span_lb} + 0.001f) {
+            ESP_LOGW("waste_mass", "Visit skipped: globe not settled (window span %.1f lb)", id(globe_span));
+            return;
+          }
+          const float grams = (after - before) * 453.592f;
+          const bool detected = grams >= id(waste_mass_threshold).state;
+          ESP_LOGI("waste_mass", "Visit: before %.1f lb, after %.1f lb, delta %.0f g (threshold %.0f g) -> %s",
+                   before, after, grams, id(waste_mass_threshold).state, detected ? "detected" : "none");
+          id(last_waste_mass).publish_state(grams);
+          id(waste_mass_detected).publish_state(detected);

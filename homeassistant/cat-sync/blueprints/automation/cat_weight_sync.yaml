@@ -1,0 +1,96 @@
+blueprint:
+  name: Cat weight sync across litter robots
+  description: >-
+    Keeps one cat's weight identical on every robot. When a robot's cat weight
+    sensor changes (after an identified visit) the value is stored in the shared
+    input_number and pushed to every OTHER robot's "Set Cat N Weight". Editing the
+    input_number pushes it to all robots. Loops are prevented because a change is
+    only acted on when it differs from the shared value by more than the tolerance.
+  domain: automation
+  input:
+    shared_weight:
+      name: Shared weight helper
+      selector:
+        entity:
+          domain: input_number
+    weight_sensors:
+      name: Cat weight sensors (one per robot)
+      selector:
+        entity:
+          domain: sensor
+          device_class: weight
+          multiple: true
+    set_numbers:
+      name: "Set Cat N Weight numbers (one per robot, same cat)"
+      selector:
+        entity:
+          domain: number
+          multiple: true
+    tolerance:
+      name: Tolerance (lb)
+      description: Ignore differences up to this size. Keep it well below the robots' weight_tolerance (0.6).
+      default: 0.2
+      selector:
+        number:
+          min: 0.01
+          max: 0.5
+          step: 0.01
+          unit_of_measurement: lb
+
+mode: queued
+max: 10
+
+variables:
+  shared: !input shared_weight
+  numbers: !input set_numbers
+  tol: !input tolerance
+
+trigger:
+  - platform: state
+    entity_id: !input weight_sensors
+    id: robot
+  - platform: state
+    entity_id: !input shared_weight
+    id: shared
+
+condition:
+  - condition: template
+    value_template: "{{ trigger.to_state.state | is_number and trigger.to_state.state | float > 0 }}"
+  # state is lb only while the sensor keeps its native unit
+  - condition: template
+    value_template: >-
+      {{ trigger.id == 'shared' or trigger.to_state.attributes.unit_of_measurement == 'lb' }}
+  # a loop-guard: sensor echo of our own push equals the shared value
+  - condition: template
+    value_template: >-
+      {% if not (states(shared) | is_number) %} true
+      {% elif trigger.id == 'robot' %}
+        {{ (trigger.to_state.state | float - states(shared) | float) | abs > tol | float }}
+      {% else %} true {% endif %}
+
+action:
+  - if:
+      - condition: template
+        value_template: "{{ trigger.id == 'robot' }}"
+    then:
+      - service: input_number.set_value
+        target:
+          entity_id: !input shared_weight
+        data:
+          value: "{{ trigger.to_state.state | float }}"
+  - variables:
+      value: "{{ trigger.to_state.state | float }}"
+      src_device: "{{ device_id(trigger.entity_id) if trigger.id == 'robot' else none }}"
+  - repeat:
+      for_each: "{{ numbers }}"
+      sequence:
+        - condition: template
+          value_template: >-
+            {{ (src_device is none or device_id(repeat.item) != src_device)
+               and states(repeat.item) not in ['unknown', 'unavailable']
+               and ((states(repeat.item) | float(0)) - value) | abs > 0.005 }}
+        - service: number.set_value
+          target:
+            entity_id: "{{ repeat.item }}"
+          data:
+            value: "{{ value }}"

@@ -24,6 +24,13 @@ class LitterRobot4CatWeightSensor : public sensor::Sensor, public Component, pub
   void dump_config() override;
 };
 
+// Live globe scale (debug register 0x89), signed decipounds; only reported while Debug Mode is on.
+class LitterRobot4GlobeWeightSensor : public sensor::Sensor, public Component, public Parented<LitterRobot4Component> {
+ public:
+  void setup() override;
+  void dump_config() override;
+};
+
 class LitterRobot4RegisterSensor : public sensor::Sensor, public Component, public Parented<LitterRobot4Component> {
  public:
   void setup() override;

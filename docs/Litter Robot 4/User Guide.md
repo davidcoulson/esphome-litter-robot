@@ -60,6 +60,23 @@ Each robot keeps its own tracker state, so with more than one unit the learned w
 
 A specific implementation is beyond the scope of this guide - if you build a blueprint or similar, contributions are welcome!
 
+## Maintenance
+
+Optional package that forecasts chores from the entities the robot already reports. Add it to your device config after the LR4 package (and, for the Hopper Empty entity, `hopper.yaml`, which is included by default):
+
+```yaml
+packages:
+  maintenance: !include packages/litter-robot4/maintenance.yaml
+```
+
+- **Cycles Per Percent** - how many clean cycles it takes to add 1% to the waste drawer. It is fitted each time the drawer is emptied (the level drops by 20 or more points) and averaged with the previous fit. It is empty until the first empty after install.
+- **Drawer Cycles Until Full** / **Days Until Drawer Full** - extrapolated from the current level and the cycle rate since the last empty. Days appear after 24 hours of data and ignore time the robot is powered off.
+- **Filter Cycles Until Due** / **Filter Due** - `filter_life_cycles` (default 500) minus the Filter Cycles odometer. It is a cycle count, not a measurement of the filter; press **Replace Filter** to reset the odometer.
+- **Litter Low** - litter level below `litter_low_percent` (default 25).
+- **Needs Attention** - `OK`, or a comma-separated list of: Waste drawer full, Waste drawer nearly full (from `drawer_warn_percent`, default 80), Filter due, Litter low, Hopper empty. Use it as an automation trigger for notifications.
+
+Override the thresholds with `substitutions:` in your device config. The fitted values are stored in flash.
+
 ## WasteSense™ and Odor Control
 
 [WasteSense™](WasteSense%20Install.md) utilizes an optional BME688 sensor to classify waste as feces or urine, similar to Whisker's "WasteID". It requires flashing the **`litter-robot4-waste-sense.yaml`** firmware and soldering the sensor to the mainboard.
@@ -126,3 +143,32 @@ Once ESPHome is installed, future firmware updates can be applied over the air w
 3. At the bottom, use the "OTA Update" file selector to select the downloaded OTA update file and click update. Be sure to not use the `.bin` file or the update will fail.
 
 To return the device to the original Whisker firmware, see [Restoring the Stock Firmware](Flashing%20Instructions.md#restoring-the-stock-firmware).
+
+## Cat Health History
+
+The cat tracker keeps 14 days of per-cat history in flash (it survives reboots and Home Assistant outages) and needs the robot's clock to be set. Include `packages/cat-tracker/health.yaml` (cats 1-4) or add the entities to your own cats:
+
+```yaml
+sensor:
+  - platform: cat_tracker
+    cat: cat1
+    visits_per_day_7d: {name: "Cat 1 Visits per Day (7d)"}   # last 7 full days
+    avg_weight_7d: {name: "Cat 1 Average Weight (7d)"}
+    hours_since_visit: {name: "Cat 1 Hours Since Last Visit"}
+binary_sensor:
+  - platform: cat_tracker
+    cat: cat1
+    type: weight_changed   # last 3 days vs the 10 before, percent, default 5
+    name: "Cat 1 Weight Changed"
+  - platform: cat_tracker
+    cat: cat1
+    type: visits_changed   # last 7 days vs the 7 before, percent, default 40
+    name: "Cat 1 Visits Changed"
+  - platform: cat_tracker
+    cat: cat1
+    type: no_visit         # hours since the last identified visit, default 24
+    name: "Cat 1 No Recent Visit"
+    threshold: 18
+```
+
+Only visits the tracker attributed to a cat count, so a cat that skips its collar looks like it is visiting less. The alerts say something changed, not that your cat is sick. A change in weight or in how often a cat uses the box is worth a call to the vet, but it is not a diagnosis. Weight alerts need 3 visits in each period and visit alerts need a week of earlier history, so they stay off for the first couple of weeks. Visit duration is not tracked.

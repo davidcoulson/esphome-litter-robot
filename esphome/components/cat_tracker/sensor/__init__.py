@@ -51,7 +51,7 @@ SUB_SENSORS = {
         _sub_sensor(
             accuracy_decimals=0,
             state_class=STATE_CLASS_TOTAL_INCREASING,
-            icon="mdi:paper-roll",
+            icon="mdi:emoticon-poop",
         ),
         CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_FECES_COUNT,
     ),
@@ -80,6 +80,33 @@ SUB_SENSORS = {
             icon="mdi:scale",
         ),
         CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_URINE_WEIGHT,
+    ),
+    "visits_per_day_7d": (
+        _sub_sensor(
+            accuracy_decimals=1,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:chart-line",
+        ),
+        CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_VISITS_PER_DAY_7D,
+    ),
+    "avg_weight_7d": (
+        _sub_sensor(
+            unit_of_measurement=UNIT_POUND,
+            accuracy_decimals=2,
+            device_class=DEVICE_CLASS_WEIGHT,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:scale-bathroom",
+        ),
+        CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_AVG_WEIGHT_7D,
+    ),
+    "hours_since_visit": (
+        _sub_sensor(
+            unit_of_measurement="h",
+            accuracy_decimals=1,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:timer-sand",
+        ),
+        CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_HOURS_SINCE_VISIT,
     ),
 }
 

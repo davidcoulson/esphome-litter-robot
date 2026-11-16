@@ -48,6 +48,21 @@ The **Waste Drawer Full** sensor mirrors the robot's drawer-full state.
 
 The **Clean Cycles** sensor is the robot's lifetime clean-cycle total.
 
+## Maintenance
+
+Optional package, to be listed after `waste-drawer-cycles.yaml`:
+
+```yaml
+packages:
+  maintenance: !include packages/litter-robot3/maintenance.yaml
+```
+
+- **Cycles Per Full Drawer** - learned from the Waste Drawer Cycles count each time the robot reports the drawer full (counts under 20 are ignored; later readings are averaged with earlier ones).
+- **Drawer Cycles Until Full** / **Days Until Drawer Full** - extrapolated from that capacity and the cycle rate since the drawer was last reset. Days appear after 24 hours of data.
+- **Needs Attention** - `OK`, `Waste drawer nearly full` (from `drawer_warn_percent`, default 80% of the learned capacity) or `Waste drawer full`.
+
+The LR3 has no filter odometer or litter sensor, so there are no filter or litter forecasts.
+
 ## Web Server
 
 The firmware hosts a lightweight web server on the device's IP address for basic control and OTA updates. The default username is `user` and the password is `Wh1sk3rM30wM30w`. You can find the device IP in your router's device list.

@@ -5,6 +5,7 @@
 #include "esphome/core/preferences.h"
 
 #include <array>
+#include <ctime>
 
 namespace esphome::cat_tracker {
 
@@ -35,6 +36,16 @@ class CatTrackerCat : public Component {
   float get_waste_weight(CatTrackerCountType type) const { return this->waste_weight_[static_cast<size_t>(type)]; }
   void reset();
 
+  // Daily history (14 days, flash-backed). Needs a valid clock; visits without one are not recorded.
+  // Averages cover the `days` full days ending `offset` days ago (offset 0 includes today).
+  float visits_per_day(uint8_t offset, uint8_t days) const;
+  float avg_weight(uint8_t offset, uint8_t days) const;  // NaN without visits
+  uint32_t visits_in(uint8_t offset, uint8_t days) const;
+  float hours_since_visit() const;  // NaN if never seen or no clock
+  template<typename F> void add_on_history_callback(F &&callback) {
+    this->history_callback_.add(std::forward<F>(callback));
+  }
+
   template<typename F> void add_on_weight_callback(F &&callback) {
     this->weight_callback_.add(std::forward<F>(callback));
   }
@@ -44,6 +55,8 @@ class CatTrackerCat : public Component {
 
  protected:
   void save_state_();
+  void save_history_();
+  uint32_t today_() const;  // local day number, 0 without a valid clock
   // Imports weight/visits from the 2026.9.2 per-entity NVS key (one-time).
   void migrate_legacy_state_();
 
@@ -55,6 +68,16 @@ class CatTrackerCat : public Component {
   CallbackManager<void(float)> weight_callback_;
   CallbackManager<void()> count_callback_;
   ESPPreferenceObject pref_{};
+
+  static constexpr uint8_t HISTORY_DAYS = 14;
+  struct History {
+    uint32_t day[HISTORY_DAYS];  // day number a slot holds (slot = day % 14); stale slots are ignored
+    uint8_t visits[HISTORY_DAYS];
+    float weight_sum[HISTORY_DAYS];
+    uint32_t last_visit;  // epoch seconds, 0 = never
+  } history_{};
+  ESPPreferenceObject history_pref_{};
+  CallbackManager<void()> history_callback_;
 };
 
 }  // namespace esphome::cat_tracker

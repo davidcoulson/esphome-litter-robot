@@ -1,0 +1,99 @@
+# Per-cat health history: 7-day averages and "changed" alerts for cat1-cat4.
+# Include next to cat-tracker/default.yaml. For other cat ids, copy a block.
+# Alerts say something changed, not that the cat is sick; see the User Guide.
+
+sensor:
+  - platform: cat_tracker
+    cat: cat1
+    visits_per_day_7d:
+      name: "Cat 1 Visits per Day (7d)"
+      disabled_by_default: true
+    avg_weight_7d:
+      name: "Cat 1 Average Weight (7d)"
+      disabled_by_default: true
+    hours_since_visit:
+      name: "Cat 1 Hours Since Last Visit"
+      disabled_by_default: true
+  - platform: cat_tracker
+    cat: cat2
+    visits_per_day_7d:
+      name: "Cat 2 Visits per Day (7d)"
+      disabled_by_default: true
+    avg_weight_7d:
+      name: "Cat 2 Average Weight (7d)"
+      disabled_by_default: true
+    hours_since_visit:
+      name: "Cat 2 Hours Since Last Visit"
+      disabled_by_default: true
+  - platform: cat_tracker
+    cat: cat3
+    visits_per_day_7d:
+      name: "Cat 3 Visits per Day (7d)"
+      disabled_by_default: true
+    avg_weight_7d:
+      name: "Cat 3 Average Weight (7d)"
+      disabled_by_default: true
+    hours_since_visit:
+      name: "Cat 3 Hours Since Last Visit"
+      disabled_by_default: true
+  - platform: cat_tracker
+    cat: cat4
+    visits_per_day_7d:
+      name: "Cat 4 Visits per Day (7d)"
+      disabled_by_default: true
+    avg_weight_7d:
+      name: "Cat 4 Average Weight (7d)"
+      disabled_by_default: true
+    hours_since_visit:
+      name: "Cat 4 Hours Since Last Visit"
+      disabled_by_default: true
+
+binary_sensor:
+  - platform: cat_tracker
+    cat: cat1
+    type: weight_changed
+    name: "Cat 1 Weight Changed"
+  - platform: cat_tracker
+    cat: cat1
+    type: visits_changed
+    name: "Cat 1 Visits Changed"
+  - platform: cat_tracker
+    cat: cat1
+    type: no_visit
+    name: "Cat 1 No Recent Visit"
+  - platform: cat_tracker
+    cat: cat2
+    type: weight_changed
+    name: "Cat 2 Weight Changed"
+  - platform: cat_tracker
+    cat: cat2
+    type: visits_changed
+    name: "Cat 2 Visits Changed"
+  - platform: cat_tracker
+    cat: cat2
+    type: no_visit
+    name: "Cat 2 No Recent Visit"
+  - platform: cat_tracker
+    cat: cat3
+    type: weight_changed
+    name: "Cat 3 Weight Changed"
+  - platform: cat_tracker
+    cat: cat3
+    type: visits_changed
+    name: "Cat 3 Visits Changed"
+  - platform: cat_tracker
+    cat: cat3
+    type: no_visit
+    name: "Cat 3 No Recent Visit"
+  - platform: cat_tracker
+    cat: cat4
+    type: weight_changed
+    name: "Cat 4 Weight Changed"
+  - platform: cat_tracker
+    cat: cat4
+    type: visits_changed
+    name: "Cat 4 Visits Changed"
+  - platform: cat_tracker
+    cat: cat4
+    type: no_visit
+    name: "Cat 4 No Recent Visit"

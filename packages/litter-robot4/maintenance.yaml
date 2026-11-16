@@ -1,0 +1,175 @@
+# Maintenance forecast: how fast the waste drawer fills, when it will be full, when the
+# filter is due, low litter, and a single "Needs Attention" summary.
+# Built only on existing entities (waste_drawer_level, clean_cycle_count,
+# filter_cycle_count, litter_level, waste_drawer_full, hopper_empty); it does not use UART 0x45.
+#
+# Include it from your device config, after the LR4 default package:
+#   packages:
+#     maintenance: !include packages/litter-robot4/maintenance.yaml
+
+substitutions:
+  filter_life_cycles: "500"     # clean cycles per filter; adjust to taste
+  litter_low_percent: "25"      # "Litter Low" turns on below this litter level
+  drawer_warn_percent: "80"     # "Needs Attention" warns from this drawer level
+
+globals:
+  - id: mt_cycles_per_percent
+    type: float
+    restore_value: yes
+    initial_value: "0"
+  - id: mt_base_cycles          # clean cycle count at the last drawer empty
+    type: uint32_t
+    restore_value: yes
+    initial_value: "0"
+  - id: mt_has_base
+    type: bool
+    restore_value: yes
+    initial_value: "false"
+  - id: mt_peak_percent         # highest drawer level since the last empty
+    type: float
+    restore_value: yes
+    initial_value: "0"
+  - id: mt_prev_percent
+    type: float
+    restore_value: yes
+    initial_value: "0"
+  # Powered-on hours since the last empty. shortcut: time the robot is off is not
+  # counted, so days-until-full reads a little long after an outage.
+  - id: mt_hours
+    type: uint32_t
+    restore_value: yes
+    initial_value: "0"
+
+interval:
+  - interval: 1h
+    then:
+      - lambda: "id(mt_hours)++;"
+      - script.execute: mt_update
+
+sensor:
+  - platform: template
+    id: mt_cpp_sensor
+    name: "Cycles Per Percent"
+    icon: "mdi:chart-line"
+    accuracy_decimals: 2
+    update_interval: never
+  - platform: template
+    id: mt_cycles_to_full
+    name: "Drawer Cycles Until Full"
+    icon: "mdi:delete-variant"
+    accuracy_decimals: 0
+    update_interval: never
+  - platform: template
+    id: mt_days_to_full
+    name: "Days Until Drawer Full"
+    icon: "mdi:calendar-clock"
+    unit_of_measurement: "d"
+    accuracy_decimals: 1
+    update_interval: never
+  - platform: template
+    id: mt_filter_cycles_left
+    name: "Filter Cycles Until Due"
+    icon: "mdi:air-filter"
+    accuracy_decimals: 0
+    update_interval: never
+
+  - id: !extend waste_drawer_level
+    on_value:
+      - lambda: |-
+          // A drop of 20+ points means the drawer was emptied: fit cycles-per-percent
+          // from the cycles added while it filled to its peak, blended with the last fit.
+          if (id(mt_has_base) && x <= id(mt_prev_percent) - 20) {
+            if (id(mt_peak_percent) >= 10 && id(clean_cycle_count).has_state()) {
+              float sample = (id(clean_cycle_count).state - id(mt_base_cycles)) / id(mt_peak_percent);
+              id(mt_cycles_per_percent) = id(mt_cycles_per_percent) > 0 ? 0.5f * (id(mt_cycles_per_percent) + sample) : sample;
+            }
+            if (id(clean_cycle_count).has_state())
+              id(mt_base_cycles) = id(clean_cycle_count).state;
+            id(mt_hours) = 0;
+            id(mt_peak_percent) = x;
+          } else if (x > id(mt_peak_percent)) {
+            id(mt_peak_percent) = x;
+          }
+          id(mt_prev_percent) = x;
+      - script.execute: mt_update
+
+  - id: !extend clean_cycle_count
+    on_value:
+      - lambda: |-
+          if (!id(mt_has_base)) {
+            id(mt_base_cycles) = x;
+            id(mt_has_base) = true;
+          }
+      - script.execute: mt_update
+
+  - id: !extend filter_cycle_count
+    on_value:
+      - script.execute: mt_update
+
+  - id: !extend litter_level
+    on_value:
+      - script.execute: mt_update
+
+binary_sensor:
+  - platform: template
+    id: mt_litter_low
+    name: "Litter Low"
+    icon: "mdi:tray-alert"
+  - platform: template
+    id: mt_filter_due
+    name: "Filter Due"
+    icon: "mdi:air-filter"
+
+text_sensor:
+  - platform: template
+    id: mt_needs_attention
+    name: "Needs Attention"
+    icon: "mdi:alert-circle-outline"
+
+script:
+  - id: mt_update
+    mode: restart
+    then:
+      - lambda: |-
+          std::string att;
+          auto add = [&](const char *s) { if (!att.empty()) att += ", "; att += s; };
+
+          const float cpp = id(mt_cycles_per_percent);
+          if (cpp > 0) id(mt_cpp_sensor).publish_state(cpp);
+
+          if (id(waste_drawer_level).has_state()) {
+            const float lvl = id(waste_drawer_level).state;
+            if (id(waste_drawer_full).state || lvl >= 100) {
+              add("Waste drawer full");
+              id(mt_cycles_to_full).publish_state(0);
+              id(mt_days_to_full).publish_state(0);
+            } else {
+              if (lvl >= ${drawer_warn_percent}) add("Waste drawer nearly full");
+              if (cpp > 0) {
+                const float left = (100.0f - lvl) * cpp;
+                id(mt_cycles_to_full).publish_state(left);
+                // Per-day rate needs at least a day of data since the last empty.
+                const float used = id(clean_cycle_count).has_state() ? id(clean_cycle_count).state - id(mt_base_cycles) : 0;
+                if (id(mt_hours) >= 24 && used > 0)
+                  id(mt_days_to_full).publish_state(left / (used / (id(mt_hours) / 24.0f)));
+              }
+            }
+          }
+
+          if (id(filter_cycle_count).has_state()) {
+            const float left = ${filter_life_cycles} - id(filter_cycle_count).state;
+            id(mt_filter_cycles_left).publish_state(left > 0 ? left : 0);
+            id(mt_filter_due).publish_state(left <= 0);
+            if (left <= 0) add("Filter due");
+          }
+
+          if (id(litter_level).has_state()) {
+            const bool low = id(litter_level).state < ${litter_low_percent};
+            id(mt_litter_low).publish_state(low);
+            if (low) add("Litter low");
+          }
+
+          if (id(hopper_empty).state) add("Hopper empty");
+
+          if (att.empty()) att = "OK";
+          id(mt_needs_attention).publish_state(att);
