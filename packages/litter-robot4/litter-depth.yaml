@@ -1,0 +1,41 @@
+# Litter depth from a VL53L1X time-of-flight sensor (e.g. TOF400C) on the same
+# I2C bus as the BME688 (VIN 3.3 V, GND, SDA, SCL; leave INT and SHUT open).
+# The 4 m figure is the maximum range; the minimum is about 4 cm, so mounting it
+# up in the bonnet next to the BME688, looking down at the bed, is fine. Keep
+# its ~27 degree cone clear of the globe wall.
+# Calibrate: read "Litter Distance" with no litter (empty_mm) and filled to the
+# fill line (full_mm), then set the substitutions below in your config.
+substitutions:
+  litter_full_mm: "100"
+  litter_empty_mm: "250"
+
+sensor:
+  - platform: vl53l1x # built into ESPHome 2026.11+
+    id: litter_distance
+    name: "Litter Distance"
+    entity_category: diagnostic
+    distance_mode: short # most accurate under 1.3 m
+    update_interval: 5s
+    filters:
+      # No valid reading comes back as NaN or out of range; drop it.
+      - lambda: |-
+          if (std::isnan(x) || x < 0.04f || x > 1.3f) return {};
+          return x;
+      # A minute-long median rides out the rake and a cat passing the beam.
+      - median:
+          window_size: 12
+          send_every: 12
+          send_first_at: 6
+
+  - platform: template
+    id: litter_depth
+    name: "Litter Depth"
+    icon: "mdi:layers-triple"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    state_class: measurement
+    lambda: |-
+      if (!id(litter_distance).has_state()) return {};
+      const float full = ${litter_full_mm}, empty = ${litter_empty_mm};
+      return clamp((empty - id(litter_distance).state * 1000.0f) / (empty - full) * 100.0f, 0.0f, 100.0f);
+    update_interval: 60s

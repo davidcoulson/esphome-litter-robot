@@ -166,3 +166,7 @@ It needs Home Assistant time (included by default) to count cycles per day.
 Assumptions: the sensor's own BSEC2 drift or a humid room can also move the baseline, and a cat that rarely uses the box leaves little odor to measure. Poop visits cause large spikes (hundreds of ppm), so `Odor Level` is dominated by them for the first minutes after a visit; set `Smell Cycle Minutes` longer than your `Odor Control Delay` plus a cycle so the normal cycle gets the first chance.
 
 Tuning: log `Odor Level` in Home Assistant, note where it settles with clean litter and after a poop visit, then set `Smell Cycle Odor Level` a little above the normal after-visit tail and the two `Change Litter` thresholds above what a fresh box shows over a week.
+
+## Litter depth (experimental)
+
+An optional VL53L1X time-of-flight board (e.g. the TOF400C) shares the BME688's I2C bus (GPIO13/14, 3.3 V, GND; leave INT and SHUT open) and reports how deep the litter is. The "4 m" on the box is the maximum range; the minimum is about 4 cm, so it can sit in the bonnet beside the BME688, looking down at the bed with its ~27° cone clear of the globe wall. Add `packages/litter-robot4/litter-depth.yaml` to your config, then read "Litter Distance" with no litter and again at the fill line, and set `litter_empty_mm` and `litter_full_mm` in `substitutions`. Uses the VL53L1X platform built into ESPHome 2026.11 and later. Untested on a real robot.
