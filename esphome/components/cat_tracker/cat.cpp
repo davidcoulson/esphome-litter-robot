@@ -178,7 +178,7 @@ uint32_t CatTrackerCat::visits_in(uint8_t offset, uint8_t days) const {
 }
 
 float CatTrackerCat::visits_per_day(uint8_t offset, uint8_t days) const {
-  return this->today_() == 0 ? NAN : static_cast<float>(this->visits_in(offset, days)) / days;
+  return !this->history_covers(offset + days - 1) ? NAN : static_cast<float>(this->visits_in(offset, days)) / days;
 }
 
 float CatTrackerCat::avg_weight(uint8_t offset, uint8_t days) const {

@@ -171,7 +171,7 @@ binary_sensor:
     threshold: 18
 ```
 
-Only visits the tracker attributed to a cat count, so a cat that skips its collar looks like it is visiting less. The alerts say something changed, not that your cat is sick. A change in weight or in how often a cat uses the box is worth a call to the vet, but it is not a diagnosis. Weight alerts need 3 weighed visits in each period and visit alerts need two full weeks of history since the tracker started (or was reset), so they stay off for the first two weeks. Visits heard before the clock is set are counted once it is. "Hours Since Last Visit" counts from the start of monitoring until a cat's first visit, so a cat that is never identified eventually raises "No Recent Visit". Days follow the local calendar, including across daylight saving changes.
+Only visits the tracker attributed to a cat count, so a cat that skips its collar looks like it is visiting less. The alerts say something changed, not that your cat is sick. A change in weight or in how often a cat uses the box is worth a call to the vet, but it is not a diagnosis. Weight alerts need 3 weighed visits in each period and visit alerts need two full weeks of history since the tracker started (or was reset), so they stay off for the first two weeks. Visits heard before the clock is set are counted once it is. "Hours Since Last Visit" counts from the start of monitoring until a cat's first visit, so a cat that is never identified eventually raises "No Recent Visit". Visits per Day (7d) shows unknown until 7 full days of history exist. Days follow the local calendar, including across daylight saving changes.
 
 ### Visit duration and "in the box a while"
 
