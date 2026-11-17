@@ -1,5 +1,6 @@
 #pragma once
 
+#include "civil.h"
 #include "dwell.h"
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
@@ -37,12 +38,14 @@ class CatTrackerCat : public Component {
   float get_waste_weight(CatTrackerCountType type) const { return this->waste_weight_[static_cast<size_t>(type)]; }
   void reset();
 
-  // Daily history (14 days, flash-backed). Needs a valid clock; visits without one are not recorded.
+  // Daily history (today + 15 days, flash-backed). Visits before the clock is set are held and counted once it is.
   // Averages cover the `days` full days ending `offset` days ago (offset 0 includes today).
   float visits_per_day(uint8_t offset, uint8_t days) const;
   float avg_weight(uint8_t offset, uint8_t days) const;  // NaN without visits
   uint32_t visits_in(uint8_t offset, uint8_t days) const;
-  float hours_since_visit() const;  // NaN if never seen or no clock
+  float hours_since_visit() const;  // since the last visit, or since monitoring began if none yet; NaN without a clock
+  // True once history spans at least `days_back` days before today, so a baseline window is fully covered.
+  bool history_covers(uint8_t days_back) const;
   // Visit duration from BLE tag sightings. Sightings below min_rssi are ignored; a visit ends when the tag is
   // silent for longer than the gap (or on end_visit()). Durations are history-backed, the live minutes are not.
   void set_min_rssi(int8_t rssi) { this->min_rssi_ = rssi; }
@@ -66,6 +69,7 @@ class CatTrackerCat : public Component {
  protected:
   void save_state_();
   void save_history_();
+  void flush_pending_();
   void on_visit_ended_();
   uint32_t today_() const;  // local day number, 0 without a valid clock
   // Imports weight/visits from the 2026.9.2 per-entity NVS key (one-time).
@@ -80,19 +84,25 @@ class CatTrackerCat : public Component {
   CallbackManager<void()> count_callback_;
   ESPPreferenceObject pref_{};
 
-  static constexpr uint8_t HISTORY_DAYS = 14;
+  static constexpr uint8_t HISTORY_DAYS = 16;  // today + 14 completed days, one spare
   struct History {
-    uint32_t day[HISTORY_DAYS];  // day number a slot holds (slot = day % 14); stale slots are ignored
+    uint32_t day[HISTORY_DAYS];  // day number a slot holds (slot = day % 16); stale slots are ignored
     uint8_t visits[HISTORY_DAYS];
+    uint8_t weight_n[HISTORY_DAYS];  // visits that carried a weight, so a visit never depends on one
     float weight_sum[HISTORY_DAYS];
     uint32_t last_visit;  // epoch seconds, 0 = never
+    uint32_t started;     // epoch seconds monitoring began (first time the clock was valid), 0 = not yet
   } history_{};
   ESPPreferenceObject history_pref_{};
-  // Duration history lives in its own preference so the 14-day history above stays loadable.
+  // Visits seen before the clock was set; counted into today's slot once it is.
+  uint8_t pending_visits_{0}, pending_weights_{0};
+  float pending_weight_sum_{0};
+  // Duration history lives in its own preference so the history above stays loadable.
+  static constexpr uint8_t DURATION_DAYS = 14;
   struct Durations {
-    uint32_t day[HISTORY_DAYS];
-    uint32_t sum_s[HISTORY_DAYS];
-    uint8_t n[HISTORY_DAYS];
+    uint32_t day[DURATION_DAYS];
+    uint32_t sum_s[DURATION_DAYS];
+    uint8_t n[DURATION_DAYS];
     uint32_t last;  // seconds, 0 = never
   } dur_{};
   ESPPreferenceObject dur_pref_{};

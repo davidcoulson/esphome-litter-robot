@@ -81,7 +81,9 @@ sensor:
           if (id(mt_has_base) && x <= id(mt_prev_percent) - 20) {
             if (id(mt_peak_percent) >= 10 && id(clean_cycle_count).has_state()) {
               float sample = (id(clean_cycle_count).state - id(mt_base_cycles)) / id(mt_peak_percent);
-              id(mt_cycles_per_percent) = id(mt_cycles_per_percent) > 0 ? 0.5f * (id(mt_cycles_per_percent) + sample) : sample;
+              // A counter reset or rollover gives a negative or zero delta: ignore it rather than learn from it.
+              if (std::isfinite(sample) && sample > 0)
+                id(mt_cycles_per_percent) = id(mt_cycles_per_percent) > 0 ? 0.5f * (id(mt_cycles_per_percent) + sample) : sample;
             }
             if (id(clean_cycle_count).has_state())
               id(mt_base_cycles) = id(clean_cycle_count).state;
@@ -96,7 +98,8 @@ sensor:
   - id: !extend clean_cycle_count
     on_value:
       - lambda: |-
-          if (!id(mt_has_base)) {
+          // First reading, or the counter went backwards (reset or 16-bit rollover): start counting from here.
+          if (!id(mt_has_base) || x < id(mt_base_cycles)) {
             id(mt_base_cycles) = x;
             id(mt_has_base) = true;
           }
@@ -144,6 +147,8 @@ script:
               id(mt_cycles_to_full).publish_state(0);
               id(mt_days_to_full).publish_state(0);
             } else {
+              id(mt_cycles_to_full).publish_state(NAN);
+              id(mt_days_to_full).publish_state(NAN);
               if (lvl >= ${drawer_warn_percent}) add("Waste drawer nearly full");
               if (cpp > 0) {
                 const float left = (100.0f - lvl) * cpp;

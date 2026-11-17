@@ -1,13 +1,83 @@
 # Cat sync package: shared weight per cat + visit/poop/pee counts summed across robots.
 # Include with:  homeassistant: { packages: { cat_sync: !include cat-sync/cat_sync.yaml } }
-# Robots are listed ONCE in input_text.cat_sync_robots (comma separated ESPHome device slugs).
-# Entities read: sensor.<slug>_cat_<n>_visits / _poop_count / _pee_count
+# Totals sum entities you list explicitly: after installing, open each helper
+# "Cat N <counter> entities" and paste the full entity ids of that cat's sensor on every
+# robot, comma separated (e.g. sensor.robot_a_meg_visits,sensor.robot_b_meg_visits).
+# Nothing is guessed from device names, so renaming entities or devices cannot break it
+# silently: a total goes unavailable until every listed entity has a number.
 input_text:
-  cat_sync_robots:
-    name: Cat sync robots
-    initial: "robot_a,robot_b"   # edit: device slugs as they appear in entity ids
+  cat_1_visits_entities:
+    name: "Cat 1 Visits entities"
     max: 255
-    icon: mdi:robot-vacuum
+    icon: mdi:cat
+  cat_1_poop_entities:
+    name: "Cat 1 Poop Count entities"
+    max: 255
+    icon: mdi:poop
+  cat_1_pee_entities:
+    name: "Cat 1 Pee Count entities"
+    max: 255
+    icon: mdi:water
+  cat_2_visits_entities:
+    name: "Cat 2 Visits entities"
+    max: 255
+    icon: mdi:cat
+  cat_2_poop_entities:
+    name: "Cat 2 Poop Count entities"
+    max: 255
+    icon: mdi:poop
+  cat_2_pee_entities:
+    name: "Cat 2 Pee Count entities"
+    max: 255
+    icon: mdi:water
+  cat_3_visits_entities:
+    name: "Cat 3 Visits entities"
+    max: 255
+    icon: mdi:cat
+  cat_3_poop_entities:
+    name: "Cat 3 Poop Count entities"
+    max: 255
+    icon: mdi:poop
+  cat_3_pee_entities:
+    name: "Cat 3 Pee Count entities"
+    max: 255
+    icon: mdi:water
+  cat_4_visits_entities:
+    name: "Cat 4 Visits entities"
+    max: 255
+    icon: mdi:cat
+  cat_4_poop_entities:
+    name: "Cat 4 Poop Count entities"
+    max: 255
+    icon: mdi:poop
+  cat_4_pee_entities:
+    name: "Cat 4 Pee Count entities"
+    max: 255
+    icon: mdi:water
+  cat_5_visits_entities:
+    name: "Cat 5 Visits entities"
+    max: 255
+    icon: mdi:cat
+  cat_5_poop_entities:
+    name: "Cat 5 Poop Count entities"
+    max: 255
+    icon: mdi:poop
+  cat_5_pee_entities:
+    name: "Cat 5 Pee Count entities"
+    max: 255
+    icon: mdi:water
+  cat_6_visits_entities:
+    name: "Cat 6 Visits entities"
+    max: 255
+    icon: mdi:cat
+  cat_6_poop_entities:
+    name: "Cat 6 Poop Count entities"
+    max: 255
+    icon: mdi:poop
+  cat_6_pee_entities:
+    name: "Cat 6 Pee Count entities"
+    max: 255
+    icon: mdi:water
 
 input_number:
   cat_1_weight:
@@ -66,178 +136,178 @@ template:
         icon: mdi:cat
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_1_visits') | list %}
+          {% set ids = states('input_text.cat_1_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_1_visits') | list %}
+          {% set ids = states('input_text.cat_1_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 1 Total Poop Count"
         unique_id: cat_sync_cat_1_total_feces_count
         icon: mdi:poop
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_1_poop_count') | list %}
+          {% set ids = states('input_text.cat_1_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_1_poop_count') | list %}
+          {% set ids = states('input_text.cat_1_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 1 Total Pee Count"
         unique_id: cat_sync_cat_1_total_urine_count
         icon: mdi:water
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_1_pee_count') | list %}
+          {% set ids = states('input_text.cat_1_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_1_pee_count') | list %}
+          {% set ids = states('input_text.cat_1_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 2 Total Visits"
         unique_id: cat_sync_cat_2_total_visits
         icon: mdi:cat
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_2_visits') | list %}
+          {% set ids = states('input_text.cat_2_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_2_visits') | list %}
+          {% set ids = states('input_text.cat_2_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 2 Total Poop Count"
         unique_id: cat_sync_cat_2_total_feces_count
         icon: mdi:poop
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_2_poop_count') | list %}
+          {% set ids = states('input_text.cat_2_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_2_poop_count') | list %}
+          {% set ids = states('input_text.cat_2_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 2 Total Pee Count"
         unique_id: cat_sync_cat_2_total_urine_count
         icon: mdi:water
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_2_pee_count') | list %}
+          {% set ids = states('input_text.cat_2_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_2_pee_count') | list %}
+          {% set ids = states('input_text.cat_2_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 3 Total Visits"
         unique_id: cat_sync_cat_3_total_visits
         icon: mdi:cat
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_3_visits') | list %}
+          {% set ids = states('input_text.cat_3_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_3_visits') | list %}
+          {% set ids = states('input_text.cat_3_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 3 Total Poop Count"
         unique_id: cat_sync_cat_3_total_feces_count
         icon: mdi:poop
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_3_poop_count') | list %}
+          {% set ids = states('input_text.cat_3_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_3_poop_count') | list %}
+          {% set ids = states('input_text.cat_3_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 3 Total Pee Count"
         unique_id: cat_sync_cat_3_total_urine_count
         icon: mdi:water
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_3_pee_count') | list %}
+          {% set ids = states('input_text.cat_3_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_3_pee_count') | list %}
+          {% set ids = states('input_text.cat_3_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 4 Total Visits"
         unique_id: cat_sync_cat_4_total_visits
         icon: mdi:cat
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_4_visits') | list %}
+          {% set ids = states('input_text.cat_4_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_4_visits') | list %}
+          {% set ids = states('input_text.cat_4_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 4 Total Poop Count"
         unique_id: cat_sync_cat_4_total_feces_count
         icon: mdi:poop
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_4_poop_count') | list %}
+          {% set ids = states('input_text.cat_4_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_4_poop_count') | list %}
+          {% set ids = states('input_text.cat_4_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 4 Total Pee Count"
         unique_id: cat_sync_cat_4_total_urine_count
         icon: mdi:water
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_4_pee_count') | list %}
+          {% set ids = states('input_text.cat_4_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_4_pee_count') | list %}
+          {% set ids = states('input_text.cat_4_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 5 Total Visits"
         unique_id: cat_sync_cat_5_total_visits
         icon: mdi:cat
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_5_visits') | list %}
+          {% set ids = states('input_text.cat_5_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_5_visits') | list %}
+          {% set ids = states('input_text.cat_5_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 5 Total Poop Count"
         unique_id: cat_sync_cat_5_total_feces_count
         icon: mdi:poop
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_5_poop_count') | list %}
+          {% set ids = states('input_text.cat_5_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_5_poop_count') | list %}
+          {% set ids = states('input_text.cat_5_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 5 Total Pee Count"
         unique_id: cat_sync_cat_5_total_urine_count
         icon: mdi:water
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_5_pee_count') | list %}
+          {% set ids = states('input_text.cat_5_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_5_pee_count') | list %}
+          {% set ids = states('input_text.cat_5_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 6 Total Visits"
         unique_id: cat_sync_cat_6_total_visits
         icon: mdi:cat
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_6_visits') | list %}
+          {% set ids = states('input_text.cat_6_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_6_visits') | list %}
+          {% set ids = states('input_text.cat_6_visits_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 6 Total Poop Count"
         unique_id: cat_sync_cat_6_total_feces_count
         icon: mdi:poop
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_6_poop_count') | list %}
+          {% set ids = states('input_text.cat_6_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_6_poop_count') | list %}
+          {% set ids = states('input_text.cat_6_poop_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}
       - name: "Cat 6 Total Pee Count"
         unique_id: cat_sync_cat_6_total_urine_count
         icon: mdi:water
         state_class: total
         availability: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_6_pee_count') | list %}
+          {% set ids = states('input_text.cat_6_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | count > 0 and ids | map('states') | select('is_number') | list | count == ids | count }}
         state: >-
-          {% set ids = states('input_text.cat_sync_robots').split(',') | map('trim') | select | map('regex_replace','^','sensor.') | map('regex_replace','$','_cat_6_pee_count') | list %}
+          {% set ids = states('input_text.cat_6_pee_entities').split(',') | map('trim') | select | list %}
           {{ ids | map('states') | map('float') | sum | int }}

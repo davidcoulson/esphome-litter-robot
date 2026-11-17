@@ -26,14 +26,14 @@ Use the same cat number for the same cat on every robot.
      packages:
        cat_sync: !include packages/cat_sync.yaml
    ```
-   Restart HA. This creates `input_number.cat_1_weight` ... `cat_6_weight`, `input_text.cat_sync_robots`, and sensors `Cat N Total Visits / Poop Count / Pee Count`.
-3. Set **Cat sync robots** (`input_text.cat_sync_robots`) to the device slugs, comma separated, e.g. `robot_a,robot_b`. This is the only place robots are listed for the totals.
+   Restart HA. This creates `input_number.cat_1_weight` ... `cat_6_weight`, 18 `input_text.cat_N_<counter>_entities` helpers, and sensors `Cat N Total Visits / Poop Count / Pee Count`.
+3. For each cat and counter, fill in the matching **Cat N Visits / Poop Count / Pee Count entities** helper with the full entity ids of that cat's sensor on every robot, comma separated, e.g. `sensor.robot_a_meg_visits,sensor.robot_b_meg_visits`. Nothing is guessed from device names, and a total goes unavailable until every listed entity has a number.
 4. Copy `blueprints/automation/cat_weight_sync.yaml` to `<config>/blueprints/automation/cat-sync/` and create **one automation per cat**: pick `input_number.cat_N_weight`, every robot's `Cat N Weight` sensor, and every robot's `Set Cat N Weight` number.
 5. Seed the weight once by typing it into the `input_number`; it is pushed to all robots.
 
 ## How loops are avoided
 
-An automation run acts on a robot sensor change only if it differs from the shared value by more than the tolerance (default 0.2 lb). Our own push makes the other robots' sensors equal the shared value, so their echo is ignored. Pushes skip the robot that triggered, and skip any robot already within 0.005 lb. Editing the shared helper pushes to every robot.
+An automation run acts on a robot sensor change only if it differs from the shared value by more than the tolerance (default 0.2 lb). Our own push makes the other robots' sensors equal the shared value, so their echo is ignored. Pushes skip the robot that triggered, and skip any robot already within 0.005 lb. Editing the shared helper pushes to every robot. A robot whose weight is still unknown (uncalibrated or just reset) is seeded by the push. When a robot comes back from unavailable, it is given the shared value rather than overwriting it with its saved one; only a real measurement updates the shared weight.
 
 ## Limits
 
