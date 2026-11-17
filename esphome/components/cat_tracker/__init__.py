@@ -18,12 +18,22 @@ CONF_CATS = "cats"
 CONF_WASTE_TYPE = "waste_type"
 CONF_WASTE_WEIGHT = "waste_weight"
 CONF_LEGACY_OBJECT_ID = "legacy_object_id"
+CONF_MIN_RSSI = "min_rssi"
+CONF_GAP = "gap"
+CONF_RSSI = "rssi"
 
 cat_tracker_ns = cg.esphome_ns.namespace("cat_tracker")
 CatTrackerComponent = cat_tracker_ns.class_("CatTrackerComponent", cg.Component)
 CatTrackerCat = cat_tracker_ns.class_("CatTrackerCat", cg.Component)
 CatTrackerRecordVisitAction = cat_tracker_ns.class_(
     "CatTrackerRecordVisitAction", automation.Action
+)
+
+CatTrackerTagSeenAction = cat_tracker_ns.class_(
+    "CatTrackerTagSeenAction", automation.Action
+)
+CatTrackerVisitEndedAction = cat_tracker_ns.class_(
+    "CatTrackerVisitEndedAction", automation.Action
 )
 
 CatTrackerCountType = cat_tracker_ns.enum("CatTrackerCountType", is_class=True)
@@ -36,6 +46,9 @@ CAT_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(CatTrackerCat),
         cv.Optional(CONF_LEGACY_OBJECT_ID): cv.string,
+        # BLE tag sightings weaker than this are ignored; a visit ends after this long without one.
+        cv.Optional(CONF_MIN_RSSI, default=-85): cv.int_range(min=-127, max=0),
+        cv.Optional(CONF_GAP, default="60s"): cv.positive_time_period_milliseconds,
     }
 )
 
@@ -69,6 +82,8 @@ async def to_code(config: ConfigType) -> None:
         await cg.register_component(cat, cat_conf)
         if (legacy_object_id := cat_conf.get(CONF_LEGACY_OBJECT_ID)) is not None:
             cg.add(cat.set_legacy_object_id(legacy_object_id))
+        cg.add(cat.set_min_rssi(cat_conf[CONF_MIN_RSSI]))
+        cg.add(cat.set_gap_ms(cat_conf[CONF_GAP]))
         cg.add(var.register_cat(cat))
     for conf in config.get(CONF_ON_VISIT, []):
         await automation.build_callback_automation(
@@ -120,4 +135,51 @@ async def cat_tracker_record_visit_to_code(
     if (waste_weight := config.get(CONF_WASTE_WEIGHT)) is not None:
         waste_weight_value = await cg.templatable(waste_weight, args, cg.float_)
         cg.add(var.set_waste_weight(waste_weight_value))
+    return var
+
+
+@automation.register_action(
+    "cat_tracker.tag_seen",
+    CatTrackerTagSeenAction,
+    cv.Schema(
+        {
+            cv.Required(CONF_CAT): cv.use_id(CatTrackerCat),
+            cv.Required(CONF_RSSI): cv.templatable(cv.int_),
+        }
+    ),
+    synchronous=True,
+)
+async def cat_tracker_tag_seen_to_code(
+    config: ConfigType,
+    action_id: ID,
+    template_arg: cg.TemplateArguments,
+    args: TemplateArgsType,
+) -> MockObj:
+    var = cg.new_Pvariable(action_id, template_arg)
+    cg.add(var.set_cat(await cg.get_variable(config[CONF_CAT])))
+    cg.add(var.set_rssi(await cg.templatable(config[CONF_RSSI], args, cg.int_)))
+    return var
+
+
+@automation.register_action(
+    "cat_tracker.visit_ended",
+    CatTrackerVisitEndedAction,
+    cv.Schema(
+        {
+            cv.GenerateID(CONF_CAT_TRACKER_ID): cv.use_id(CatTrackerComponent),
+            cv.Optional(CONF_CAT): cv.use_id(CatTrackerCat),
+        }
+    ),
+    synchronous=True,
+)
+async def cat_tracker_visit_ended_to_code(
+    config: ConfigType,
+    action_id: ID,
+    template_arg: cg.TemplateArguments,
+    args: TemplateArgsType,
+) -> MockObj:
+    var = cg.new_Pvariable(action_id, template_arg)
+    await cg.register_parented(var, config[CONF_CAT_TRACKER_ID])
+    if (cat_id := config.get(CONF_CAT)) is not None:
+        cg.add(var.set_cat(await cg.get_variable(cat_id)))
     return var

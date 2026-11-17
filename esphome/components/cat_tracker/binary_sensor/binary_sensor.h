@@ -10,6 +10,7 @@ enum class CatTrackerAlertType : uint8_t {
   CAT_TRACKER_ALERT_WEIGHT_CHANGED = 0,
   CAT_TRACKER_ALERT_VISITS_CHANGED = 1,
   CAT_TRACKER_ALERT_NO_VISIT = 2,
+  CAT_TRACKER_ALERT_IN_BOX_TOO_LONG = 3,
 };
 
 // On when a cat's recent history departs from its own baseline. Not medical advice: "changed", not "sick".
@@ -25,7 +26,7 @@ class CatTrackerAlert : public binary_sensor::BinarySensor, public Component {
   void update_();
   CatTrackerCat *cat_;
   CatTrackerAlertType type_;
-  float threshold_{0};  // weight/visits: percent change; no_visit: hours
+  float threshold_{0};  // weight/visits: percent change; no_visit: hours; in_box_too_long: minutes
 };
 
 }  // namespace esphome::cat_tracker

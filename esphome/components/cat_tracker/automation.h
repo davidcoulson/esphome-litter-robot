@@ -39,4 +39,24 @@ class CatTrackerRecordVisitAction final : public Action<Ts...>, public Parented<
   bool has_waste_{false};
 };
 
+template<typename... Ts> class CatTrackerTagSeenAction final : public Action<Ts...> {
+ public:
+  TEMPLATABLE_VALUE(int, rssi)
+  void set_cat(CatTrackerCat *cat) { this->cat_ = cat; }
+  void play(const Ts &...x) override { this->cat_->tag_seen(this->rssi_.value(x...)); }
+
+ protected:
+  CatTrackerCat *cat_{nullptr};
+};
+
+template<typename... Ts>
+class CatTrackerVisitEndedAction final : public Action<Ts...>, public Parented<CatTrackerComponent> {
+ public:
+  void set_cat(CatTrackerCat *cat) { this->cat_ = cat; }
+  void play(const Ts &...x) override { this->parent_->end_visits(this->cat_); }
+
+ protected:
+  CatTrackerCat *cat_{nullptr};
+};
+
 }  // namespace esphome::cat_tracker

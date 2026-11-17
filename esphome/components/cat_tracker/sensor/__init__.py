@@ -1,10 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.const import (
+    DEVICE_CLASS_DURATION,
     DEVICE_CLASS_WEIGHT,
     STATE_CLASS_MEASUREMENT,
     STATE_CLASS_TOTAL_INCREASING,
     UNIT_POUND,
+    UNIT_SECOND,
 )
 from esphome.types import ConfigType
 
@@ -98,6 +100,26 @@ SUB_SENSORS = {
             icon="mdi:scale-bathroom",
         ),
         CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_AVG_WEIGHT_7D,
+    ),
+    "last_visit_duration": (
+        _sub_sensor(
+            unit_of_measurement=UNIT_SECOND,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_DURATION,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:timer-outline",
+        ),
+        CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_LAST_VISIT_DURATION,
+    ),
+    "avg_visit_duration_7d": (
+        _sub_sensor(
+            unit_of_measurement=UNIT_SECOND,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_DURATION,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:timer-sand-complete",
+        ),
+        CatTrackerSensorType.CAT_TRACKER_SENSOR_TYPE_AVG_VISIT_DURATION_7D,
     ),
     "hours_since_visit": (
         _sub_sensor(

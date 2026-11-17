@@ -37,8 +37,15 @@ void CatTrackerCat::setup() {
   this->history_pref_ = global_preferences->make_preference<History>(
       fnv1_hash_extend(fnv1_hash("cat_tracker_hist_"), this->id_name_));
   this->history_pref_.load(&this->history_);
+  this->dur_pref_ = global_preferences->make_preference<Durations>(
+      fnv1_hash_extend(fnv1_hash("cat_tracker_dur_"), this->id_name_));
+  this->dur_pref_.load(&this->dur_);
   // Time passes with no visit: refresh the derived history values (new day, hours since visit).
   this->set_interval(5 * 60 * 1000, [this]() { this->history_callback_.call(); });
+  this->set_interval(5000, [this]() {
+    if (this->dwell_.expire(millis(), this->gap_ms_))
+      this->on_visit_ended_();
+  });
   this->weight_callback_.call(this->weight_);
   this->count_callback_.call();
   this->history_callback_.call();
@@ -132,6 +139,51 @@ float CatTrackerCat::hours_since_visit() const {
   return (::time(nullptr) - this->history_.last_visit) / 3600.0f;
 }
 
+void CatTrackerCat::tag_seen(int rssi) {
+  if (rssi < this->min_rssi_)
+    return;
+  if (this->dwell_.seen(millis(), this->gap_ms_))
+    this->on_visit_ended_();
+}
+
+void CatTrackerCat::end_visit() {
+  if (this->dwell_.finish())
+    this->on_visit_ended_();
+}
+
+void CatTrackerCat::on_visit_ended_() {
+  uint32_t secs = this->dwell_.ended_s, day = this->today_();
+  if (secs > 0) {
+    this->dur_.last = secs;
+    if (day != 0) {
+      uint8_t i = day % HISTORY_DAYS;
+      if (this->dur_.day[i] != day) {
+        this->dur_.day[i] = day;
+        this->dur_.sum_s[i] = 0;
+        this->dur_.n[i] = 0;
+      }
+      if (this->dur_.n[i] < UINT8_MAX) {
+        this->dur_.n[i]++;
+        this->dur_.sum_s[i] += secs;
+      }
+    }
+    this->dur_pref_.save(&this->dur_);
+  }
+  this->history_callback_.call();
+}
+
+float CatTrackerCat::avg_duration(uint8_t offset, uint8_t days) const {
+  uint32_t today = this->today_(), n = 0, sum = 0;
+  for (uint8_t k = offset; today != 0 && k < offset + days && k < HISTORY_DAYS; k++) {
+    uint32_t d = today - k;
+    if (this->dur_.day[d % HISTORY_DAYS] == d) {
+      n += this->dur_.n[d % HISTORY_DAYS];
+      sum += this->dur_.sum_s[d % HISTORY_DAYS];
+    }
+  }
+  return n == 0 ? NAN : static_cast<float>(sum) / n;
+}
+
 void CatTrackerCat::save_history_() { this->history_pref_.save(&this->history_); }
 
 void CatTrackerCat::record_count(CatTrackerCountType type) {
@@ -155,6 +207,9 @@ void CatTrackerCat::reset() {
   this->save_state_();
   this->history_ = {};
   this->save_history_();
+  this->dur_ = {};
+  this->dur_pref_.save(&this->dur_);
+  this->dwell_ = {};
   this->history_callback_.call();
 }
 

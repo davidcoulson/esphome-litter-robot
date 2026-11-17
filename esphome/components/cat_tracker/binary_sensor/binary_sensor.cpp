@@ -9,6 +9,8 @@ static const char *const TAG = "cat_tracker.binary_sensor";
 
 void CatTrackerAlert::setup() {
   this->cat_->add_on_history_callback([this]() { this->update_(); });
+  if (this->type_ == CatTrackerAlertType::CAT_TRACKER_ALERT_IN_BOX_TOO_LONG)
+    this->set_interval(10000, [this]() { this->update_(); });
   this->update_();
 }
 
@@ -31,6 +33,12 @@ void CatTrackerAlert::update_() {
     case CatTrackerAlertType::CAT_TRACKER_ALERT_NO_VISIT: {
       float hours = this->cat_->hours_since_visit();
       on = !std::isnan(hours) && hours > this->threshold_;
+      break;
+    }
+    case CatTrackerAlertType::CAT_TRACKER_ALERT_IN_BOX_TOO_LONG: {
+      // A tag has been heard continuously (see the cat's min_rssi and gap) for longer than the threshold.
+      float minutes = this->cat_->minutes_in_box();
+      on = !std::isnan(minutes) && minutes > this->threshold_;
       break;
     }
   }

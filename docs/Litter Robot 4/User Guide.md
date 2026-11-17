@@ -171,4 +171,40 @@ binary_sensor:
     threshold: 18
 ```
 
-Only visits the tracker attributed to a cat count, so a cat that skips its collar looks like it is visiting less. The alerts say something changed, not that your cat is sick. A change in weight or in how often a cat uses the box is worth a call to the vet, but it is not a diagnosis. Weight alerts need 3 visits in each period and visit alerts need a week of earlier history, so they stay off for the first couple of weeks. Visit duration is not tracked.
+Only visits the tracker attributed to a cat count, so a cat that skips its collar looks like it is visiting less. The alerts say something changed, not that your cat is sick. A change in weight or in how often a cat uses the box is worth a call to the vet, but it is not a diagnosis. Weight alerts need 3 visits in each period and visit alerts need a week of earlier history, so they stay off for the first couple of weeks.
+
+### Visit duration and "in the box a while"
+
+If your cats wear BLE tags, the tracker can time each visit. It needs a sighting from your tag-matching code, so the cat is still identified the way you do it today; add one call to your existing `on_ble_advertise`, for the cat whose tag was heard:
+
+```yaml
+esp32_ble_tracker:
+  on_ble_advertise:
+    - then:
+        - lambda: |-
+            // your existing matching, then for the matched cat:
+            if (x.address_uint64() == 0xAABBCCDDEEFF)
+              id(cat1).tag_seen(x.get_rssi());
+        # or, without a lambda:
+        # - cat_tracker.tag_seen: {cat: cat1, rssi: !lambda "return x.get_rssi();"}
+
+cat_tracker:
+  cats:
+    - id: cat1
+      min_rssi: -80   # ignore sightings weaker than this (default -85)
+      gap: 90s        # tag silent this long = visit over (default 60s)
+
+sensor:
+  - platform: cat_tracker
+    cat: cat1
+    last_visit_duration: {name: "Cat 1 Last Visit Duration"}          # seconds
+    avg_visit_duration_7d: {name: "Cat 1 Average Visit Duration (7d)"} # seconds, includes today
+binary_sensor:
+  - platform: cat_tracker
+    cat: cat1
+    type: in_box_too_long   # minutes of continuous tag presence, default 10
+    name: "Cat 1 In Box a While"
+    threshold: 15
+```
+
+A visit is the time from the first sighting until the tag has been silent for the gap, so it includes the time the cat sits near the box with the tag in range; set `min_rssi` so only a tag inside or at the box counts. You can also end a visit sooner, for example when the robot reports the cat has left, with `cat_tracker.visit_ended` (add `cat: cat1` for one cat, or leave it out for all). The alert turns on while a tag has been heard continuously for longer than the threshold and off when the tag is gone. It says a cat has been in the box a while, nothing more, and is not a safety feature; the robot's own sensors and safety logic are unchanged. Durations use their own small flash record, are only stored while the clock is set, and the averages need at least one timed visit.

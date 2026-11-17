@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dwell.h"
 #include "esphome/core/component.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/preferences.h"
@@ -42,6 +43,15 @@ class CatTrackerCat : public Component {
   float avg_weight(uint8_t offset, uint8_t days) const;  // NaN without visits
   uint32_t visits_in(uint8_t offset, uint8_t days) const;
   float hours_since_visit() const;  // NaN if never seen or no clock
+  // Visit duration from BLE tag sightings. Sightings below min_rssi are ignored; a visit ends when the tag is
+  // silent for longer than the gap (or on end_visit()). Durations are history-backed, the live minutes are not.
+  void set_min_rssi(int8_t rssi) { this->min_rssi_ = rssi; }
+  void set_gap_ms(uint32_t gap_ms) { this->gap_ms_ = gap_ms; }
+  void tag_seen(int rssi);
+  void end_visit();
+  float minutes_in_box() const { return this->dwell_.minutes(millis()); }  // NaN when no tag is present
+  float last_duration() const { return this->dur_.last == 0 ? NAN : this->dur_.last; }  // seconds
+  float avg_duration(uint8_t offset, uint8_t days) const;                                 // seconds, NaN without visits
   template<typename F> void add_on_history_callback(F &&callback) {
     this->history_callback_.add(std::forward<F>(callback));
   }
@@ -56,6 +66,7 @@ class CatTrackerCat : public Component {
  protected:
   void save_state_();
   void save_history_();
+  void on_visit_ended_();
   uint32_t today_() const;  // local day number, 0 without a valid clock
   // Imports weight/visits from the 2026.9.2 per-entity NVS key (one-time).
   void migrate_legacy_state_();
@@ -77,6 +88,17 @@ class CatTrackerCat : public Component {
     uint32_t last_visit;  // epoch seconds, 0 = never
   } history_{};
   ESPPreferenceObject history_pref_{};
+  // Duration history lives in its own preference so the 14-day history above stays loadable.
+  struct Durations {
+    uint32_t day[HISTORY_DAYS];
+    uint32_t sum_s[HISTORY_DAYS];
+    uint8_t n[HISTORY_DAYS];
+    uint32_t last;  // seconds, 0 = never
+  } dur_{};
+  ESPPreferenceObject dur_pref_{};
+  VisitDwell dwell_{};
+  int8_t min_rssi_{-85};
+  uint32_t gap_ms_{60000};
   CallbackManager<void()> history_callback_;
 };
 

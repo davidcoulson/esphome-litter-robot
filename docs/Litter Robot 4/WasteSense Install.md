@@ -145,3 +145,24 @@ packages:
 ```
 
 It needs **Debug Mode** switched on, since the globe weight is only reported then (it adds a UART message per second). It adds `Last Waste Mass` (g), `Waste Mass Detected`, the `Waste Mass Threshold` and `Waste Mass Settle Time` settings, and a disabled `Globe Weight` diagnostic sensor. Each visit is logged at INFO level under `waste_mass` with the before and after weights, so you can compare them with what was really in the drawer. Visits are skipped, with a warning, if the weight did not settle or no readings arrived. Keep `Waste Mass Settle Time` shorter than the cycle delay.
+
+## Odor watch (experimental)
+
+An optional package turns the BME688 VOC reading into a smoothed odor level, can run an extra clean cycle when the smell lingers, and warns when the litter probably needs changing. **All thresholds are untested on real hardware.** The defaults are guesses; watch `Odor Level` for a few days and adjust them.
+
+To include it, add this to your config next to the `waste_sense` and `odor_control` packages:
+
+```yaml
+packages:
+  odor_watch: !include packages/litter-robot4/odor-watch.yaml
+```
+
+It needs Home Assistant time (included by default) to count cycles per day.
+
+- **`Odor Level`** (ppm): the `Breath VOC Equivalent` reading averaged over about 10 minutes, minus a slow floor. The floor drops quickly when the air gets cleaner and creeps up over about 16 hours, so a lasting smell fades from this value and shows up as drift instead. Nothing is reported for the first 10 minutes after boot.
+- **`Smell Cycle`** switch (off by default): when `Odor Level` stays above `Smell Cycle Odor Level` for `Smell Cycle Minutes`, press Cycle once. At most `Smell Cycle Max Per Day` (default 2) run per day. It only runs when the robot is `Ready`, no cat or weight is detected, it is not in sleep mode, `Auto Cycle` is on and no `Odor Control` cycle is pending. After a smell cycle the timer starts over.
+- **`Change Litter Soon`**: on when either the days-long average of `Odor Level` (about a 3 day time constant, saved every 30 minutes) is above `Change Litter Odor Level`, or the floor has risen more than `Change Litter Baseline Drift` above where it was when the litter was fresh. The first is odor that stays even after cycles; the second is the sensor's clean-air baseline creeping up. Press `Litter Changed` after changing the litter to restart both. The very first floor seen is taken as "fresh", so install it when the litter is fresh.
+
+Assumptions: the sensor's own BSEC2 drift or a humid room can also move the baseline, and a cat that rarely uses the box leaves little odor to measure. Poop visits cause large spikes (hundreds of ppm), so `Odor Level` is dominated by them for the first minutes after a visit; set `Smell Cycle Minutes` longer than your `Odor Control Delay` plus a cycle so the normal cycle gets the first chance.
+
+Tuning: log `Odor Level` in Home Assistant, note where it settles with clean litter and after a poop visit, then set `Smell Cycle Odor Level` a little above the normal after-visit tail and the two `Change Litter` thresholds above what a fresh box shows over a week.

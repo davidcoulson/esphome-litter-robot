@@ -16,6 +16,8 @@ enum class CatTrackerSensorType : uint8_t {
   CAT_TRACKER_SENSOR_TYPE_VISITS_PER_DAY_7D = 6,
   CAT_TRACKER_SENSOR_TYPE_AVG_WEIGHT_7D = 7,
   CAT_TRACKER_SENSOR_TYPE_HOURS_SINCE_VISIT = 8,
+  CAT_TRACKER_SENSOR_TYPE_LAST_VISIT_DURATION = 9,
+  CAT_TRACKER_SENSOR_TYPE_AVG_VISIT_DURATION_7D = 10,
 };
 
 // Thin entity that exposes one of a cat's counters, waste weights, or weight.

@@ -46,6 +46,12 @@ void CatTrackerCountSensor::publish_value_() {
     case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_HOURS_SINCE_VISIT:
       this->publish_state(this->cat_->hours_since_visit());
       break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_LAST_VISIT_DURATION:
+      this->publish_state(this->cat_->last_duration());
+      break;
+    case CatTrackerSensorType::CAT_TRACKER_SENSOR_TYPE_AVG_VISIT_DURATION_7D:
+      this->publish_state(this->cat_->avg_duration(0, 7));
+      break;
   }
 }
 

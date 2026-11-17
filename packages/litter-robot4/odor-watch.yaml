@@ -1,0 +1,216 @@
+# Odor watch: a smoothed, baseline-relative odor level from the WasteSense VOC
+# reading, an optional extra clean cycle when it stays high, and a slow
+# "Change Litter Soon" indicator. Needs waste-sense.yaml (voc) and
+# odor-control.yaml (suppress_ready, odor_control_cycle). All thresholds are
+# untested on real hardware: tune them.
+globals:
+  # Runtime smoothing state; rebuilt after a reboot.
+  - id: odor_ema
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  - id: odor_floor
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  # Persisted copies, written every 30 min only, to spare the flash.
+  - id: odor_floor_saved
+    type: float
+    restore_value: yes
+    initial_value: "NAN"
+  # Floor at the time the litter was last changed (or first seen).
+  - id: odor_floor_ref
+    type: float
+    restore_value: yes
+    initial_value: "NAN"
+  # Days-long average of the odor level.
+  - id: odor_slow_avg
+    type: float
+    restore_value: yes
+    initial_value: "0"
+  - id: smell_above_s
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: smell_day
+    type: int
+    restore_value: yes
+    initial_value: "0"
+  - id: smell_count
+    type: int
+    restore_value: yes
+    initial_value: "0"
+
+switch:
+  - platform: template
+    id: smell_cycle
+    name: "Smell Cycle"
+    icon: "mdi:weather-windy"
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
+number:
+  - platform: template
+    id: smell_cycle_threshold
+    name: "Smell Cycle Odor Level"
+    icon: "mdi:gauge"
+    entity_category: config
+    unit_of_measurement: "ppm"
+    mode: box
+    min_value: 0.5
+    max_value: 100
+    step: 0.5
+    optimistic: true
+    restore_value: true
+    initial_value: 5
+  - platform: template
+    id: smell_cycle_minutes
+    name: "Smell Cycle Minutes"
+    icon: "mdi:timer-sand"
+    entity_category: config
+    unit_of_measurement: "min"
+    mode: box
+    min_value: 1
+    max_value: 120
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 15
+  - platform: template
+    id: smell_cycle_max_per_day
+    name: "Smell Cycle Max Per Day"
+    icon: "mdi:counter"
+    entity_category: config
+    mode: box
+    min_value: 1
+    max_value: 10
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: 2
+  - platform: template
+    id: change_litter_level
+    name: "Change Litter Odor Level"
+    icon: "mdi:gauge-full"
+    entity_category: config
+    unit_of_measurement: "ppm"
+    mode: box
+    min_value: 0.1
+    max_value: 50
+    step: 0.1
+    optimistic: true
+    restore_value: true
+    initial_value: 1.5
+  - platform: template
+    id: change_litter_drift
+    name: "Change Litter Baseline Drift"
+    icon: "mdi:trending-up"
+    entity_category: config
+    unit_of_measurement: "ppm"
+    mode: box
+    min_value: 0.1
+    max_value: 50
+    step: 0.1
+    optimistic: true
+    restore_value: true
+    initial_value: 3
+
+sensor:
+  # EMA over ~10 min of the VOC reading, minus a slow floor that follows the
+  # EMA down quickly and up over ~16 h, so a stale litter bed shows as drift
+  # instead of as a permanent odor.
+  - platform: template
+    id: odor_level
+    name: "Odor Level"
+    icon: "mdi:scent"
+    unit_of_measurement: "ppm"
+    accuracy_decimals: 2
+    state_class: measurement
+    update_interval: 30s
+    lambda: |-
+      const float x = id(${voc_sensor_id}).state;
+      if (isnan(x) || millis() < 600000)  // BSEC needs minutes to settle
+        return {};
+      if (isnan(id(odor_ema)))
+        id(odor_ema) = x;
+      id(odor_ema) += 0.05f * (x - id(odor_ema));
+      if (isnan(id(odor_floor)))
+        id(odor_floor) = isnan(id(odor_floor_saved)) ? id(odor_ema) : id(odor_floor_saved);
+      if (id(odor_ema) < id(odor_floor))
+        id(odor_floor) += 0.2f * (id(odor_ema) - id(odor_floor));
+      else
+        id(odor_floor) += 0.0005f * (id(odor_ema) - id(odor_floor));
+      return id(odor_ema) - id(odor_floor);
+
+binary_sensor:
+  - platform: template
+    id: change_litter_soon
+    name: "Change Litter Soon"
+    icon: "mdi:delete-restore"
+    lambda: |-
+      const float floor = id(odor_floor), ref = id(odor_floor_ref);
+      if (isnan(floor) || isnan(ref))
+        return false;
+      return id(odor_slow_avg) > id(change_litter_level).state ||
+             floor - ref > id(change_litter_drift).state;
+
+button:
+  # Press after changing the litter: restarts the days-long tracking.
+  - platform: template
+    id: litter_changed
+    name: "Litter Changed"
+    icon: "mdi:delete-sweep"
+    entity_category: config
+    on_press:
+      - lambda: |-
+          id(odor_slow_avg) = 0;
+          id(odor_floor_ref) = id(odor_floor);
+          id(smell_above_s) = 0;
+
+interval:
+  # Persist the slow state and track the long-term average.
+  - interval: 30min
+    then:
+      - lambda: |-
+          const float lvl = id(odor_level).state;
+          if (isnan(lvl) || isnan(id(odor_floor)))
+            return;
+          id(odor_floor_saved) = id(odor_floor);
+          if (isnan(id(odor_floor_ref)))
+            id(odor_floor_ref) = id(odor_floor);
+          // ~3 day time constant at 48 samples a day.
+          id(odor_slow_avg) += 0.007f * (lvl - id(odor_slow_avg));
+
+  # Smell cycle: the level must stay above the threshold for N minutes.
+  - interval: 30s
+    then:
+      - lambda: |-
+          const float lvl = id(odor_level).state;
+          if (!id(smell_cycle).state || isnan(lvl) || lvl <= id(smell_cycle_threshold).state)
+            id(smell_above_s) = 0;
+          else
+            id(smell_above_s) += 30;
+          auto t = id(ha_time).now();
+          if (t.is_valid()) {
+            const int day = t.year * 1000 + t.day_of_year;
+            if (day != id(smell_day)) {
+              id(smell_day) = day;
+              id(smell_count) = 0;
+            }
+          }
+      - if:
+          condition:
+            and:
+              - lambda: "return id(smell_above_s) >= (int) (id(smell_cycle_minutes).state * 60);"
+              - lambda: "return id(ha_time).now().is_valid() && id(smell_count) < (int) id(smell_cycle_max_per_day).state;"
+              # Same guards as odor_control_cycle, plus the robot must be Ready.
+              - lambda: "return id(smell_cycle).state && id(auto_cycle).state && !id(sleeping).state;"
+              - lambda: 'return id(robot_status).state == "Ready" && !id(suppress_ready);'
+              - lambda: "return !id(curtain_detected).state && !id(weight_detected).state;"
+              - lambda: "return !id(odor_control_cycle).is_running();"
+          then:
+            - lambda: |-
+                id(smell_count) += 1;
+                id(smell_above_s) = 0;
+            - button.press: cycle

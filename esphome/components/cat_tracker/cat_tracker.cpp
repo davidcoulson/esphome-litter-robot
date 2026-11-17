@@ -109,6 +109,17 @@ void CatTrackerComponent::record_waste_weight(CatTrackerCat *cat, CatTrackerCoun
 #endif
 }
 
+void CatTrackerComponent::end_visits(CatTrackerCat *cat) {
+#if CAT_TRACKER_MAX_CATS > 0
+  if (cat != nullptr) {
+    cat->end_visit();
+    return;
+  }
+  for (auto *c : this->cats_)
+    c->end_visit();
+#endif
+}
+
 void CatTrackerComponent::reset() {
 #if CAT_TRACKER_MAX_CATS > 0
   for (auto *cat : this->cats_) {

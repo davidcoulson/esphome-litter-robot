@@ -20,6 +20,7 @@ class CatTrackerComponent : public Component {
   void register_cat(CatTrackerCat *cat);
 #endif
   void reset();
+  void end_visits(CatTrackerCat *cat);  // nullptr = every cat
   CatTrackerCat *match_weight(float weight);
   void register_visit(CatTrackerCat *cat);
   void record_waste(CatTrackerCat *cat, CatTrackerCountType type);

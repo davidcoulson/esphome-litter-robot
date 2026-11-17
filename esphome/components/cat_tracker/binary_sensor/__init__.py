@@ -17,17 +17,19 @@ CatTrackerAlertType = cat_tracker_ns.enum("CatTrackerAlertType", is_class=True)
 CONF_TYPE = "type"
 CONF_THRESHOLD = "threshold"
 
-# type -> (enum, default threshold): weight and visit alerts are percent change, no_visit is hours.
+# type -> (enum, default threshold): weight and visit alerts are percent change, no_visit is hours, in_box_too_long is minutes.
 ALERT_TYPES = {
     "weight_changed": (CatTrackerAlertType.CAT_TRACKER_ALERT_WEIGHT_CHANGED, 5.0),
     "visits_changed": (CatTrackerAlertType.CAT_TRACKER_ALERT_VISITS_CHANGED, 40.0),
     "no_visit": (CatTrackerAlertType.CAT_TRACKER_ALERT_NO_VISIT, 24.0),
+    "in_box_too_long": (CatTrackerAlertType.CAT_TRACKER_ALERT_IN_BOX_TOO_LONG, 10.0),
 }
 
 ICONS = {
     "weight_changed": "mdi:scale-unbalanced",
     "visits_changed": "mdi:chart-line-variant",
     "no_visit": "mdi:clock-alert-outline",
+    "in_box_too_long": "mdi:timer-alert-outline",
 }
 
 
