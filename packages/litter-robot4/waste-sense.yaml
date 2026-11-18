@@ -19,6 +19,18 @@ text_sensor:
             lambda: 'return x != "Cat detected";'
           then:
             - script.execute: odor_control_cancel
+      - if:
+          condition:
+            lambda: |-
+              return x == "Clean cycle in progress" || x == "Emptying litter" ||
+                     x == "Filter replacement in progress";
+          then:
+            - script.execute: waste_sense_cycle_start
+      - if:
+          condition:
+            lambda: 'return x == "Ready";'
+          then:
+            - script.execute: waste_sense_robot_ready
       - script.execute: update_odor_control_clear
 
 binary_sensor:

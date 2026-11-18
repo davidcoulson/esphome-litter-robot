@@ -1,6 +1,7 @@
 # WasteSense: VOC-based feces/urine classification and odor control.
-# The robot package calls waste_sense_visit_start/end, odor_control_update and
-# odor_control_cancel, and defines odor_control_cycle.
+# The robot package calls waste_sense_visit_start/end, waste_sense_cycle_start,
+# waste_sense_robot_ready, odor_control_update and odor_control_cancel, and
+# defines odor_control_cycle.
 substitutions:
   waste_sense_sensor_id: "bme680"
   voc_sensor_id: "voc"
@@ -43,6 +44,12 @@ globals:
     type: int
     restore_value: no
     initial_value: "0"
+  # Set from a cycle start until the robot is ready, so cycle VOCs stay out of
+  # the baseline.
+  - id: voc_baseline_hold
+    type: bool
+    restore_value: no
+    initial_value: "false"
   - id: feces_detected
     type: bool
     restore_value: no
@@ -134,6 +141,9 @@ sensor:
           if (isnan(x))
             return;
           if (!id(waste_detection_active)) {
+            id(voc_spike_samples) = 0;
+            if (id(voc_baseline_hold))
+              return;
             // Idle: average recent readings into the baseline.
             if (isnan(id(voc_baseline)))
               id(voc_baseline) = x;
@@ -141,7 +151,6 @@ sensor:
               id(voc_baseline) += ${feces_voc_baseline_fall_alpha} * (x - id(voc_baseline));
             else
               id(voc_baseline) += ${feces_voc_baseline_alpha} * (x - id(voc_baseline));
-            id(voc_spike_samples) = 0;
             return;
           }
           const float baseline = id(voc_baseline);
@@ -187,6 +196,22 @@ script:
           id(feces_detected) = false;
           id(voc_spike_samples) = 0;
           id(odor_control_pending) = false;
+
+  # Cycle VOCs would read as feces, so a cycle ends the visit as urine.
+  - id: waste_sense_cycle_start
+    then:
+      - lambda: "id(voc_baseline_hold) = true;"
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active);"
+          then:
+            - script.execute:
+                id: waste_sense_close
+                feces: false
+
+  - id: waste_sense_robot_ready
+    then:
+      - lambda: "id(voc_baseline_hold) = false;"
 
   - id: waste_sense_visit_end
     then:
