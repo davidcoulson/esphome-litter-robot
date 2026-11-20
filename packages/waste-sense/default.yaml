@@ -9,8 +9,6 @@ substitutions:
   # baseline. Cat spikes range from ~3 ppm to ~1000 ppm over a 1 ppm baseline,
   # so the threshold is relative rather than a fixed ppm delta.
   feces_voc_ratio: "2.0"
-  # Minimum ppm rise, so noise around a near-zero baseline cannot trigger.
-  feces_voc_min_delta: "1.0"
   # Readings in a row that must clear the threshold.
   feces_voc_confirm_samples: "2"
   # Idle baseline weight while the reading is above it.
@@ -157,8 +155,6 @@ sensor:
           if (isnan(baseline))
             return;
           float threshold = baseline * (${feces_voc_ratio} - 1.0f);
-          if (threshold < ${feces_voc_min_delta})
-            threshold = ${feces_voc_min_delta};
           // 5 is the stock threshold; 10 halves it, 1 multiplies it by 5.
           const float sensitivity = id(odor_control_sensitivity).state / 5.0f;
           if (!isnan(sensitivity) && sensitivity > 0.0f)
@@ -170,7 +166,7 @@ sensor:
           id(voc_spike_samples) += 1;
           if (id(voc_spike_samples) < ${feces_voc_confirm_samples})
             return;
-          ESP_LOGD("waste_sense", "Feces VOC spike: %.1f -> %.1f ppm (needed +%.1f)", baseline, x, threshold);
+          ESP_LOGD("waste_sense", "Feces VOC spike: %.2f -> %.2f ppm (needed +%.2f)", baseline, x, threshold);
           id(feces_detected) = true;
       - if:
           condition:
