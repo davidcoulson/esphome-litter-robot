@@ -71,6 +71,11 @@ script:
             - lambda: "id(suppress_ready) = true;"
             - button.press: reset
             - delay: 1s
-            - button.press: cycle
-            - delay: 1s
+            # Re-check: a cat may have stepped in during the reset.
+            - if:
+                condition:
+                  lambda: "return !id(curtain_detected).state && !id(weight_detected).state && !id(sleeping).state;"
+                then:
+                  - button.press: cycle
+                  - delay: 1s
             - lambda: "id(suppress_ready) = false;"

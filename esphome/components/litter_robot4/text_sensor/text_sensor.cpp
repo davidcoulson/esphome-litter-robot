@@ -12,6 +12,11 @@ void LitterRobot4StatusTextSensor::setup() {
       return;
     if (auto *name = status_name(value)) {
       this->publish_state(name);
+    } else {
+      // Never keep a stale "Ready": guards compare this state before pressing Cycle.
+      char buf[20];
+      snprintf(buf, sizeof(buf), "Unknown (0x%02X)", value);
+      this->publish_state(buf);
     }
   });
 }

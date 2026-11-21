@@ -118,6 +118,7 @@ static const StatusInfo STATUS_NAMES[] = {
     {STATUS_CAT_DETECTED, "Cat detected"},
     {STATUS_CLEAN_CYCLE, "Clean cycle in progress"},
     {STATUS_EMPTYING, "Emptying litter"},
+    {STATUS_EXPOSING_WASTE_DRAWER, "Exposing waste drawer"},
     {STATUS_FILTER_REPLACEMENT, "Filter replacement in progress"},
     {STATUS_START_CALIBRATION, "Starting calibration"},
     {STATUS_CALIBRATING, "Calibration in progress"},
@@ -125,11 +126,13 @@ static const StatusInfo STATUS_NAMES[] = {
 
 static const FaultInfo FAULT_NAMES[] = {
     {FAULT_CLEAR, "None"},
+    {FAULT_TIMEOUT, "Timeout"},
     {FAULT_GLOBE_DISCONNECT, "Globe motor disconnected"},
     {FAULT_UNDERVOLTAGE, "Undervoltage"},
     {FAULT_GLOBE_OVERTORQUE_AMP, "Globe motor over-torque"},
     {FAULT_GLOBE_OVERTORQUE_SLOPE, "Globe motor over-torque"},
     {FAULT_PINCH, "Pinch detected"},
+    {FAULT_ALL_SENSORS, "All sensors"},
 };
 
 // clang-format off
