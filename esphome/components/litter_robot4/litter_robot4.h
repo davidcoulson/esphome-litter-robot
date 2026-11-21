@@ -13,6 +13,7 @@ static const uint8_t FRAME_TERMINATOR = 0xFF;
 static const uint8_t MAX_PENDING = 64;
 static const uint8_t MAX_POLL_REGISTERS = 64;
 static const uint32_t PENDING_TIMEOUT = 100;
+static const uint8_t WRITE_RETRIES = 2;
 static const size_t FORMAT_BUFFER_SIZE = 48;
 
 enum Direction : uint8_t {
@@ -237,6 +238,7 @@ class LitterRobot4Component final : public uart::UARTDevice, public Component {
   PendingOperation pending_queue_[MAX_PENDING];
   uint8_t pending_head_{0}, pending_tail_{0}, pending_count_{0};
   uint32_t pending_timestamp_{0};
+  uint8_t pending_attempts_{0};
 
   LazyCallbackManager<void(Register, uint16_t)> on_register_update_callback_;
   StaticVector<Register, MAX_POLL_REGISTERS> poll_registers_;

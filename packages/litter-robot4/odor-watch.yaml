@@ -224,6 +224,8 @@ interval:
               # Same guards as odor_control_cycle, plus the robot must be Ready.
               - lambda: "return id(smell_cycle).state && id(auto_cycle).state && !id(sleeping).state;"
               - lambda: 'return id(robot_status).state == "Ready" && !id(suppress_ready);'
+              # has_state(): both sensors are event-only and unknown after a reboot.
+              - lambda: "return id(curtain_detected).has_state() && id(weight_detected).has_state();"
               - lambda: "return !id(curtain_detected).state && !id(weight_detected).state;"
               - lambda: "return !id(odor_control_cycle).is_running();"
           then:

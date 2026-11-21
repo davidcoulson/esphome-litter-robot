@@ -265,6 +265,7 @@ void LitterRobot4Component::pop_queue_() {
     this->lockout_bypass_pops_--;
   this->pending_head_ = (this->pending_head_ + 1) % MAX_PENDING;
   this->pending_count_--;
+  this->pending_attempts_ = 0;
 
   if (this->pending_count_ > 0) {
     auto &next = this->pending_queue_[this->pending_head_];
@@ -281,6 +282,16 @@ void LitterRobot4Component::check_timeouts_() {
     }
     bool is_write = pending_op.op == OP_WRITE;
     char name[FORMAT_BUFFER_SIZE];
+    // Retry writes so a lost frame can't leave the panel unlocked or drop a setting. Not keypad
+    // presses: the PIC may have acted with only the ack lost, and a second Cycle press pauses.
+    if (is_write && pending_op.reg != REG_KEYPAD && this->pending_attempts_ < WRITE_RETRIES) {
+      this->pending_attempts_++;
+      ESP_LOGW(TAG, "Write for %s timed out, retry %u", reg_name(pending_op.reg, name, sizeof(name)),
+               this->pending_attempts_);
+      this->pending_timestamp_ = millis();
+      this->send_frame_(pending_op.op, pending_op.reg, pending_op.value);
+      break;
+    }
     ESP_LOGW(TAG, "%s for %s timed out", is_write ? "Write" : "Read",
              reg_name(pending_op.reg, name, sizeof(name)));
     this->pop_queue_();

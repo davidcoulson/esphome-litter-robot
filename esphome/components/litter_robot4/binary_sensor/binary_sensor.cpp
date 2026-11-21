@@ -22,7 +22,8 @@ void LitterRobot4BoolBinarySensor::dump_config() {
 }
 
 void LitterRobot4DetectionBinarySensor::setup() {
-  this->publish_initial_state(false);
+  // Event-only: no initial "clear", so has_state() stays false until the PIC reports and a
+  // reboot with a cat inside is not read as an empty globe.
   this->parent_->add_on_register_update_callback([this](Register reg, uint16_t value) {
     if (reg == REG_KEYPAD && (value == CMD_KEYPAD_RESET)) {
       this->publish_state(false);

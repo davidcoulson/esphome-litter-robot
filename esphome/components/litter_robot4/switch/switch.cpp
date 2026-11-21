@@ -6,6 +6,12 @@ namespace esphome::litter_robot4 {
 static const char *const TAG = "litter_robot4.switch";
 
 void LitterRobot4SleepSchedule::set_day_enabled(DayOfWeek day, bool enabled) {
+  if (!this->mask_known_) {
+    // Writing now would clear every other day.
+    ESP_LOGW(TAG, "Sleep days not read yet, ignoring change");
+    this->parent_->queue_register_read(REG_SLEEP_DAY_MASK);
+    return;
+  }
   if (enabled) {
     this->mask_ |= (1 << static_cast<uint8_t>(day));
   } else {

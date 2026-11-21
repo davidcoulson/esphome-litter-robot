@@ -11,10 +11,14 @@ namespace esphome::litter_robot4 {
 class LitterRobot4SleepSchedule : public Parented<LitterRobot4Component> {
  public:
   void set_day_enabled(DayOfWeek day, bool enabled);
-  void update_mask(uint16_t mask) { this->mask_ = mask; }
+  void update_mask(uint16_t mask) {
+    this->mask_ = mask;
+    this->mask_known_ = true;
+  }
 
  protected:
   uint16_t mask_{0};
+  bool mask_known_{false};
 };
 
 class LitterRobot4BoolSwitch : public switch_::Switch, public Component, public Parented<LitterRobot4Component> {
