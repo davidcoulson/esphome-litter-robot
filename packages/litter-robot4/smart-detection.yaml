@@ -61,8 +61,7 @@ script:
                      !id(curtain_detected).state && !id(weight_detected).state &&
                      id(robot_status).state == "Cat detected";
           then:
-            - script.execute: press_reset_unlocked
-            - script.wait: press_reset_unlocked
+            - button.press: reset
 
   - id: cat_pending_expire
     mode: restart

@@ -1,7 +1,7 @@
 # Odor watch: a smoothed, baseline-relative odor level from the WasteSense VOC
 # reading, an optional extra clean cycle when it stays high, and a slow
-# "Change Litter Soon" indicator. Needs waste-sense.yaml (voc) and
-# odor-control.yaml (suppress_ready, odor_control_cycle). All thresholds are
+# "Change Litter Soon" indicator. Needs the WasteSense voc sensor and
+# litter-robot4/waste-sense.yaml (suppress_ready, odor_control_cycle). All thresholds are
 # untested on real hardware: tune them.
 globals:
   # The VOC value and millis() at which it last changed; a reading that stops changing is stale.

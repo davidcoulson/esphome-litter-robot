@@ -1,0 +1,288 @@
+# WasteSense: VOC-based feces/urine classification and odor control.
+# The robot package calls waste_sense_visit_start/end, waste_sense_cycle_start,
+# waste_sense_robot_ready, odor_control_update and odor_control_cancel, and
+# defines odor_control_cycle.
+substitutions:
+  waste_sense_sensor_id: "bme680"
+  voc_sensor_id: "voc"
+  # A visit is feces once the reading rises this many times over the idle
+  # baseline. Cat spikes range from ~3 ppm to ~1000 ppm over a 1 ppm baseline,
+  # so the threshold is relative rather than a fixed ppm delta.
+  feces_voc_ratio: "2.0"
+  # Readings in a row that must clear the threshold.
+  feces_voc_confirm_samples: "2"
+  # Idle baseline weight while the reading is above it.
+  feces_voc_baseline_alpha: "0.2"
+  # ...and while below it, followed faster so the baseline recovers from a
+  # visit's spike instead of lagging above the clean air.
+  feces_voc_baseline_fall_alpha: "0.6"
+  # Home Assistant slider position on the 1-10 scale that leaves the threshold
+  # above unchanged. The stock threshold is already quite sensitive, so lower
+  # values mostly trade sensitivity away; higher values detect smaller rises.
+  odor_control_sensitivity: "5"
+  # Minutes.
+  waste_sense_timeout: "2"
+  odor_control_delay: "1"
+
+globals:
+  # User's enable/disable intent, independent of whether the sensor is present.
+  - id: odor_control_enabled
+    type: bool
+    restore_value: yes
+    initial_value: "true"
+  - id: waste_detection_active
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: voc_baseline
+    type: float
+    restore_value: no
+    initial_value: "NAN"
+  - id: voc_spike_samples
+    type: int
+    restore_value: no
+    initial_value: "0"
+  # Set from a cycle start until the robot is ready, so cycle VOCs stay out of
+  # the baseline.
+  - id: voc_baseline_hold
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: feces_detected
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: odor_control_pending
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: odor_control_clear
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  # Cat has been clear for at least the odor control delay.
+  - id: odor_control_settled
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+switch:
+  - platform: template
+    id: odor_control
+    name: "Odor Control"
+    icon: "mdi:scent-off"
+    entity_category: config
+    restore_mode: DISABLED
+    lambda: |-
+      return id(odor_control_enabled) && !id(${waste_sense_sensor_id}).is_failed();
+    turn_on_action:
+      - lambda: "id(odor_control_enabled) = true;"
+    turn_off_action:
+      - lambda: "id(odor_control_enabled) = false;"
+    on_turn_off:
+      - script.execute: odor_control_cancel
+
+number:
+  # Runtime adjustment for the feces VOC threshold on a 1-10 scale: 5 matches
+  # the substitutions above, lower needs a larger rise, higher a smaller one.
+  - platform: template
+    id: odor_control_sensitivity
+    name: "Odor Control Sensitivity"
+    icon: "mdi:tune-variant"
+    entity_category: config
+    mode: slider
+    min_value: 1
+    max_value: 10
+    step: 1
+    optimistic: true
+    restore_value: true
+    initial_value: ${odor_control_sensitivity}
+  - platform: template
+    id: waste_sense_timeout
+    name: "WasteSense Timeout"
+    icon: "mdi:timer-sand"
+    entity_category: config
+    disabled_by_default: true
+    unit_of_measurement: "min"
+    mode: slider
+    min_value: 0.5
+    max_value: 5
+    step: 0.5
+    optimistic: true
+    restore_value: true
+    initial_value: ${waste_sense_timeout}
+  - platform: template
+    id: odor_control_delay
+    name: "Odor Control Delay"
+    icon: "mdi:timer-sync"
+    entity_category: config
+    disabled_by_default: true
+    unit_of_measurement: "min"
+    mode: slider
+    min_value: 0
+    max_value: 10
+    step: 0.5
+    optimistic: true
+    restore_value: true
+    initial_value: ${odor_control_delay}
+
+sensor:
+  # Mirrors the nested, non-extendable VOC sensor onto a top-level id so the
+  # detection logic can hook its on_value.
+  - platform: copy
+    source_id: ${voc_sensor_id}
+    id: voc_detect
+    internal: true
+  - id: !extend voc_detect
+    on_value:
+      - lambda: |-
+          if (isnan(x))
+            return;
+          if (!id(waste_detection_active)) {
+            id(voc_spike_samples) = 0;
+            if (id(voc_baseline_hold))
+              return;
+            // Idle: average recent readings into the baseline.
+            if (isnan(id(voc_baseline)))
+              id(voc_baseline) = x;
+            else if (x < id(voc_baseline))
+              id(voc_baseline) += ${feces_voc_baseline_fall_alpha} * (x - id(voc_baseline));
+            else
+              id(voc_baseline) += ${feces_voc_baseline_alpha} * (x - id(voc_baseline));
+            return;
+          }
+          const float baseline = id(voc_baseline);
+          if (isnan(baseline))
+            return;
+          float threshold = baseline * (${feces_voc_ratio} - 1.0f);
+          // 5 is the stock threshold; 10 halves it, 1 multiplies it by 5.
+          const float sensitivity = id(odor_control_sensitivity).state / 5.0f;
+          if (!isnan(sensitivity) && sensitivity > 0.0f)
+            threshold /= sensitivity;
+          if (x - baseline < threshold) {
+            id(voc_spike_samples) = 0;
+            return;
+          }
+          id(voc_spike_samples) += 1;
+          if (id(voc_spike_samples) < ${feces_voc_confirm_samples})
+            return;
+          ESP_LOGD("waste_sense", "Feces VOC spike: %.2f -> %.2f ppm (needed +%.2f)", baseline, x, threshold);
+          id(feces_detected) = true;
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active) && id(feces_detected);"
+          then:
+            - script.execute:
+                id: waste_sense_close
+                feces: true
+
+script:
+  # A visit still open on entry had no feces spike, so it is urine.
+  - id: waste_sense_visit_start
+    then:
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active);"
+          then:
+            - script.execute:
+                id: waste_sense_close
+                feces: false
+      - lambda: |-
+          id(waste_detection_active) = true;
+          id(feces_detected) = false;
+          id(voc_spike_samples) = 0;
+          id(odor_control_pending) = false;
+
+  # Cycle VOCs would read as feces, so a cycle ends the visit as urine.
+  - id: waste_sense_cycle_start
+    then:
+      - lambda: "id(voc_baseline_hold) = true;"
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active);"
+          then:
+            - script.execute:
+                id: waste_sense_close
+                feces: false
+
+  - id: waste_sense_robot_ready
+    then:
+      - lambda: "id(voc_baseline_hold) = false;"
+
+  - id: waste_sense_visit_end
+    then:
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active);"
+          then:
+            - script.execute: waste_detection_timeout
+
+  - id: waste_detection_timeout
+    mode: restart
+    then:
+      - delay: !lambda "return (uint32_t) (id(waste_sense_timeout).state * 60000.0f);"
+      - if:
+          condition:
+            lambda: "return id(waste_detection_active);"
+          then:
+            - script.execute:
+                id: waste_sense_close
+                feces: false
+
+  - id: waste_sense_close
+    parameters:
+      feces: bool
+    then:
+      - script.stop: waste_detection_timeout
+      - lambda: |-
+          id(waste_detection_active) = false;
+          // Drop the baseline so the next visit does not inherit this one's spike.
+          id(voc_baseline) = NAN;
+          if (feces && id(odor_control).state)
+            id(odor_control_pending) = true;
+      - script.execute:
+          id: waste_sense_classified
+          feces: !lambda "return feces;"
+      - script.execute: odor_control_evaluate
+
+  # Extension point.
+  - id: waste_sense_classified
+    parameters:
+      feces: bool
+    then:
+      - logger.log:
+          format: "Visit classified as %s"
+          args: ['feces ? "feces" : "urine"']
+
+  - id: odor_control_update
+    parameters:
+      clear: bool
+    then:
+      - lambda: "id(odor_control_clear) = clear;"
+      - script.execute: odor_control_evaluate
+
+  - id: odor_control_cancel
+    then:
+      - lambda: "id(odor_control_pending) = false;"
+
+  # The delay runs from when the cat clears, so later feces cycles at once.
+  - id: odor_control_evaluate
+    then:
+      - lambda: |-
+          const bool clear = id(odor_control_clear);
+          if (!clear) {
+            id(odor_control_settled) = false;
+            id(odor_control_settle).stop();
+          } else if (!id(odor_control_settled) && !id(odor_control_settle).is_running()) {
+            id(odor_control_settle).execute();
+          }
+          if (id(odor_control_pending) && clear && id(odor_control_settled)) {
+            id(odor_control_pending) = false;
+            id(odor_control_cycle).execute();
+          }
+
+  - id: odor_control_settle
+    then:
+      - delay: !lambda "return (uint32_t) (id(odor_control_delay).state * 60000.0f);"
+      - lambda: "id(odor_control_settled) = true;"
+      - script.execute: odor_control_evaluate

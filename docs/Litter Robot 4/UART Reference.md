@@ -66,6 +66,8 @@ The PIC reports physical button presses by pushing a value to register `0x01`. T
 
 A low byte value of `0x02` is written instead of `0x01` to indicate a long press.
 
+Simulated presses are ignored while [Control Panel Lockout](#control-panel-lockout-0x17) is enabled, just like physical ones. To simulate a press while locked, write `0x17` = `0`, then the button value, then `0x17` = `1` to restore the lock.
+
 ## 6. Configuration Registers
 
 ### Debug Mode 0x05
