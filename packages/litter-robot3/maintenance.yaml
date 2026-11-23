@@ -86,8 +86,8 @@ script:
           } else if (cap > 0) {
             const float left = cap > used ? cap - used : 0;
             id(mt_cycles_to_full).publish_state(left);
-            if (id(mt_hours) >= 24 && used > 0)
-              id(mt_days_to_full).publish_state(left / (used / (id(mt_hours) / 24.0f)));
+            // Unknown until the new batch has a day of data, not the previous drawer's estimate.
+            id(mt_days_to_full).publish_state(id(mt_hours) >= 24 && used > 0 ? left / (used / (id(mt_hours) / 24.0f)) : NAN);
             if (used * 100.0f >= cap * ${drawer_warn_percent}) att = "Waste drawer nearly full";
           }
           id(mt_needs_attention).publish_state(att.empty() ? "OK" : att);

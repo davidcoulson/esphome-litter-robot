@@ -19,12 +19,13 @@ class CatTrackerRecordVisitAction final : public Action<Ts...>, public Parented<
 
   void play(const Ts &...x) override {
     CatTrackerCat *cat = this->cat_;
+    const bool weighed = cat == nullptr;  // `cat:` given means no weight was measured
     if (cat == nullptr) {
       cat = this->parent_->match_weight(this->weight_.value(x...));
     }
     if (cat == nullptr)
       return;
-    this->parent_->register_visit(cat);
+    this->parent_->register_visit(cat, weighed);
     if (this->has_waste_) {
       this->parent_->record_waste(cat, this->waste_type_);
     }

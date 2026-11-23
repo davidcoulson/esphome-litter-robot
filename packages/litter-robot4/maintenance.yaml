@@ -114,6 +114,14 @@ sensor:
       - script.execute: mt_update
 
 binary_sensor:
+  - id: !extend waste_drawer_full
+    trigger_on_initial_state: true
+    on_state:
+      - script.execute: mt_update
+  - id: !extend hopper_empty
+    trigger_on_initial_state: true
+    on_state:
+      - script.execute: mt_update
   - platform: template
     id: mt_litter_low
     name: "Litter Low"

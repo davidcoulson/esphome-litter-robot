@@ -99,8 +99,11 @@ sensor:
           std::sort(sorted.begin(), sorted.end());
           id(globe_median) = sorted[sorted.size() / 2];
           id(globe_span) = sorted.back() - sorted.front();
-          // Track the idle baseline from settled windows while nobody is inside.
-          if (id(weight_detected).state || id(globe_span) > ${waste_mass_max_span_lb} + 0.001f) {
+          // Track the idle baseline from settled windows while nobody is inside (known, not assumed
+          // after a reboot) and the globe is not turning.
+          const std::string &st = id(robot_status).state;
+          const bool turning = st == "Clean cycle in progress" || st == "Emptying litter" || st == "Filter replacement in progress";
+          if (!id(weight_detected).has_state() || id(weight_detected).state || turning || id(globe_span) > ${waste_mass_max_span_lb} + 0.001f) {
             id(globe_stable_run) = 0;
             return;
           }
@@ -122,6 +125,16 @@ sensor:
     accuracy_decimals: 0
     state_class: measurement
     update_interval: never
+
+text_sensor:
+  # A cycle that starts during the settle delay moves the globe: drop the measurement.
+  - id: !extend robot_status
+    on_value:
+      - if:
+          condition:
+            lambda: 'return x == "Clean cycle in progress" || x == "Emptying litter" || x == "Filter replacement in progress";'
+          then:
+            - script.stop: waste_mass_measure
 
 binary_sensor:
   - platform: template
@@ -149,6 +162,7 @@ script:
       - lambda: |-
           const float before = id(globe_visit_baseline);
           const float after = id(globe_median);
+          id(globe_visit_baseline) = NAN;  // one measurement per recorded visit start
           if (millis() - id(globe_last_ms) > 5000) {
             ESP_LOGW("waste_mass", "Visit skipped: no globe weight readings (is Debug Mode on?)");
             return;

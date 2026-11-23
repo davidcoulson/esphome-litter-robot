@@ -22,7 +22,8 @@ class CatTrackerComponent : public Component {
   void reset();
   void end_visits(CatTrackerCat *cat);  // nullptr = every cat
   CatTrackerCat *match_weight(float weight);
-  void register_visit(CatTrackerCat *cat);
+  // weighed = false for a visit identified without a fresh weight (e.g. by tag only)
+  void register_visit(CatTrackerCat *cat, bool weighed = true);
   void record_waste(CatTrackerCat *cat, CatTrackerCountType type);
   // Stores the most recent waste weight (ounces) for the given waste type.
   void record_waste_weight(CatTrackerCat *cat, CatTrackerCountType type, float weight);

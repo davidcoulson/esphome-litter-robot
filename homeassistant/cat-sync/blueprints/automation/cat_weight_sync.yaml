@@ -58,6 +58,9 @@ trigger:
 condition:
   - condition: template
     value_template: "{{ trigger.to_state is not none and trigger.to_state.state | is_number and trigger.to_state.state | float > 0 }}"
+  # A queued event whose entity has changed again since is superseded: acting on it would replay an old weight.
+  - condition: template
+    value_template: "{{ states(trigger.entity_id) == trigger.to_state.state }}"
   # state is lb only while the sensor keeps its native unit
   - condition: template
     value_template: >-

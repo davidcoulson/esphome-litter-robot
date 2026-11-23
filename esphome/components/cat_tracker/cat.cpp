@@ -104,19 +104,19 @@ void CatTrackerCat::set_weight(float weight) {
   this->save_state_();
 }
 
-void CatTrackerCat::record_visit() {
+void CatTrackerCat::record_visit(bool weighed) {
   if (this->today_() == 0) {
     // No clock yet: hold the visit so it still counts once SNTP/HA sets the time.
     if (this->pending_visits_ < UINT8_MAX) {
       this->pending_visits_++;
-      if (!std::isnan(this->weight_) && this->pending_weights_ < UINT8_MAX) {
+      if (weighed && !std::isnan(this->weight_) && this->pending_weights_ < UINT8_MAX) {
         this->pending_weights_++;
         this->pending_weight_sum_ += this->weight_;
       }
     }
   } else {
     this->pending_visits_++;
-    if (!std::isnan(this->weight_)) {
+    if (weighed && !std::isnan(this->weight_)) {
       this->pending_weights_++;
       this->pending_weight_sum_ += this->weight_;
     }
@@ -173,6 +173,16 @@ uint32_t CatTrackerCat::visits_in(uint8_t offset, uint8_t days) const {
     uint32_t d = today - k;
     if (this->history_.day[d % HISTORY_DAYS] == d)
       total += this->history_.visits[d % HISTORY_DAYS];
+  }
+  return total;
+}
+
+uint32_t CatTrackerCat::weights_in(uint8_t offset, uint8_t days) const {
+  uint32_t today = this->today_(), total = 0;
+  for (uint8_t k = offset; today != 0 && k < offset + days && k < HISTORY_DAYS; k++) {
+    uint32_t d = today - k;
+    if (this->history_.day[d % HISTORY_DAYS] == d)
+      total += this->history_.weight_n[d % HISTORY_DAYS];
   }
   return total;
 }

@@ -15,6 +15,20 @@ interval:
     then:
       - litter_robot4.sync_time:
           time_id: ha_time
+  # An interval first fires one period after boot, so also sync once when the time is known.
+  - interval: 1min
+    then:
+      - if:
+          condition:
+            lambda: |-
+              static bool done = false;
+              if (done || !id(ha_time).now().is_valid())
+                return false;
+              done = true;
+              return true;
+          then:
+            - litter_robot4.sync_time:
+                time_id: ha_time
 
 switch:
   - platform: litter_robot4

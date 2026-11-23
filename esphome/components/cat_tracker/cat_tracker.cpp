@@ -64,13 +64,13 @@ CatTrackerCat *CatTrackerComponent::match_weight(float weight) {
 #endif
 }
 
-void CatTrackerComponent::register_visit(CatTrackerCat *cat) {
+void CatTrackerComponent::register_visit(CatTrackerCat *cat, bool weighed) {
 #if CAT_TRACKER_MAX_CATS > 0
   if (cat == nullptr) {
     ESP_LOGW(TAG, "Cannot register visit: no cat specified");
     return;
   }
-  cat->record_visit();
+  cat->record_visit(weighed);
   this->on_visit_callback_.call();
 #else
   ESP_LOGW(TAG, "Cannot register visit: no cats are configured");

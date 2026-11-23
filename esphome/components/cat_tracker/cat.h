@@ -31,7 +31,8 @@ class CatTrackerCat : public Component {
   void set_weight(float weight);
   float get_weight() const { return this->weight_; }
 
-  void record_visit();
+  // weighed: weight_ was measured on this visit (not a cached or seeded value)
+  void record_visit(bool weighed);
   void record_count(CatTrackerCountType type);
   uint32_t get_count(CatTrackerCountType type) const { return this->counts_[static_cast<size_t>(type)]; }
   void set_waste_weight(CatTrackerCountType type, float weight);
@@ -43,6 +44,7 @@ class CatTrackerCat : public Component {
   float visits_per_day(uint8_t offset, uint8_t days) const;
   float avg_weight(uint8_t offset, uint8_t days) const;  // NaN without visits
   uint32_t visits_in(uint8_t offset, uint8_t days) const;
+  uint32_t weights_in(uint8_t offset, uint8_t days) const;
   float hours_since_visit() const;  // since the last visit, or since monitoring began if none yet; NaN without a clock
   // True once history spans at least `days_back` days before today, so a baseline window is fully covered.
   bool history_covers(uint8_t days_back) const;

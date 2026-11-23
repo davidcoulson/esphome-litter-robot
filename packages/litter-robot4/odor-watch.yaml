@@ -5,10 +5,6 @@
 # untested on real hardware: tune them.
 globals:
   # The VOC value and millis() at which it last changed; a reading that stops changing is stale.
-  - id: odor_voc_last
-    type: float
-    restore_value: no
-    initial_value: "NAN"
   - id: odor_voc_ms
     type: uint32_t
     restore_value: no
@@ -138,11 +134,16 @@ sensor:
     state_class: measurement
     update_interval: 30s
     lambda: |-
-      const float x = id(${voc_sensor_id}).state;
-      if (!isnan(x) && x != id(odor_voc_last)) {
-        id(odor_voc_last) = x;
-        id(odor_voc_ms) = millis();
+      // Freshness is a new publication, not a changed value: a steady reading is still alive.
+      static bool hooked = false;
+      if (!hooked) {
+        hooked = true;
+        id(${voc_sensor_id}).add_on_state_callback([](float v) {
+          if (!isnan(v))
+            id(odor_voc_ms) = millis();
+        });
       }
+      const float x = id(${voc_sensor_id}).state;
       // Settling, no reading, or no new reading for 15 min: publish unknown and restart the smoothing, so
       // a failed sensor can neither show an old level nor count toward a smell cycle.
       if (isnan(x) || millis() < 600000 || id(odor_voc_ms) == 0 || millis() - id(odor_voc_ms) > 900000) {

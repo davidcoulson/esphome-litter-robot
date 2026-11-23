@@ -21,7 +21,7 @@ void CatTrackerAlert::update_() {
       // Last 3 days against the 10 days before; needs 3 weighed visits in each and history covering both windows,
       // so one odd reading or a freshly reset tracker cannot trip it.
       float recent = this->cat_->avg_weight(0, 3), base = this->cat_->avg_weight(3, 10);
-      on = this->cat_->history_covers(12) && this->cat_->visits_in(0, 3) >= 3 && this->cat_->visits_in(3, 10) >= 3 &&
+      on = this->cat_->history_covers(12) && this->cat_->weights_in(0, 3) >= 3 && this->cat_->weights_in(3, 10) >= 3 &&
            base > 0 && std::abs(recent - base) / base * 100.0f > this->threshold_;
       break;
     }

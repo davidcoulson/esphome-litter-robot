@@ -42,7 +42,11 @@ binary_sensor:
           then:
             - script.execute: waste_sense_visit_start
             - script.stop: odor_control_cycle
-            - lambda: "id(suppress_ready) = false;"
+            - lambda: |-
+                // A "Ready" may have been hidden while the cycle script ran: read the status again.
+                if (id(suppress_ready))
+                  id(my_litter_robot4).request_poll();
+                id(suppress_ready) = false;
           else:
             - script.execute: waste_sense_visit_end
       - script.execute: update_odor_control_clear
@@ -80,4 +84,9 @@ script:
                 then:
                   - button.press: cycle
                   - delay: 1s
-            - lambda: "id(suppress_ready) = false;"
+                  - lambda: "id(suppress_ready) = false;"
+                else:
+                  # No cycle follows, so the hidden "Ready" was the real state: read it again.
+                  - lambda: |-
+                      id(suppress_ready) = false;
+                      id(my_litter_robot4).request_poll();
