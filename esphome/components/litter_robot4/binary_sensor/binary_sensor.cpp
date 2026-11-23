@@ -26,7 +26,9 @@ void LitterRobot4DetectionBinarySensor::setup() {
   // reboot with a cat inside is not read as an empty globe.
   this->parent_->add_on_register_update_callback([this](Register reg, uint16_t value) {
     if (reg == REG_KEYPAD && (value == CMD_KEYPAD_RESET)) {
-      this->publish_state(false);
+      // Reset clears a known detection, but must not turn "unknown" into "clear".
+      if (this->has_state())
+        this->publish_state(false);
       return;
     }
     if (reg != REG_DETECTION_EVENT)

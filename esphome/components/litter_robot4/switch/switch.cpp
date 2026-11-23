@@ -45,6 +45,7 @@ void LitterRobot4SleepDayEnabledSwitch::setup() {
   this->parent_->add_on_register_update_callback([this](Register reg, uint16_t value) {
     if (reg == REG_SLEEP_DAY_MASK) {
       this->schedule_->update_mask(value);
+      this->set_has_state(true);  // lets Sleep Override wait for the first read
       this->publish_state((value >> static_cast<uint8_t>(this->day_)) & 1);
     }
   });

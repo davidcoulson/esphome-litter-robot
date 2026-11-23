@@ -24,72 +24,89 @@ switch:
              id(sleep_sat).hour == 0 && id(sleep_sat).minute == 0 &&
              id(wake_sat).hour == 0 && id(wake_sat).minute == 0;
     turn_on_action:
-      # Remember the schedule so turning the override off can put it back.
-      - lambda: |-
-          if (id(sleep_override).state)
-            return;
-          datetime::TimeEntity *times[14] = {id(sleep_sun), id(wake_sun), id(sleep_mon), id(wake_mon), id(sleep_tue), id(wake_tue), id(sleep_wed),
-                                         id(wake_wed), id(sleep_thu), id(wake_thu), id(sleep_fri), id(wake_fri), id(sleep_sat),
-                                         id(wake_sat)};
-          switch_::Switch *days[7] = {id(sleep_schedule_sun), id(sleep_schedule_mon), id(sleep_schedule_tue), id(sleep_schedule_wed),
-                                id(sleep_schedule_thu), id(sleep_schedule_fri), id(sleep_schedule_sat)};
-          for (int i = 0; i < 14; i++)
-            id(saved_sleep_times)[i] = times[i]->hour * 60 + times[i]->minute;
-          uint8_t mask = 0;
-          for (int i = 0; i < 7; i++)
-            if (days[i]->state)
-              mask |= 1 << i;
-          id(saved_sleep_days) = mask;
-          id(saved_sleep_valid) = true;
-      - datetime.time.set:
-          id: sleep_sun
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_sun
-          time: "00:00:00"
-      - datetime.time.set:
-          id: sleep_mon
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_mon
-          time: "00:00:00"
-      - datetime.time.set:
-          id: sleep_tue
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_tue
-          time: "00:00:00"
-      - datetime.time.set:
-          id: sleep_wed
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_wed
-          time: "00:00:00"
-      - datetime.time.set:
-          id: sleep_thu
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_thu
-          time: "00:00:00"
-      - datetime.time.set:
-          id: sleep_fri
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_fri
-          time: "00:00:00"
-      - datetime.time.set:
-          id: sleep_sat
-          time: "00:00:00"
-      - datetime.time.set:
-          id: wake_sat
-          time: "00:00:00"
-      - switch.turn_on: sleep_schedule_sun
-      - switch.turn_on: sleep_schedule_mon
-      - switch.turn_on: sleep_schedule_tue
-      - switch.turn_on: sleep_schedule_wed
-      - switch.turn_on: sleep_schedule_thu
-      - switch.turn_on: sleep_schedule_fri
-      - switch.turn_on: sleep_schedule_sat
+      # Only once the whole schedule has been read: otherwise the snapshot would be empty and the
+      # override would overwrite the robot's schedule with nothing to restore.
+      - if:
+          condition:
+            lambda: |-
+              datetime::TimeEntity *times[14] = {id(sleep_sun), id(wake_sun), id(sleep_mon), id(wake_mon), id(sleep_tue), id(wake_tue), id(sleep_wed),
+                                             id(wake_wed), id(sleep_thu), id(wake_thu), id(sleep_fri), id(wake_fri), id(sleep_sat),
+                                             id(wake_sat)};
+              for (auto *t : times)
+                if (!t->has_state())
+                  return false;
+              return id(sleep_schedule_sun).has_state();
+          then:
+            # Remember the schedule so turning the override off can put it back.
+            - lambda: |-
+                if (id(sleep_override).state)
+                  return;
+                datetime::TimeEntity *times[14] = {id(sleep_sun), id(wake_sun), id(sleep_mon), id(wake_mon), id(sleep_tue), id(wake_tue), id(sleep_wed),
+                                               id(wake_wed), id(sleep_thu), id(wake_thu), id(sleep_fri), id(wake_fri), id(sleep_sat),
+                                               id(wake_sat)};
+                switch_::Switch *days[7] = {id(sleep_schedule_sun), id(sleep_schedule_mon), id(sleep_schedule_tue), id(sleep_schedule_wed),
+                                      id(sleep_schedule_thu), id(sleep_schedule_fri), id(sleep_schedule_sat)};
+                for (int i = 0; i < 14; i++)
+                  id(saved_sleep_times)[i] = times[i]->hour * 60 + times[i]->minute;
+                uint8_t mask = 0;
+                for (int i = 0; i < 7; i++)
+                  if (days[i]->state)
+                    mask |= 1 << i;
+                id(saved_sleep_days) = mask;
+                id(saved_sleep_valid) = true;
+                global_preferences->sync();  // survive a power cut before the periodic flush
+            - datetime.time.set:
+                id: sleep_sun
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_sun
+                time: "00:00:00"
+            - datetime.time.set:
+                id: sleep_mon
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_mon
+                time: "00:00:00"
+            - datetime.time.set:
+                id: sleep_tue
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_tue
+                time: "00:00:00"
+            - datetime.time.set:
+                id: sleep_wed
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_wed
+                time: "00:00:00"
+            - datetime.time.set:
+                id: sleep_thu
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_thu
+                time: "00:00:00"
+            - datetime.time.set:
+                id: sleep_fri
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_fri
+                time: "00:00:00"
+            - datetime.time.set:
+                id: sleep_sat
+                time: "00:00:00"
+            - datetime.time.set:
+                id: wake_sat
+                time: "00:00:00"
+            - switch.turn_on: sleep_schedule_sun
+            - switch.turn_on: sleep_schedule_mon
+            - switch.turn_on: sleep_schedule_tue
+            - switch.turn_on: sleep_schedule_wed
+            - switch.turn_on: sleep_schedule_thu
+            - switch.turn_on: sleep_schedule_fri
+            - switch.turn_on: sleep_schedule_sat
+          else:
+            - lambda: |-
+                ESP_LOGW("sleep_override", "Sleep schedule not read yet, ignoring Sleep Override");
     turn_off_action:
       - switch.turn_off: sleep_schedule_sun
       - switch.turn_off: sleep_schedule_mon
@@ -117,7 +134,26 @@ switch:
           for (int i = 0; i < 7; i++)
             if (id(saved_sleep_days) & (1 << i))
               days[i]->turn_on();
-          id(saved_sleep_valid) = false;
+      # Drop the snapshot only after the robot reads back the restored schedule, so a failed
+      # restore can be retried by turning the override off again.
+      - delay: 30s
+      - lambda: |-
+          if (!id(saved_sleep_valid))
+            return;
+          datetime::TimeEntity *times[14] = {id(sleep_sun), id(wake_sun), id(sleep_mon), id(wake_mon), id(sleep_tue), id(wake_tue), id(sleep_wed),
+                                         id(wake_wed), id(sleep_thu), id(wake_thu), id(sleep_fri), id(wake_fri), id(sleep_sat),
+                                         id(wake_sat)};
+          switch_::Switch *days[7] = {id(sleep_schedule_sun), id(sleep_schedule_mon), id(sleep_schedule_tue), id(sleep_schedule_wed),
+                                id(sleep_schedule_thu), id(sleep_schedule_fri), id(sleep_schedule_sat)};
+          bool restored = true;
+          for (int i = 0; i < 14; i++)
+            restored &= times[i]->hour * 60 + times[i]->minute == id(saved_sleep_times)[i];
+          for (int i = 0; i < 7; i++)
+            restored &= days[i]->state == (((id(saved_sleep_days) >> i) & 1) != 0);
+          if (restored)
+            id(saved_sleep_valid) = false;
+          else
+            ESP_LOGW("sleep_override", "Schedule restore not confirmed, turn Sleep Override off again to retry");
 
 globals:
   - id: saved_sleep_times

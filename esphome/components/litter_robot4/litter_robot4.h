@@ -247,6 +247,8 @@ class LitterRobot4Component final : public uart::UARTDevice, public Component {
   bool panel_lockout_{false};
   // Queue pops left until the relock of a keypad lockout bypass completes; lockout frames are masked meanwhile.
   uint8_t lockout_bypass_pops_{0};
+  // Relock writes still allowed if the panel reads unlocked after a bypass.
+  uint8_t relock_tries_{0};
 };
 
 }  // namespace esphome::litter_robot4

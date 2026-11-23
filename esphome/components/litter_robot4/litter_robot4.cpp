@@ -37,6 +37,7 @@ void LitterRobot4Component::request_poll() {
 void LitterRobot4Component::queue_register_write(Register reg, uint16_t value) {
   if (reg == REG_PANEL_LOCKOUT) {
     this->panel_lockout_ = value != 0;
+    this->relock_tries_ = 0;
   } else if (reg == REG_KEYPAD && this->panel_lockout_) {
     // The PIC ignores simulated presses while the panel is locked, so unlock around the press.
     // All three must fit, otherwise a dropped relock would leave the panel unlocked.
@@ -48,6 +49,7 @@ void LitterRobot4Component::queue_register_write(Register reg, uint16_t value) {
     this->push_queue_(OP_WRITE, reg, value);
     this->push_queue_(OP_WRITE, REG_PANEL_LOCKOUT, 1);
     this->lockout_bypass_pops_ = this->pending_count_;
+    this->relock_tries_ = 3;
     return;
   }
   this->push_queue_(OP_WRITE, reg, value);
@@ -250,8 +252,18 @@ bool LitterRobot4Component::is_poll_register_(Register reg) const {
 void LitterRobot4Component::notify_register_update_(Register reg, uint16_t value) {
   if (reg == REG_PANEL_LOCKOUT) {
     // Lockout frames during a bypass are transient; report the user-facing state so the switch doesn't flicker.
-    if (this->lockout_bypass_pops_ == 0)
-      this->panel_lockout_ = value != 0;
+    if (this->lockout_bypass_pops_ == 0) {
+      if (value == 0 && this->relock_tries_ > 0) {
+        // The bypass is over but the panel is still unlocked (relock lost, or popped by a late
+        // ack): lock it again. The ack's read-back brings us back here to check.
+        this->relock_tries_--;
+        ESP_LOGW(TAG, "Panel still unlocked after keypad press, locking again");
+        this->push_queue_(OP_WRITE, REG_PANEL_LOCKOUT, 1);
+      } else {
+        this->relock_tries_ = 0;
+        this->panel_lockout_ = value != 0;
+      }
+    }
     value = this->panel_lockout_;
   }
   this->on_register_update_callback_.call(reg, value);
@@ -299,10 +311,10 @@ void LitterRobot4Component::check_timeouts_() {
     ESP_LOGW(TAG, "%s for %s timed out", is_write ? "Write" : "Read",
              reg_name(pending_op.reg, name, sizeof(name)));
     this->pop_queue_();
-    // A lockout write that never got through: read the real state so HA doesn't show a relock
-    // that may not have happened.
-    if (is_write && timed_out_reg == REG_PANEL_LOCKOUT)
-      this->queue_register_read(REG_PANEL_LOCKOUT);
+    // A write that never got through: read the real state so HA doesn't show a relock or a
+    // setting that may not have happened.
+    if (is_write && this->is_poll_register_(timed_out_reg))
+      this->queue_register_read(timed_out_reg);
   }
 }
 
