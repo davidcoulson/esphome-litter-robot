@@ -171,8 +171,13 @@ binary_sensor:
   - platform: litter_robot4
     type: curtain_detected
     id: curtain_detected
+    # No state until the PIC reports, and ESPHome skips triggers on a first state, so without
+    # this the first visit after every boot is missed by on_state/on_press handlers.
+    trigger_on_initial_state: true
     name: "Curtain Detected"
   - platform: litter_robot4
     type: weight_detected
     id: weight_detected
+    # See curtain_detected.
+    trigger_on_initial_state: true
     name: "Weight Detected"
