@@ -36,6 +36,7 @@ script:
             lambda: |-
               return !id(auto_cycle).state && !id(sleeping).state &&
                      id(robot_status).state == "Cat detected" &&
+                     id(curtain_detected).has_state() && id(weight_detected).has_state() &&
                      !id(curtain_detected).state && !id(weight_detected).state;
           then:
             - script.execute: cancel_pending_cycle
@@ -51,6 +52,7 @@ script:
             lambda: |-
               return !id(auto_cycle).state && !id(sleeping).state &&
                      id(robot_status).state == "Cat detected" &&
+                     id(curtain_detected).has_state() && id(weight_detected).has_state() &&
                      !id(curtain_detected).state && !id(weight_detected).state;
           then:
             - button.press: reset

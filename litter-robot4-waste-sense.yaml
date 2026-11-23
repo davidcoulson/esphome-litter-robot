@@ -7,11 +7,13 @@ esphome:
     - <nvs.h>
 
 dashboard_import:
-  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot4-waste-sense.yaml@LR4/stable
+  package_import_url: github://davidcoulson/esphome-litter-robot/litter-robot4-waste-sense.yaml@main
 
 packages:
   common: !include packages/common/default.yaml
   base: !include packages/litter-robot4/default.yaml
+  # Weight-only cats 1-4. Replace with your own cat_tracker block for BLE tags or sub-devices.
+  cat_tracking: !include packages/cat-tracker/default.yaml
   waste_tracking: !include packages/cat-tracker/waste-tracking/default.yaml
   waste_sense: !include packages/waste-sense/default.yaml
   waste_sense_tracking: !include packages/waste-sense/cat-tracker.yaml

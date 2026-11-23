@@ -2,6 +2,8 @@ substitutions:
   name: litter-robot4
   friendly_name: Litter Robot 4
   version: 2026.11.0
+  # dc fork tag that the components are built from. Bump with every release tag.
+  fork_ref: djc-2026.11.23.01
 
 esphome:
   name: "${name}"
@@ -14,8 +16,8 @@ esphome:
 external_components:
   source:
     type: git
-    url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
-    ref: LR4/${version}
+    url: https://github.com/davidcoulson/esphome-litter-robot.git
+    ref: ${fork_ref}
 
 packages:
   sleep_schedule: !include sleep-schedule.yaml

@@ -172,7 +172,7 @@ Tuning: log `Odor Level` in Home Assistant, note where it settles with clean lit
 
 ## VOC and NOx index (optional SGP41)
 
-A **Sensirion SGP41** breakout adds a VOC Index and a NOx Index (both 0-500, 100 is the room's normal air). It does not change how waste is classified; it is a second, independent odor reading to log next to the BME688.
+A **Sensirion SGP41** breakout adds a VOC Index and a NOx Index. Each is relative to the room's recent average: the VOC Index sits around 100 in normal air and the NOx Index around 1, and both rise (up to 500) when the air gets worse. It does not change how waste is classified; it is a second, independent odor reading to log next to the BME688.
 
 It shares the BME688's I2C bus at address `0x59`, so no extra mainboard wiring is needed. If both breakouts have STEMMA QT / Qwiic sockets, plug a 4-pin JST SH cable from the BME688's second socket into the SGP41. Otherwise wire its `VIN`, `GND`, `SCL` and `SDA` to the same pins as the BME688.
 
@@ -191,7 +191,7 @@ packages:
   voc_nox: !include packages/litter-robot4/voc-nox.yaml
 ```
 
-The SGP41 learns its baseline over the first hour or so after each boot, and NOx in particular reads 1 until then.
+The SGP41 learns its baseline again after each boot, so give it an hour or so before trusting the numbers. A NOx Index that stays at 1 is normal clean air, not a fault.
 
 ## Litter depth (experimental)
 

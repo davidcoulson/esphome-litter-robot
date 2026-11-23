@@ -32,14 +32,15 @@ web_server:
 captive_portal:
 
 dashboard_import:
-  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot3.yaml@LR3/stable
+  package_import_url: github://davidcoulson/esphome-litter-robot/litter-robot3.yaml@main
   import_full_config: false
 
 external_components:
   source:
     type: git
-    url: https://codeberg.org/Joseph-DiGiovanni/esphome-litter-robot.git
-    ref: LR3/${version}
+    url: https://github.com/davidcoulson/esphome-litter-robot.git
+    # dc fork tag that the components are built from. Bump with every release tag.
+    ref: djc-2026.11.23.01
 
 packages:
   base_config: !include packages/litter-robot3/base.yaml

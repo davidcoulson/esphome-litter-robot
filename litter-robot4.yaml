@@ -1,7 +1,9 @@
 dashboard_import:
-  package_import_url: codeberg://Joseph-DiGiovanni/esphome-litter-robot/litter-robot4.yaml@LR4/stable
+  package_import_url: github://davidcoulson/esphome-litter-robot/litter-robot4.yaml@main
 
 packages:
   common: !include packages/common/default.yaml
   litter_robot4: !include packages/litter-robot4/default.yaml
+  # Weight-only cats 1-4. Replace with your own cat_tracker block for BLE tags or sub-devices.
+  cat_tracking: !include packages/cat-tracker/default.yaml
   weight_visits: !include packages/cat-tracker/weight-detection.yaml

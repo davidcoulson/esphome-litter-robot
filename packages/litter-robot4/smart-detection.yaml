@@ -58,6 +58,7 @@ script:
           condition:
             lambda: |-
               return id(smart_cat_detection).state && !id(cat_confirmed).state &&
+                     id(curtain_detected).has_state() && id(weight_detected).has_state() &&
                      !id(curtain_detected).state && !id(weight_detected).state &&
                      id(robot_status).state == "Cat detected";
           then:
@@ -90,7 +91,9 @@ script:
             
           const bool cat_detected = id(robot_status).state == "Cat detected";
           const bool agreed = id(curtain_detected).state && id(weight_detected).state;
-          const bool neither = !id(curtain_detected).state && !id(weight_detected).state;
+          // Unknown (no report since boot) is not clear.
+          const bool neither = id(curtain_detected).has_state() && id(weight_detected).has_state() &&
+                               !id(curtain_detected).state && !id(weight_detected).state;
 
           if (!cat_detected) {
             id(cat_confirmed).publish_state(false);

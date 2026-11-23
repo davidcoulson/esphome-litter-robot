@@ -47,7 +47,8 @@ script:
       - lambda: |-
           std::string result = id(robot_status).state;
 
-          if (result == "Cat detected" && !id(curtain_detected).state && !id(weight_detected).state) {
+          if (result == "Cat detected" && id(curtain_detected).has_state() && id(weight_detected).has_state() &&
+              !id(curtain_detected).state && !id(weight_detected).state) {
             result = "Waiting to cycle";
           } else if (result == "Clean cycle in progress" && (id(curtain_detected).state || id(weight_detected).state)) {
             result = "Cycle interrupted";

@@ -283,8 +283,12 @@ void LitterRobot4Component::check_timeouts_() {
     bool is_write = pending_op.op == OP_WRITE;
     char name[FORMAT_BUFFER_SIZE];
     // Retry writes so a lost frame can't leave the panel unlocked or drop a setting. Not keypad
-    // presses: the PIC may have acted with only the ack lost, and a second Cycle press pauses.
-    if (is_write && pending_op.reg != REG_KEYPAD && this->pending_attempts_ < WRITE_RETRIES) {
+    // presses or commands (0x34 start clean/empty/filter, factory reset): the PIC may have acted
+    // with only the ack lost, and a repeat would press or run it twice.
+    const Register timed_out_reg = pending_op.reg;
+    const bool is_command =
+        timed_out_reg == REG_KEYPAD || timed_out_reg == REG_ROBOT_STATUS || timed_out_reg == REG_FACTORY_RESET;
+    if (is_write && !is_command && this->pending_attempts_ < WRITE_RETRIES) {
       this->pending_attempts_++;
       ESP_LOGW(TAG, "Write for %s timed out, retry %u", reg_name(pending_op.reg, name, sizeof(name)),
                this->pending_attempts_);
@@ -295,6 +299,10 @@ void LitterRobot4Component::check_timeouts_() {
     ESP_LOGW(TAG, "%s for %s timed out", is_write ? "Write" : "Read",
              reg_name(pending_op.reg, name, sizeof(name)));
     this->pop_queue_();
+    // A lockout write that never got through: read the real state so HA doesn't show a relock
+    // that may not have happened.
+    if (is_write && timed_out_reg == REG_PANEL_LOCKOUT)
+      this->queue_register_read(REG_PANEL_LOCKOUT);
   }
 }
 
