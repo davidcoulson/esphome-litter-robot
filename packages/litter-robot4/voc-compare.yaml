@@ -1,0 +1,134 @@
+# Per-visit comparison of the SGP41 against WasteSense's BME688 verdict (data collection
+# only: nothing acts on it). For each visit it publishes the WasteSense verdict together
+# with how far each sensor's VOC reading rose above its value when the cat stepped in.
+# A urine visit is published when WasteSense classifies it (timeout, cycle or next visit);
+# a feces visit keeps tracking until the cycle starts, the next visit, or 10 minutes.
+# Requires waste-sense (default.yaml + litter-robot4/waste-sense.yaml) and voc-nox.yaml.
+#
+#   packages:
+#     voc_compare: !include packages/litter-robot4/voc-compare.yaml
+
+globals:
+  - id: vc_open
+    type: bool
+    restore_value: no
+    initial_value: "false"
+  - id: vc_verdict  # 0 none yet, 1 urine, 2 feces
+    type: int
+    restore_value: no
+    initial_value: "0"
+  - id: vc_start_ms
+    type: uint32_t
+    restore_value: no
+  - id: vc_feces_ms
+    type: uint32_t
+    restore_value: no
+  - id: vc_peak_ms
+    type: uint32_t
+    restore_value: no
+  # start and peak for: SGP41 VOC index, SGP41 NOx index, BME688 VOC (ppm)
+  - id: vc_start
+    type: std::array<float, 3>
+    restore_value: no
+  - id: vc_peak
+    type: std::array<float, 3>
+    restore_value: no
+
+sensor:
+  - platform: template
+    id: vc_sgp_voc_rise
+    name: "Visit SGP41 VOC Rise"
+    icon: "mdi:chart-bell-curve"
+    accuracy_decimals: 0
+    force_update: true
+    update_interval: never
+  - platform: template
+    id: vc_sgp_voc_peak_time
+    name: "Visit SGP41 VOC Peak Time"
+    icon: "mdi:timer-outline"
+    unit_of_measurement: "s"
+    accuracy_decimals: 0
+    force_update: true
+    update_interval: never
+  - platform: template
+    id: vc_sgp_nox_rise
+    name: "Visit SGP41 NOx Rise"
+    icon: "mdi:chart-bell-curve"
+    accuracy_decimals: 0
+    force_update: true
+    update_interval: never
+  - platform: template
+    id: vc_bme_voc_rise
+    name: "Visit BME688 VOC Rise"
+    icon: "mdi:chart-bell-curve"
+    unit_of_measurement: "ppm"
+    accuracy_decimals: 2
+    force_update: true
+    update_interval: never
+
+text_sensor:
+  - platform: template
+    id: vc_visit_verdict
+    name: "Visit WasteSense Verdict"
+    icon: "mdi:scale-balance"
+
+interval:
+  - interval: 5s
+    then:
+      - lambda: |-
+          if (!id(vc_open))
+            return;
+          const float now[3] = {id(sgp_voc_index).get_raw_state(), id(sgp_nox_index).get_raw_state(), id(${voc_sensor_id}).state};
+          for (int i = 0; i < 3; i++) {
+            if (isnan(now[i]))
+              continue;
+            if (isnan(id(vc_start)[i]))
+              id(vc_start)[i] = now[i];
+            if (isnan(id(vc_peak)[i]) || now[i] > id(vc_peak)[i]) {
+              id(vc_peak)[i] = now[i];
+              if (i == 0)
+                id(vc_peak_ms) = millis();
+            }
+          }
+          if (id(vc_verdict) == 2 && millis() - id(vc_feces_ms) > 600000)
+            id(vc_publish).execute();
+
+script:
+  - id: vc_publish
+    then:
+      - lambda: |-
+          if (!id(vc_open))
+            return;
+          id(vc_open) = false;
+          const char *verdict = id(vc_verdict) == 2 ? "Feces" : id(vc_verdict) == 1 ? "Urine" : "Unknown";
+          const float voc = id(vc_peak)[0] - id(vc_start)[0], nox = id(vc_peak)[1] - id(vc_start)[1],
+                      bme = id(vc_peak)[2] - id(vc_start)[2];
+          const float peak_s = (id(vc_peak_ms) - id(vc_start_ms)) / 1000.0f;
+          ESP_LOGI("voc_compare", "Visit %s: SGP41 VOC +%.0f after %.0f s, NOx +%.0f; BME688 VOC +%.2f ppm (window %.0f s)",
+                   verdict, voc, peak_s, nox, bme, (millis() - id(vc_start_ms)) / 1000.0f);
+          id(vc_sgp_voc_rise).publish_state(voc);
+          id(vc_sgp_voc_peak_time).publish_state(isnan(voc) ? NAN : peak_s);
+          id(vc_sgp_nox_rise).publish_state(nox);
+          id(vc_bme_voc_rise).publish_state(bme);
+          id(vc_visit_verdict).publish_state(verdict);
+
+  # Appended to the WasteSense scripts, so the previous visit is classified before these run.
+  - id: !extend waste_sense_visit_start
+    then:
+      - lambda: |-
+          id(vc_publish).execute();  // a feces visit still being tracked
+          id(vc_open) = true;
+          id(vc_verdict) = 0;
+          id(vc_start_ms) = id(vc_peak_ms) = millis();
+          id(vc_start).fill(NAN);
+          id(vc_peak).fill(NAN);
+  - id: !extend waste_sense_classified
+    then:
+      - lambda: |-
+          id(vc_verdict) = feces ? 2 : 1;
+          id(vc_feces_ms) = millis();
+          if (!feces)
+            id(vc_publish).execute();
+  - id: !extend waste_sense_cycle_start
+    then:
+      - script.execute: vc_publish

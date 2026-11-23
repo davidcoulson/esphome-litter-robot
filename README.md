@@ -58,6 +58,7 @@ Both share the BME688's I2C bus (GPIO13/14 via J5, 3.3 V and GND from J7), so th
 | Sensor | Package | What it adds |
 |---|---|---|
 | Sensirion **SGP41** (0x59) | `packages/litter-robot4/voc-nox.yaml` | VOC Index and NOx Index, compensated with the BME688's temperature and humidity. Daisy-chains off the BME688 with a STEMMA QT / Qwiic cable. [Wiring and photos](docs/Litter%20Robot%204/WasteSense%20Install.md#voc-and-nox-index-optional-sgp41). |
+| SGP41 + WasteSense | `packages/litter-robot4/voc-compare.yaml` | Data collection only: per visit, publishes the WasteSense verdict next to how far the SGP41 and BME688 VOC readings rose, to judge whether the SGP41 could confirm or correct the verdict. |
 | **VL53L1X** time-of-flight (e.g. TOF400C) | `packages/litter-robot4/litter-depth.yaml` | Litter Distance and litter depth, after a two-point calibration. Untested on a real robot. [Details](docs/Litter%20Robot%204/WasteSense%20Install.md#litter-depth-experimental). |
 
 ### 🔒 Safer install and operation
