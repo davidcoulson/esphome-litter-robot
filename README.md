@@ -31,6 +31,10 @@ Tag addresses, thresholds and cat names live in your device config, not in this 
 - **Sleep Override keeps your schedule.** Turning the override on remembers the weekly schedule and turning it off restores it.
 - **No boot clock sync and no Cycle lockout workaround**; both caused more trouble than they solved.
 
+### 🌫️ Optional SGP41 VOC and NOx sensor
+
+An SGP41 breakout can share the BME688's I2C bus and adds a VOC Index and NOx Index to Home Assistant. See [VOC and NOx index](docs/Litter%20Robot%204/WasteSense%20Install.md#voc-and-nox-index-optional-sgp41) in the WasteSense guide for wiring and photos.
+
 ### 🔒 Safer install and operation
 
 - The flashing guide has you **verify the stock firmware backup before erasing**, and has clearer wiring steps.

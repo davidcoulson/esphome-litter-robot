@@ -170,6 +170,29 @@ Assumptions: the sensor's own BSEC2 drift or a humid room can also move the base
 
 Tuning: log `Odor Level` in Home Assistant, note where it settles with clean litter and after a poop visit, then set `Smell Cycle Odor Level` a little above the normal after-visit tail and the two `Change Litter` thresholds above what a fresh box shows over a week.
 
+## VOC and NOx index (optional SGP41)
+
+A **Sensirion SGP41** breakout adds a VOC Index and a NOx Index (both 0-500, 100 is the room's normal air). It does not change how waste is classified; it is a second, independent odor reading to log next to the BME688.
+
+It shares the BME688's I2C bus at address `0x59`, so no extra mainboard wiring is needed. If both breakouts have STEMMA QT / Qwiic sockets, plug a 4-pin JST SH cable from the BME688's second socket into the SGP41. Otherwise wire its `VIN`, `GND`, `SCL` and `SDA` to the same pins as the BME688.
+
+![BME688 with the cable on to the SGP41](Images/Waste%20Sense/LR4C/BME688%20chain.JPG)
+
+Mount it in the bonnet like the BME688, sensor side down and uncovered. Below, it sits on the far side of the laser board from the BME688.
+
+![SGP41 and BME688 in the bonnet](Images/Waste%20Sense/LR4C/SGP41%20overview.JPG)
+
+![SGP41 close up](Images/Waste%20Sense/LR4C/SGP41.JPG)
+
+To include it, add this to your WasteSense config:
+
+```yaml
+packages:
+  voc_nox: !include packages/litter-robot4/voc-nox.yaml
+```
+
+The SGP41 learns its baseline over the first hour or so after each boot, and NOx in particular reads 1 until then.
+
 ## Litter depth (experimental)
 
 An optional VL53L1X time-of-flight board (e.g. the TOF400C) shares the BME688's I2C bus (GPIO13/14, 3.3 V, GND; leave INT and SHUT open) and reports how deep the litter is. The "4 m" on the box is the maximum range; the minimum is about 4 cm, so it can sit in the bonnet beside the BME688, looking down at the bed with its ~27° cone clear of the globe wall. Add `packages/litter-robot4/litter-depth.yaml` to your config, then read "Litter Distance" with no litter and again at the fill line, and set `litter_empty_mm` and `litter_full_mm` in `substitutions`. Uses the VL53L1X platform built into ESPHome 2026.11 and later. Untested on a real robot.

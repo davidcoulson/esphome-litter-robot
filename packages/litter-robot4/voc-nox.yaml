@@ -1,0 +1,15 @@
+# Sensirion SGP41 VOC and NOx index on the same I2C bus as the BME688 (address
+# 0x59). It samples every second internally; Home Assistant gets a reading every
+# 120 s like the BME688. Uses the BME688's temperature and humidity for
+# compensation, so it needs the WasteSense firmware.
+sensor:
+  - platform: sgp4x
+    i2c_id: i2c_bus
+    update_interval: 120s
+    voc_index:
+      name: "VOC Index"
+    nox_index:
+      name: "NOx Index"
+    compensation:
+      humidity_source: humidity
+      temperature_source: temperature
