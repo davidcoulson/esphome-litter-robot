@@ -1,5 +1,7 @@
 # Cat sync across robots (Home Assistant)
 
+> **Replaced by Clowder on Litter Robot 4.** On LR4 robots with WasteSense, use `packages/litter-robot4/clowder.yaml` and the [Clowder](https://github.com/davidcoulson/ha-clowder) integration instead: one device per cat across all robots, and no visit lost while Home Assistant is down. See [Clowder](../../docs/Litter%20Robot%204/Clowder.md). Cat sync stays for the Litter Robot 3, which has no Clowder package.
+
 Keeps one cat's weight the same on every robot and sums visit, poop and pee counts across robots. Software only; nothing to flash.
 
 ## What was checked in the firmware

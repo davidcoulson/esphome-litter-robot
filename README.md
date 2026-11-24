@@ -51,7 +51,7 @@ Each one is off unless you include it in your device config. Most are untested b
 | `packages/cat-tracker/waste-tracking/waste-mass.yaml` | LR4 | Estimated waste per visit from the globe weight before and after (needs Debug Mode). Diagnostic only. See [Waste mass](docs/Litter%20Robot%204/WasteSense%20Install.md#waste-mass-experimental). |
 | `packages/litter-robot4/odor-watch.yaml` | LR4 + WasteSense | Smoothed Odor Level, an opt-in extra Smell Cycle when the smell lingers, and **Change Litter Soon**. See [Odor watch](docs/Litter%20Robot%204/WasteSense%20Install.md#odor-watch-experimental). |
 | `packages/litter-robot4/clowder.yaml` | LR4 + WasteSense | Sends every visit to the [Clowder](https://github.com/davidcoulson/ha-clowder) Home Assistant integration, which keeps one device per cat across all your robots. Visits wait in flash until Home Assistant confirms them, so none are lost while it is down. Your config reports each identified visit. See [Clowder](docs/Litter%20Robot%204/Clowder.md). |
-| `homeassistant/cat-sync/` | any | Home Assistant package and blueprint (nothing to flash) that keeps each cat's weight the same on every robot and sums visit, poop and pee counts, using each robot's own per-cat entities. See its [README](homeassistant/cat-sync/README.md). |
+| `homeassistant/cat-sync/` | LR3 | **Replaced by Clowder on LR4 robots.** Home Assistant package and blueprint (nothing to flash) that keeps each cat's weight the same on every robot and sums visit, poop and pee counts, using each robot's own per-cat entities. See its [README](homeassistant/cat-sync/README.md). |
 
 ### 🔌 Hardware add-ons
 
