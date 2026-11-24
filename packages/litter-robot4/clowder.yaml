@@ -1,0 +1,84 @@
+# Clowder: send every visit to the Clowder Home Assistant integration
+# (https://github.com/davidcoulson/ha-clowder), which keeps one device per cat across robots.
+#
+# Visits are kept in flash and resent until Home Assistant acknowledges them, so a visit made
+# while Home Assistant is down is counted when it is back. Needs waste-sense.yaml.
+#
+# You must:
+#   - set the substitution clowder_cats to your cats' names in slot order, e.g. "Ash,Bean,Coco"
+#   - call id(clowder_queue).open(slot, rssi, weight_lb) when a weight report is accepted as a
+#     visit; slot is 1-based, 0 when the cat was not identified.
+# See docs/Litter Robot 4/Clowder.md.
+
+visit_queue:
+  id: clowder_queue
+  cats: ${clowder_cats}
+  on_record:
+    - homeassistant.event:
+        event: esphome.clowder_visit
+        data:
+          node: !lambda "return std::string(App.get_name().c_str());"  # the real name, MAC suffix included
+          robot: ${serial}
+          epoch: !lambda "return to_string(r.epoch);"
+          id: !lambda "return to_string(r.id);"
+          slot: !lambda "return to_string(r.slot);"
+          name: !lambda "return r.name;"
+          method: !lambda "return r.method;"
+          rssi: !lambda "return to_string(r.rssi);"
+          weight: !lambda "return str_sprintf(\"%.2f\", r.weight);"
+          time: !lambda "return to_string(r.time);"
+          age: !lambda "return to_string(r.age);"
+          waste: !lambda "return r.waste;"
+          waste_weight: ""
+          final: !lambda "return std::string(r.final_ ? \"1\" : \"0\");"
+
+api:
+  on_client_connected:
+    # Tell Clowder which cats this robot knows, then offer anything not yet acknowledged.
+    # Wait first: events fired before Home Assistant has subscribed are dropped.
+    - delay: 10s
+    - homeassistant.event:
+        event: esphome.clowder_hello
+        data:
+          node: !lambda "return std::string(App.get_name().c_str());"  # the real name, MAC suffix included
+          robot: ${serial}
+          cats: !lambda "return id(clowder_queue).hello_cats();"
+    - lambda: "id(clowder_queue).resend();"
+  actions:
+    # Called by the Clowder integration once it has counted a final visit record.
+    - action: clowder_ack
+      variables:
+        epoch: int
+        id: int
+      then:
+        - lambda: "id(clowder_queue).ack((uint32_t) epoch, (uint32_t) id);"
+
+interval:
+  # Covers Home Assistant being connected before the integration has loaded.
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            and:
+              - api.connected:
+              - lambda: "return id(clowder_queue).queued() > 0;"
+          then:
+            - lambda: "id(clowder_queue).resend();"
+
+script:
+  - id: !extend waste_sense_visit_start
+    then:
+      - lambda: "id(clowder_queue).visit_start();"
+  - id: !extend waste_sense_classified
+    then:
+      - lambda: "id(clowder_queue).classify(feces);"
+
+sensor:
+  - platform: template
+    name: "Unidentified Visits"
+    icon: mdi:help-circle-outline
+    state_class: total_increasing
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: "return id(clowder_queue).unidentified();"
