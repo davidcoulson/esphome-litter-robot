@@ -3,6 +3,7 @@
 # with how far each sensor's VOC reading rose above its value when the cat stepped in.
 # A urine visit is published when WasteSense classifies it (timeout, cycle or next visit);
 # a feces visit keeps tracking until the cycle starts, the next visit, or 10 minutes.
+# Weight seen for under 10 seconds is not logged as a visit.
 # Requires waste-sense (default.yaml + litter-robot4/waste-sense.yaml) and voc-nox.yaml.
 #
 #   packages:
@@ -122,6 +123,15 @@ script:
           id(vc_start_ms) = id(vc_peak_ms) = millis();
           id(vc_start).fill(NAN);
           id(vc_peak).fill(NAN);
+  - id: !extend waste_sense_visit_end
+    then:
+      - lambda: |-
+          // Weight seen for under 10 s is a blip (paw on the step), not a visit: log nothing.
+          // shortcut: a blip still ends a feces window being tracked, restore it if that skews the data.
+          if (id(vc_open) && id(vc_verdict) == 0 && millis() - id(vc_start_ms) < 10000) {
+            id(vc_open) = false;
+            ESP_LOGD("voc_compare", "Weight for under 10 s, visit not logged");
+          }
   - id: !extend waste_sense_classified
     then:
       - lambda: |-

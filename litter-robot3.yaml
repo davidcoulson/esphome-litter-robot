@@ -40,7 +40,7 @@ external_components:
     type: git
     url: https://github.com/davidcoulson/esphome-litter-robot.git
     # dc fork tag that the components are built from. Bump with every release tag.
-    ref: djc-2026.11.23.03
+    ref: djc-2026.11.24.01
 
 packages:
   base_config: !include packages/litter-robot3/base.yaml
