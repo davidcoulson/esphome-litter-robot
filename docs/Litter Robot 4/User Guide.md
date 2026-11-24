@@ -56,9 +56,10 @@ If you have WasteSense™ installed, each cat also gets `Feces Count` and `Urine
 
 ### Syncing Across Multiple Robots
 
-Each robot keeps its own tracker state, so with more than one unit the learned weights and counters will drift apart. Home Assistant helpers can act as a shared source of truth: an `input_number` per cat's weight, kept in sync with every robot's `Set Cat N Weight`, and a summed helper for the count sensors.
+Each robot keeps its own tracker state, so with more than one unit the learned weights and counters will drift apart. There are two ways to bring them together:
 
-A specific implementation is beyond the scope of this guide - if you build a blueprint or similar, contributions are welcome!
+- **Clowder** (LR4 with WasteSense): `packages/litter-robot4/clowder.yaml` sends every visit to the [Clowder](https://github.com/davidcoulson/ha-clowder) Home Assistant integration, which keeps one device per cat across all your robots. Your config reports each identified visit (for example from a collar tag). See [Clowder](Clowder.md).
+- **Cat sync** (any robot, nothing to flash): a Home Assistant package and blueprint that keeps each cat's weight the same on every robot through `Set Cat N Weight` and sums the count sensors. See [`homeassistant/cat-sync`](../../homeassistant/cat-sync/README.md).
 
 ## Maintenance
 
