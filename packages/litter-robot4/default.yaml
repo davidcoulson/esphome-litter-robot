@@ -3,7 +3,7 @@ substitutions:
   friendly_name: Litter Robot 4
   version: 2026.11.0
   # dc fork tag that the components are built from. Bump with every release tag.
-  fork_ref: djc-2026.11.24.03
+  fork_ref: djc-2026.11.24.04
 
 esphome:
   name: "${name}"

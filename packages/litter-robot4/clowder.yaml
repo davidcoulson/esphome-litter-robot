@@ -13,8 +13,8 @@
 esphome:
   # Shown as the device's model and firmware version in Home Assistant.
   project:
-    name: "Joseph DiGiovanni.Litter Robot 4 with Clowder"
-    version: ${fork_ref}.clowder
+    name: "David Coulson.Litter Robot 4 with Clowder"
+    version: ${fork_ref | replace("djc-", "")}
 
 visit_queue:
   id: clowder_queue
