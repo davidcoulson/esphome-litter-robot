@@ -10,6 +10,12 @@
 #     visit; slot is 1-based, 0 when the cat was not identified.
 # See docs/Litter Robot 4/Clowder.md.
 
+esphome:
+  # Shown as the device's model and firmware version in Home Assistant.
+  project:
+    name: "Joseph DiGiovanni.Litter Robot 4 with Clowder"
+    version: ${fork_ref}.clowder
+
 visit_queue:
   id: clowder_queue
   cats: ${clowder_cats}
