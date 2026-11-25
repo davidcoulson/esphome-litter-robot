@@ -47,6 +47,13 @@ script:
       - lambda: |-
           std::string result = id(robot_status).state;
 
+          // A code with no name ("Unknown (0x2C0)") is logged and the shown status kept.
+          // robot_status itself still changes, so guards never act on a stale "Ready".
+          if (result.rfind("Unknown", 0) == 0) {
+            ESP_LOGW("status", "Robot status %s has no name; keeping \"%s\"", result.c_str(), id(status).state.c_str());
+            result = id(status).state;
+          }
+
           if (result == "Cat detected" && id(curtain_detected).has_state() && id(weight_detected).has_state() &&
               !id(curtain_detected).state && !id(weight_detected).state) {
             result = "Waiting to cycle";
